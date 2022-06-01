@@ -22,13 +22,14 @@ Install from source
 $ python3 setup.py install
 ```
 
-Exemplary code snippet
-----------------------
-
-
 
 Run video summarisation on a single video
 -----------------------------------------
+
+
+
+Exemplary code snippet
+----------------------
 
 
 
