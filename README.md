@@ -1,6 +1,6 @@
 Description
 -----------
-Code for the **videosum** Python package. Given a video file, this package helps you to get a single image that summarises the video. The summary image is constructed as a collage of video frames evenly spaced over time.
+Code for the `videosum` Python package. Given a video file, this package helps you to get a single image that summarises the video. The summary image is constructed as a collage of video frames evenly spaced over time.
 
 Install dependencies
 --------------------
