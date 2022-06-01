@@ -41,5 +41,5 @@ Luis Carlos Garcia Peraza Herrera (luiscarlos.gph@gmail.com), 2022.
 License
 -------
 
-This code repository is shared under an [MIT license]().
+This code repository is shared under an [MIT license](https://github.com/luiscarlosgph/videosum/blob/main/LICENSE).
 
