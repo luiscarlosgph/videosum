@@ -25,12 +25,29 @@ $ python3 setup.py install
 
 Run video summarisation on a single video
 -----------------------------------------
-
+```
+$ python3 -m videosum.run --input video.mp4 --output collage.jpg --nframes 100 --height 1080 -width 1920
+```
 
 
 Exemplary code snippet
 ----------------------
+```python
+import videosum
 
+# Choose the number of frames you want in the summary
+nframes = 100
+
+# Choose the dimensions of the collage
+widtth = 1920
+height = 1080
+
+# Create video summariser object
+vidsum = videosum.VideoSummariser(nframes, width, height)
+
+# Create collage image and save it to file
+vidsum.summarise('video.mp4', 'collage.jpg')
+```
 
 
 Author
