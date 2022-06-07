@@ -24,10 +24,10 @@ class TestVideosum(unittest.TestCase):
         vs = videosum.VideoSummariser(nframes, width, height)
 
         # Make collage
-        new_collage = vs.summarise('data/test.mp4')
+        new_collage = vs.summarise('test/data/test.mp4')
 
         # Compare the collage with the one stored
-        old_collage = cv2.imread('data/test.png')
+        old_collage = cv2.imread('test/data/test.png')
 
         self.assertTrue(np.allclose(new_collage, old_collage))
 
