@@ -44,10 +44,10 @@ widtth = 1920
 height = 1080
 
 # Create video summariser object
-vidsum = videosum.VideoSummariser(nframes, width, height)
+vs = videosum.VideoSummariser(nframes, width, height)
 
 # Create collage image
-im = vidsum.summarise('video.mp4')
+im = vs.summarise('video.mp4')
 
 # Save collage to file
 cv2.imwrite('collage.jpg', im)
