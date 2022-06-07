@@ -91,12 +91,11 @@ class VideoSummariser():
         x_end = x_start + im_resized.shape[1] 
         self.collage[y_start:y_end, x_start:x_end] = im_resized
 
-    def summarise(self, input_path, output_path):
+    def summarise(self, input_path):
         """
         @brief Create a collage of the video.  
 
         @param[in]  input_path   Path to an input video.
-        @param[in]  output_path  Path to an output image. 
 
         @returns a BGR image (numpy.ndarray) with a collage of the video.
         """
@@ -112,9 +111,10 @@ class VideoSummariser():
         nframes = int(math.floor(meta['duration'] * meta['fps']))
         interval = nframes // self.number_of_frames
         counter = interval
+        inserted = 0
         for raw_frame in tqdm.tqdm(reader):
             # If we have the collage full, mic out
-            if i >= self.tiles_per_col:
+            if inserted == self.number_of_frames:
                 break
             
             # Insert image in the collage
@@ -128,6 +128,7 @@ class VideoSummariser():
             
                 # Insert image in the collage
                 self._insert_frame(im, i, j) 
+                inserted += 1
 
                 # Update collage iterators
                 j += 1
@@ -139,8 +140,7 @@ class VideoSummariser():
         #for x in range(1, self.tiles_per_row):
         #    self.collage[:, x * self.tile_width] = 255
 
-        # Save collage to output file
-        cv2.imwrite(output_path, self.collage)
+        return self.collage
 
 
 if __name__ == '__main__':

@@ -70,7 +70,8 @@ def main():
     validate_cmdline_params(args)
 
     vidsum = videosum.VideoSummariser(args.nframes, args.width, args.height)
-    im = vidsum.summarise(args.input, args.output)
+    im = vidsum.summarise(args.input)
+    cv2.imwrite(args.output, im)
 
 
 if __name__ == '__main__':
