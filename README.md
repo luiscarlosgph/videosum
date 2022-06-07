@@ -61,6 +61,19 @@ Run this from the root directory of the repository:
 $ python3 test/test_videosum.py
 ```
 
+
+Exemplary result
+----------------
+
+* Video:
+
+https://user-images.githubusercontent.com/3996630/172403028-4515cbec-0216-408c-99b8-c03cf15949af.mp4
+
+* Summary:
+
+![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/test.png) 
+
+
 Author
 ------
 Luis Carlos Garcia Peraza Herrera (luiscarlos.gph@gmail.com), 2022.
