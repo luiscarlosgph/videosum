@@ -65,6 +65,11 @@ $ python3 test/test_videosum.py
 Exemplary result
 ----------------
 
+* Command:
+```
+python3 -m videosum.run --input test/data/test.mp4 --output test/data/test.png --nframes 9 --height 480 --width 640
+```
+
 * Video:
 
 https://user-images.githubusercontent.com/3996630/172403028-4515cbec-0216-408c-99b8-c03cf15949af.mp4
