@@ -54,6 +54,13 @@ cv2.imwrite('collage.jpg', im)
 ```
 
 
+Run unit tests
+--------------
+Run this from the root directory of the repository:
+```
+$ python3 test/test_videosum.py
+```
+
 Author
 ------
 Luis Carlos Garcia Peraza Herrera (luiscarlos.gph@gmail.com), 2022.
