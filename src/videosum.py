@@ -12,6 +12,7 @@ import imageio_ffmpeg
 import numpy as np
 import cv2
 import tqdm
+import math
 
 
 class VideoSummariser():
@@ -29,27 +30,52 @@ class VideoSummariser():
         self.number_of_frames = number_of_frames
         self.width = width
         self.height = height
-        self.form_factor = float(self.height) / self.width
+        self.form_factor = float(self.width) / self.height
 
         # Compute the width and height of each collage tile
-        collage_area = self.width * self.height 
-        denom = self.form_factor * number_of_frames
-        self.tile_width = int(np.floor(np.sqrt((collage_area) / (denom))))
-        self.tile_height = int(round(self.tile_width * self.form_factor))
+        self.tile_height = self.height
+        nframes = VideoSummariser._how_many_rectangles_fit(self.tile_height, 
+                                                          self.width, 
+                                                          self.height)
+        while nframes < self.number_of_frames: 
+            self.tile_height -= 1
+            nframes = VideoSummariser._how_many_rectangles_fit(self.tile_height, 
+                                                               self.width, 
+                                                               self.height)
+        self.tile_width = int(round(self.tile_height * self.form_factor))
 
         # Compute how many tiles per row and column
-        self.tiles_per_row = int(np.floor(self.width / self.tile_width))
-        self.tiles_per_col = int(np.floor(self.height / self.tile_height)) 
-
-        print('self.tiles_per_col:', self.tiles_per_col)
-        print('self.tiles_per_row:', self.tiles_per_row)
-        print('self.tile_height:', self.tile_height)
-        print('self.tile_width:', self.tile_width)
+        self.tiles_per_row = self.width // self.tile_width
+        self.tiles_per_col = self.height // self.tile_height 
 
         # Create empty collage
         self.collage = np.zeros((self.tiles_per_col * self.tile_height, 
                                  self.tiles_per_row * self.tile_width, 3),
                                 dtype=np.uint8)
+    
+    @staticmethod
+    def _how_many_rectangles_fit(tile_height, width, height):
+        """
+        @brief Given a certain tile height, this method computes how many
+               of them fit in a collage of a given size. We assume that the
+               form factor of the tiles in the collage has to be the same of 
+               the collage itself.
+        @param[in]  tile_height  Tile height.
+        @param[in]  width        Width of the collage.
+        @param[in]  height       Height of the collage.
+        """
+        # Compute form factor
+        ff = float(width) / height
+
+        # Compute rectangle height 
+        tile_width = int(round(tile_height * ff))
+
+        # Compute how many rectangles fit inside the collage
+        tiles_per_row = width // tile_width 
+        tiles_per_col = height // tile_height
+
+        return tiles_per_row * tiles_per_col 
+
 
     def _insert_frame(self, im, i, j):
         """@brief Insert image into the collage."""
@@ -57,7 +83,7 @@ class VideoSummariser():
         # Resize frame to the right tile size
         im_resized = cv2.resize(im, (self.tile_width, self.tile_height), 
                                 interpolation = cv2.INTER_LANCZOS4)
-        
+
         # Insert image within the collage
         y_start = i * self.tile_height
         y_end = y_start + im_resized.shape[0] 
@@ -81,15 +107,20 @@ class VideoSummariser():
 
         # Collect the collage frames from the video 
         reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
-        meta = reader.__next__()  # meta data, e.g. meta["size"] -> (width, height)
+        meta = reader.__next__()
         w, h = meta['size']
-        nframes = int(round(meta['duration'] * meta['fps']))
-        interval = nframes // (self.tiles_per_row * self.tiles_per_col)
-        counter = 0
-        last_frame = None
+        nframes = int(math.floor(meta['duration'] * meta['fps']))
+        interval = nframes // self.number_of_frames
+        counter = interval
         for raw_frame in tqdm.tqdm(reader):
-            if counter == interval:
-                counter = 0
+            # If we have the collage full, mic out
+            if i >= self.tiles_per_col:
+                break
+            
+            # Insert image in the collage
+            counter -= 1
+            if counter == 0:
+                counter = interval
 
                 # Convert video frame into a BGR OpenCV/Numpy image
                 im = np.frombuffer(raw_frame, 
@@ -103,14 +134,6 @@ class VideoSummariser():
                 if j == self.tiles_per_row:
                     j = 0
                     i += 1
-            else:
-                last_frame = raw_frame
-                counter += 1
-
-        # Fill the bottom-right corner of the collage
-        im = np.frombuffer(last_frame, 
-                           dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
-        self._insert_frame(im, i, j) 
 
         # Put dividing lines on the collage
         #for x in range(1, self.tiles_per_row):
