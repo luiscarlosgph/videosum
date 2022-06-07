@@ -33,6 +33,7 @@ $ python3 -m videosum.run --input video.mp4 --output collage.jpg --nframes 100 -
 Exemplary code snippet
 ----------------------
 ```python
+import cv2
 import videosum
 
 # Choose the number of frames you want in the summary
@@ -45,8 +46,11 @@ height = 1080
 # Create video summariser object
 vidsum = videosum.VideoSummariser(nframes, width, height)
 
-# Create collage image and save it to file
-vidsum.summarise('video.mp4', 'collage.jpg')
+# Create collage image
+im = vidsum.summarise('video.mp4')
+
+# Save collage to file
+cv2.imwrite('collage.jpg', im)
 ```
 
 
