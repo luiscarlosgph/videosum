@@ -76,7 +76,7 @@ python3 -m videosum.run --input test/data/test.mp4 --output test/data/test.png -
 
 * Summary based on `time` algorithm:
 
-TODO
+![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/time.png) 
 
 * Summary based on `fid` algorithm:
 
