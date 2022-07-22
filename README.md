@@ -43,8 +43,11 @@ nframes = 100
 widtth = 1920
 height = 1080
 
+# Choose the algotrithm that selects the key frames
+algo = 'fid'  # The options are: 'time', 'fid'
+
 # Create video summariser object
-vs = videosum.VideoSummariser(nframes, width, height)
+vs = videosum.VideoSummariser(algo, nframes, width, height)
 
 # Create collage image
 im = vs.summarise('video.mp4')
