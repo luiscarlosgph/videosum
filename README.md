@@ -65,20 +65,19 @@ $ python3 test/test_videosum.py
 Exemplary result
 ----------------
 
-* Command:
-```
-python3 -m videosum.run --input test/data/test.mp4 --output test/data/test.png --nframes 9 --height 480 --width 640
-```
-
 * Video (click on the thumbnail to watch the video in Youtube):
 
 [![Exemplary surgery video](https://img.youtube.com/vi/45dRNoqGZCg/0.jpg)](https://www.youtube.com/watch?v=45dRNoqGZCg)
 
-* Summary based on `time` algorithm:
+* Summary based on `time` algorithm: 
+
+`$ python3 -m videosum.run --input video.mp4 --output time.png --nframes 16 --height 1080 --width 1920 --algo time`
 
 ![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/time.png) 
 
 * Summary based on `fid` algorithm:
+
+`$ python3 -m videosum.run --input video.mp4 --output time.png --nframes 16 --height 1080 --width 1920 --algo fid`
 
 ![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/fid.png) 
 
