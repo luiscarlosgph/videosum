@@ -54,6 +54,10 @@ im = vs.summarise('video.mp4')
 
 # Save collage to file
 cv2.imwrite('collage.jpg', im)
+
+# Retrieve a list of Numpy/OpenCV BGR images corresponding to the key frames of the video
+key_frames = vs.get_key_frames_time('video.mp4')  # 'time' algo
+key_frames = vs.get_key_frames_fid('video.mp4')   # 'fid'  algo
 ```
 
 
