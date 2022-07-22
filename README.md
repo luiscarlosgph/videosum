@@ -72,7 +72,9 @@ python3 -m videosum.run --input test/data/test.mp4 --output test/data/test.png -
 
 * Video:
 
-https://user-images.githubusercontent.com/3996630/172403028-4515cbec-0216-408c-99b8-c03cf15949af.mp4
+[![Exemplary surgery video](https://img.youtube.com/vi/45dRNoqGZCg/0.jpg)](https://www.youtube.com/watch?v=45dRNoqGZCg)
+
+<!-- https://user-images.githubusercontent.com/3996630/172403028-4515cbec-0216-408c-99b8-c03cf15949af.mp4 -->
 
 * Summary:
 
