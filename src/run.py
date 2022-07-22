@@ -28,6 +28,7 @@ def help(short_option):
         '-n': 'Number of frames in the collage (required: True)',
         '-x': 'Width of the collage (required: True)',
         '-y': 'Height of the collage (required: True)',
+        '-a': 'Algorithm for frame selection, available options: time, frechet (required: True)',
     }
     return help_msg[short_option]
 
@@ -46,6 +47,8 @@ def parse_cmdline_params():
                         help=help('-x'))
     parser.add_argument('-y', '--height', required=True, type=int, 
                         help=help('-y'))
+    parser.add_argument('-a', '--algo', required=True, type=str,
+                        help=help('-a'))
 
     # Read parameters
     args = parser.parse_args()
@@ -69,7 +72,7 @@ def main():
     args = parse_cmdline_params()
     validate_cmdline_params(args)
 
-    vidsum = videosum.VideoSummariser(args.nframes, args.width, args.height)
+    vidsum = videosum.VideoSummariser(args.algo, args.nframes, args.width, args.height)
     im = vidsum.summarise(args.input)
     cv2.imwrite(args.output, im)
 

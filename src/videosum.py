@@ -13,20 +13,34 @@ import numpy as np
 import cv2
 import tqdm
 import math
+import sklearn_extra.cluster
+
+# My imports
+import videosum
 
 
 class VideoSummariser():
-    def __init__(self, number_of_frames: int = 100, 
+    
+
+    def __init__(self, algo, number_of_frames: int = 100, 
             width: int = 1920, height: int = 1080):
         """
         @brief   Summarise a video into a collage.
         @details The frames in the collage are evenly taken from the video. 
                  No fancy stuff.
 
-        @param[in]  input_path        Path to the input video file.
+        @param[in]  algo              Algorithm to select key frames.
         @param[in]  number_of_frames  Number of frames of the video you want
                                       to see in the collage.
+        @param[in]  width             Width of the summary collage.
+        @param[in]  height            Height of the summary collage.
         """
+        assert(algo in VideoSummariser.ALGOS)
+        assert(number_of_frames > 0)
+        assert(width > 0)
+        assert(height > 0)
+
+        self.algo = algo
         self.number_of_frames = number_of_frames
         self.width = width
         self.height = height
@@ -47,12 +61,7 @@ class VideoSummariser():
         # Compute how many tiles per row and column
         self.tiles_per_row = self.width // self.tile_width
         self.tiles_per_col = self.height // self.tile_height 
-
-        # Create empty collage
-        self.collage = np.zeros((self.tiles_per_col * self.tile_height, 
-                                 self.tiles_per_row * self.tile_width, 3),
-                                dtype=np.uint8)
-    
+ 
     @staticmethod
     def _how_many_rectangles_fit(tile_height, width, height):
         """
@@ -91,18 +100,16 @@ class VideoSummariser():
         x_end = x_start + im_resized.shape[1] 
         self.collage[y_start:y_end, x_start:x_end] = im_resized
 
-    def summarise(self, input_path):
+    def get_key_frames_time(self, input_path):
         """
-        @brief Create a collage of the video.  
-
-        @param[in]  input_path   Path to an input video.
-
-        @returns a BGR image (numpy.ndarray) with a collage of the video.
-        """
+        @brief Get a list of key frames from the video. The key frames are
+               simply evenly spaced along the video.
         
-        # Initialise collage counters
-        i = 0
-        j = 0
+        @param[in]  input_path  Path to the video file.
+
+        @returns a list of Numpy/OpenCV BGR images.
+        """
+        key_frames = []
 
         # Collect the collage frames from the video 
         reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
@@ -111,13 +118,12 @@ class VideoSummariser():
         nframes = int(math.floor(meta['duration'] * meta['fps']))
         interval = nframes // self.number_of_frames
         counter = interval
-        inserted = 0
         for raw_frame in tqdm.tqdm(reader):
-            # If we have the collage full, mic out
-            if inserted == self.number_of_frames:
+            # If we have collected all the frames we needed, mic out
+            if len(key_frames) == self.number_of_frames:
                 break
             
-            # Insert image in the collage
+            # If this frame is a key frame...
             counter -= 1
             if counter == 0:
                 counter = interval
@@ -126,9 +132,93 @@ class VideoSummariser():
                 im = np.frombuffer(raw_frame, 
                         dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
             
+                # Insert video frame in our list of key frames
+                key_frames.append(im)
+
+        return key_frames
+        
+    def get_key_frames_fid(self, input_path):
+        """
+        @brief Get a list of key video frames. 
+        @details They key frames are selected by unsupervised clustering of 
+                 latent feature vectors corresponding to the video frames.
+                 The latent feature vector is obtained from Inception V3
+                 trained on ImageNet. The clustering method used is kmedoids.  
+
+        @param[in]  input_path  Path to the video file.
+        
+        @returns a list of Numpy/BGR images, range [0.0, 1.0], dtype = np.uint8. 
+        """
+        latent_vectors = []
+
+        # Initialise Inception network model
+        fid = videosum.FrechetInceptionDistance()
+
+        # Collect feature vectors for all the frames
+        reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
+        meta = reader.__next__()
+        w, h = meta['size']
+        for raw_frame in tqdm.tqdm(reader):
+            # Convert video frame into a BGR OpenCV/Numpy image
+            im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
+
+            # Compute latent feature vector for this video frame
+            vec = fid.get_latent_feature_vector(im)
+
+            # Add feature vector to our list
+            latent_vectors.append(vec)
+
+        # Compute mean and variance of every vector
+        X = np.array(latent_vectors)
+
+        # Cluster the feature vectors using the Frechet Inception Distance 
+        kmedoids = sklearn_extra.cluster.KMedoids(n_clusters=self.number_of_frames, 
+            init='k-medoids++',
+            random_state=0).fit(X)
+        indices = kmedoids.medoid_indices_.tolist()
+
+        # Retrieve the video frames corresponding to the cluster means
+        key_frames = []
+        counter = -1
+        reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
+        for raw_frame in tqdm.tqdm(reader):
+            counter += 1
+            if counter in indices:
+                # Convert video frame into a BGR OpenCV/Numpy image
+                im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
+
+                # Add key frame to list
+                key_frames.append(im)
+
+        return key_frames
+
+    def summarise(self, input_path):
+        """
+        @brief Create a collage of the video.  
+
+        @param[in]  input_path   Path to an input video.
+
+        @returns a BGR image (numpy.ndarray) with a collage of the video.
+        """
+        # Get list of key frames
+        key_frames = VideoSummariser.ALGOS[self.algo](self, input_path)
+
+        #assert(len(key_frames) == self.number_of_frames)
+        if len(key_frames) < self.number_of_frames:
+            print('[WARN] The key frame selection algorithm selected ' \
+                + 'less frames than you wanted.')
+
+        # Reset collage image
+        self.collage = np.zeros((self.tiles_per_col * self.tile_height, 
+                                 self.tiles_per_row * self.tile_width, 3),
+                                dtype=np.uint8)
+        
+        # Initialise collage counters
+        i = 0
+        j = 0
+        for im in key_frames:
                 # Insert image in the collage
                 self._insert_frame(im, i, j) 
-                inserted += 1
 
                 # Update collage iterators
                 j += 1
@@ -141,6 +231,12 @@ class VideoSummariser():
         #    self.collage[:, x * self.tile_width] = 255
 
         return self.collage
+    
+    # Class attribute: supported key frame selection algorithms
+    ALGOS = {
+        'time': get_key_frames_time,
+        'fid' : get_key_frames_fid,
+    }
 
 
 if __name__ == '__main__':
