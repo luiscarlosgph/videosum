@@ -70,7 +70,7 @@ Exemplary result
 python3 -m videosum.run --input test/data/test.mp4 --output test/data/test.png --nframes 9 --height 480 --width 640
 ```
 
-* Video:
+* Video (click on the thumbnail to watch the video in Youtube):
 
 [![Exemplary surgery video](https://img.youtube.com/vi/45dRNoqGZCg/0.jpg)](https://www.youtube.com/watch?v=45dRNoqGZCg)
 
