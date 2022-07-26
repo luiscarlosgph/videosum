@@ -192,6 +192,9 @@ class VideoSummariser():
 
         return key_frames
 
+    def get_key_frames(self, input_path):
+        return VideoSummariser.ALGOS[self.algo](self, input_path)
+
     def summarise(self, input_path):
         """
         @brief Create a collage of the video.  
