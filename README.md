@@ -26,8 +26,12 @@ $ python3 setup.py install --user
 Run video summarisation on a single video
 -----------------------------------------
 ```
-$ python3 -m videosum.run --input video.mp4 --output collage.jpg --nframes 100 --height 1080 -width 1920
+$ python3 -m videosum.run --input video.mp4 --output collage.jpg --nframes 100 --height 1080 -width 1920 --algo time
 ```
+Options:
+  * `--algo`: algorithm used to select the key frames of the video.
+    * `time`: evenly spaced frames are selected.
+    * `fid` : medoids retrieved with k-medoids clustering on InceptionV3 latent space vectors corresponding to each video frame.
 
 
 Exemplary code snippet
@@ -56,12 +60,14 @@ im = vs.summarise('video.mp4')
 cv2.imwrite('collage.jpg', im)
 
 # Retrieve a list of Numpy/OpenCV BGR images corresponding to the key frames of the video
-key_frames = vs.get_key_frames('video.mp4')       # Uses the algorithm passed in the constructor
+key_frames = vs.get_key_frames('video.mp4')       
+```
 
+<!--
 # Alternatively, you can specify which algorithm you want to use
 key_frames = vs.get_key_frames_time('video.mp4')  # 'time' algo
 key_frames = vs.get_key_frames_fid('video.mp4')   # 'fid'  algo
-```
+-->
 
 
 Run unit tests
