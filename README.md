@@ -29,6 +29,11 @@ Run video summarisation on a single video
 $ python3 -m videosum.run --input video.mp4 --output collage.jpg --nframes 100 --height 1080 -width 1920 --algo time
 ```
 Options:
+  * `--input`: path to the input video file.
+  * `--output`: path where the output collage will be saved.
+  * `--nframes`: number of frames that you want to see in the collage image.
+  * `--height`: height of the collage image.
+  * `--width`: width of the collage image.
   * `--algo`: algorithm used to select the key frames of the video.
     * `time`: evenly spaced frames are selected.
     * `fid` : medoids retrieved with k-medoids clustering on InceptionV3 latent space vectors corresponding to each video frame.
