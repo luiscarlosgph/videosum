@@ -58,7 +58,8 @@ class FrechetInceptionDistance():
     
     def get_latent_feature_tensor(self, im):
         assert(self.mode == 'tensor')
-        return self._get_latent_features(im).reshape((8, 8, 2048))
+        #return self._get_latent_features(im).reshape((8, 8, 2048))
+        return self._get_latent_features(im).reshape((2048, 8, 8))
 
         
     

@@ -228,7 +228,7 @@ class VideoSummariser():
             tensor = fid.get_latent_feature_tensor(im)
 
             # Sum tensor over channels
-            aggregation_map = tensor.sum(axis=2)
+            aggregation_map = tensor.sum(axis=0)
 
             # Compute mask map
             mean = aggregation_map.mean()
@@ -247,7 +247,7 @@ class VideoSummariser():
             for i in range(8):
                 for j in range(8):
                     if largest_cc[i, j]:
-                        selected_descriptor_set.append(tensor[i, j])
+                        selected_descriptor_set.append(tensor[:, i, j])
             selected_descriptor_set = np.array(selected_descriptor_set)
 
             # Compute avg&maxPool SCDA feature vector
