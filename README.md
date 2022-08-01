@@ -103,6 +103,12 @@ Exemplary result
 
 ![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/fid.png) 
 
+* Summary based on `scda` algorithm:
+
+`$ python3 -m videosum.run --input video.mp4 --output time.png --nframes 16 --height 1080 --width 1920 --algo scda`
+
+![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/scda.png) 
+
 
 Author
 ------
