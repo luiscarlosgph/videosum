@@ -40,7 +40,8 @@ class InceptionV3(nn.Module):
                  resize_input=True,
                  normalize_input=True,
                  requires_grad=False,
-                 use_fid_inception=True):
+                 use_fid_inception=True,
+                 output_vector=True):
         """Build pretrained InceptionV3
 
         Parameters
@@ -51,6 +52,7 @@ class InceptionV3(nn.Module):
                 - 1: corresponds to output of second max pooling
                 - 2: corresponds to output which is fed to aux classifier
                 - 3: corresponds to output of final average pooling
+                - 4: corresponds to output block 3 without average pooling
         resize_input : bool
             If true, bilinearly resizes input to width and height 299 before
             feeding input to model. As the network without fully connected
@@ -70,6 +72,9 @@ class InceptionV3(nn.Module):
             Inception model. If you want to compute FID scores, you are
             strongly advised to set this parameter to true to get comparable
             results.
+        output_vector : bool
+            If True, a latent vector is returned. Otherwise, a latent tensor
+            is returned.
         """
         super(InceptionV3, self).__init__()
 
@@ -78,8 +83,8 @@ class InceptionV3(nn.Module):
         self.output_blocks = sorted(output_blocks)
         self.last_needed_block = max(output_blocks)
 
-        assert self.last_needed_block <= 3, \
-            'Last possible output block index is 3'
+        assert self.last_needed_block <= 4, \
+            'Last possible output block index is 4'
 
         self.blocks = nn.ModuleList()
 
@@ -119,15 +124,16 @@ class InceptionV3(nn.Module):
                 inception.Mixed_6e,
             ]
             self.blocks.append(nn.Sequential(*block2))
-
+        
         # Block 3: aux classifier to final avgpool
         if self.last_needed_block >= 3:
             block3 = [
                 inception.Mixed_7a,
                 inception.Mixed_7b,
                 inception.Mixed_7c,
-                nn.AdaptiveAvgPool2d(output_size=(1, 1))
             ]
+            if output_vector:
+                block3.append(nn.AdaptiveAvgPool2d(output_size=(1, 1)))
             self.blocks.append(nn.Sequential(*block3))
 
         for param in self.parameters():

@@ -15,19 +15,27 @@ import videosum
 
 
 class FrechetInceptionDistance():
-    def __init__(self, device: str = 'cuda'):
+    def __init__(self, mode: str, device: str = 'cuda'):
+        self.mode = mode
         self.device = device
-        self.model = videosum.InceptionV3().to(device)
+        
+        # Initialise model
+        if self.mode == 'vector':
+            self.model = videosum.InceptionV3().to(device)
+        elif self.mode == 'tensor':
+            self.model = videosum.InceptionV3(output_vector=False).to(device)
+        else:
+            raise ValueError('[ERROR] Output mode not recognized.')
         self.model.eval()
     
-    def get_latent_feature_vector(self, im):
+    def _get_latent_features(self, im):
         """
         @brief  Given an image, this method computes a 1D feature vector.
 
         @param[in]  im  Numpy/OpenCV BGR image, shape (H, W, 3),
                         dtype = np.uint8.
         
-        @returns a Numpy feature vector of shape (2048,).
+        @returns a Numpy ndarray of 2048 channels.
         """
         # Convert the image to RGB in range [0, 1]
         im = im[...,::-1].copy().astype(np.float32) / 255.
@@ -38,11 +46,21 @@ class FrechetInceptionDistance():
         # Convert image to shape (1, 3, H, W)
         im = im.permute(2, 0, 1).unsqueeze(0)
 
+        # Run inference on the image and get a vector of shape (2048,)
         with torch.no_grad():
-            # Run inference on the image and get a vector of shape (2048,)
             output = self.model(im)[0].flatten().cpu().detach().numpy()
 
         return output
+    
+    def get_latent_feature_vector(self, im):
+        assert(self.mode == 'vector')
+        return self._get_latent_features(im)
+    
+    def get_latent_feature_tensor(self, im):
+        assert(self.mode == 'tensor')
+        return self._get_latent_features(im).reshape((8, 8, 2048))
+
+        
     
     @staticmethod
     def frechet_inception_distance(mu_sigma_1, mu_sigma_2):

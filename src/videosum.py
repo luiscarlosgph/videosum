@@ -14,14 +14,14 @@ import cv2
 import tqdm
 import math
 import sklearn_extra.cluster
+import skimage.measure
+import scipy
 
 # My imports
 import videosum
 
 
 class VideoSummariser():
-    
-
     def __init__(self, algo, number_of_frames: int = 100, 
             width: int = 1920, height: int = 1080):
         """
@@ -152,7 +152,7 @@ class VideoSummariser():
         latent_vectors = []
 
         # Initialise Inception network model
-        fid = videosum.FrechetInceptionDistance()
+        fid = videosum.FrechetInceptionDistance('vector')
 
         # Collect feature vectors for all the frames
         reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
@@ -167,6 +167,96 @@ class VideoSummariser():
 
             # Add feature vector to our list
             latent_vectors.append(vec)
+
+        # Compute mean and variance of every vector
+        X = np.array(latent_vectors)
+
+        # Cluster the feature vectors using the Frechet Inception Distance 
+        kmedoids = sklearn_extra.cluster.KMedoids(n_clusters=self.number_of_frames, 
+            init='k-medoids++',
+            random_state=0).fit(X)
+        indices = kmedoids.medoid_indices_.tolist()
+
+        # Retrieve the video frames corresponding to the cluster means
+        key_frames = []
+        counter = -1
+        reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
+        for raw_frame in tqdm.tqdm(reader):
+            counter += 1
+            if counter in indices:
+                # Convert video frame into a BGR OpenCV/Numpy image
+                im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
+
+                # Add key frame to list
+                key_frames.append(im)
+
+        return key_frames
+
+    def get_key_frames_scda(self, input_path):
+        """
+        @brief Get a list of key video frames. 
+        @details They key frames are selected by unsupervised clustering of 
+                 latent feature vectors corresponding to the video frames.
+                 The latent feature vector is obtained as explained in 
+                 Wei et al. 2017:
+
+                 "Selective Convolutional Descriptor Aggregation for
+                  Fine-Grained Image Retrieval"
+                 
+                 The only difference with the paper is we use InceptionV3
+                 to retrieve the latent tensor (as opposed to VGG-16).
+
+        @param[in]  input_path  Path to the video file.
+        
+        @returns a list of Numpy/BGR images, range [0.0, 1.0], dtype = np.uint8. 
+    
+        """
+        latent_vectors = []
+
+        # Initialise Inception network model
+        fid = videosum.FrechetInceptionDistance('tensor')
+
+        # Collect feature vectors for all the frames
+        reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
+        meta = reader.__next__()
+        w, h = meta['size']
+        for raw_frame in tqdm.tqdm(reader):
+            # Convert video frame into a BGR OpenCV/Numpy image
+            im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
+
+            # Compute latent feature vector for this video frame
+            tensor = fid.get_latent_feature_tensor(im)
+
+            # Sum tensor over channels
+            aggregation_map = tensor.sum(axis=2)
+
+            # Compute mask map
+            mean = aggregation_map.mean()
+            mask_map = np.zeros_like(aggregation_map)
+            mask_map[aggregation_map > mean] = 1
+
+            # Connected component analysis
+            cc = skimage.measure.label(mask_map) 
+
+            # Largest connected component
+            largest = np.argmax(np.bincount(cc.flat)[1:]) + 1
+            largest_cc = scipy.ndimage.binary_fill_holes(cc == largest).astype(cc.dtype)
+
+            # Selected descriptor set
+            selected_descriptor_set = []
+            for i in range(8):
+                for j in range(8):
+                    if largest_cc[i, j]:
+                        selected_descriptor_set.append(tensor[i, j])
+            selected_descriptor_set = np.array(selected_descriptor_set)
+
+            # Compute avg&maxPool SCDA feature vector
+            avgpool = np.mean(selected_descriptor_set, axis=0)
+            maxpool = np.max(selected_descriptor_set, axis=0)
+            scda = np.hstack([avgpool, maxpool])
+
+            # Add feature vector to our list
+            latent_vectors.append(scda)
 
         # Compute mean and variance of every vector
         X = np.array(latent_vectors)
@@ -239,6 +329,7 @@ class VideoSummariser():
     ALGOS = {
         'time': get_key_frames_time,
         'fid' : get_key_frames_fid,
+        'scda': get_key_frames_scda,
     }
 
 
