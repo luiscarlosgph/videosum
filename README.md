@@ -37,6 +37,7 @@ Options:
   * `--algo`: algorithm used to select the key frames of the video.
     * `time`: evenly spaced frames are selected.
     * `fid` : medoids retrieved with k-medoids clustering on InceptionV3 latent space vectors corresponding to each video frame.
+    * `scda`: medoids retrieved with k-medoids clustering on SCDA image descriptors obtained as explained in [Wei et al. 2017 "Selective Convolutional Descriptor Aggregation for Fine-Grained Image Retrieval"](https://arxiv.org/abs/1604.04994).
 
 
 Exemplary code snippet
@@ -53,7 +54,7 @@ widtth = 1920
 height = 1080
 
 # Choose the algotrithm that selects the key frames
-algo = 'fid'  # The options are: 'time', 'fid'
+algo = 'fid'  # The options are: 'time', 'fid', 'scda'
 
 # Create video summariser object
 vs = videosum.VideoSummariser(algo, nframes, width, height)
