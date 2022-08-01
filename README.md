@@ -37,7 +37,7 @@ Options:
   * `--algo`: algorithm used to select the key frames of the video.
     * `time`: evenly spaced frames are selected.
     * `fid` : medoids retrieved with k-medoids clustering on InceptionV3 latent space vectors corresponding to each video frame.
-    * `scda`: medoids retrieved with k-medoids clustering on SCDA image descriptors obtained as explained in [Wei et al. 2017 "Selective Convolutional Descriptor Aggregation for Fine-Grained Image Retrieval"](https://arxiv.org/abs/1604.04994).
+    * `scda`: medoids retrieved with k-medoids clustering on SCDA image descriptors ([Wei et al. 2017 Selective Convolutional Descriptor Aggregation for Fine-Grained Image Retrieval](https://arxiv.org/abs/1604.04994)), but with latent tensor from InceptionV3 trained on ImageNet as opposed to VGG-16.
 
 
 Exemplary code snippet
@@ -102,6 +102,12 @@ Exemplary result
 `$ python3 -m videosum.run --input video.mp4 --output time.png --nframes 16 --height 1080 --width 1920 --algo fid`
 
 ![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/fid.png) 
+
+* Summary based on `scda` algorithm:
+
+`$ python3 -m videosum.run --input video.mp4 --output time.png --nframes 16 --height 1080 --width 1920 --algo scda`
+
+![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/scda.png) 
 
 
 Author
