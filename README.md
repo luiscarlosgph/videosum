@@ -37,7 +37,7 @@ Options:
   * `--algo`: algorithm used to select the key frames of the video.
     * `time`: evenly spaced frames are selected.
     * `fid` : medoids retrieved with k-medoids clustering on InceptionV3 latent space vectors corresponding to each video frame.
-    * `scda`: medoids retrieved with k-medoids clustering on SCDA image descriptors obtained as explained in [Wei et al. 2017 "Selective Convolutional Descriptor Aggregation for Fine-Grained Image Retrieval"](https://arxiv.org/abs/1604.04994).
+    * `scda`: medoids retrieved with k-medoids clustering on SCDA image descriptors ([Wei et al. 2017 Selective Convolutional Descriptor Aggregation for Fine-Grained Image Retrieval](https://arxiv.org/abs/1604.04994)), but with latent tensor from InceptionV3 trained on ImageNet as opposed to VGG-16.
 
 
 Exemplary code snippet
