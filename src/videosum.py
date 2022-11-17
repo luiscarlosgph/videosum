@@ -155,6 +155,7 @@ class VideoSummariser():
         fid = videosum.FrechetInceptionDistance('vector')
 
         # Collect feature vectors for all the frames
+        print('[INFO] Collecting feature vectors for all the frames ...')
         reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
         meta = reader.__next__()
         w, h = meta['size']
@@ -167,17 +168,22 @@ class VideoSummariser():
 
             # Add feature vector to our list
             latent_vectors.append(vec)
-
-        # Compute mean and variance of every vector
-        X = np.array(latent_vectors)
+        print('[INFO] Done. Feature vectors computed.')
 
         # Cluster the feature vectors using the Frechet Inception Distance 
+        print('[INFO] k-medoids clustering ...')
+        X = np.array(latent_vectors)
+        fid_metric = videosum.FrechetInceptionDistance.frechet_inception_distance
         kmedoids = sklearn_extra.cluster.KMedoids(n_clusters=self.number_of_frames, 
+            metric=fid_metric,
+            method='pam',
             init='k-medoids++',
             random_state=0).fit(X)
         indices = kmedoids.medoid_indices_.tolist()
+        print('[INFO] k-medoids clustering finished.')
 
         # Retrieve the video frames corresponding to the cluster means
+        print('[INFO] Retrieving key frames ...')
         key_frames = []
         counter = -1
         reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
@@ -189,6 +195,7 @@ class VideoSummariser():
 
                 # Add key frame to list
                 key_frames.append(im)
+        print('[INFO] Key frames obtained.')
 
         return key_frames
 

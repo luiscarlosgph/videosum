@@ -61,21 +61,24 @@ class FrechetInceptionDistance():
         #return self._get_latent_features(im).reshape((8, 8, 2048))
         return self._get_latent_features(im).reshape((2048, 8, 8))
 
-        
-    
     @staticmethod
-    def frechet_inception_distance(mu_sigma_1, mu_sigma_2):
-        """
-        @brief Compute the Frechet inception distance between two 
-               distributions.
-
-        @param[in]  mu_sigma_1  Numpy array of arrays [[means], [covs]] for 
-                                distribution 1.
-        @param[in]  mu_sigma_2  Numpy array of arrays [[means], [covs]] for 
-                                distribution 2.
-        """
+    def frechet_inception_distance(vec1, vec2):
         return FrechetInceptionDistance._calculate_frechet_distance(
-            mu_sigma_1[0], mu_sigma_1[1], mu_sigma_2[0], mu_sigma_2[0])
+            np.mean(vec1), np.cov(vec1), np.mean(vec2), np.cov(vec2))
+    
+    #@staticmethod
+    #def frechet_inception_distance(mu_sigma_1, mu_sigma_2):
+    #    """
+    #    @brief Compute the Frechet inception distance between two 
+    #           distributions.
+    # 
+    #    @param[in]  mu_sigma_1  Numpy array of arrays [[means], [covs]] for 
+    #                            distribution 1.
+    #    @param[in]  mu_sigma_2  Numpy array of arrays [[means], [covs]] for 
+    #                            distribution 2.
+    #    """
+    #    return FrechetInceptionDistance._calculate_frechet_distance(
+    #        mu_sigma_1[0], mu_sigma_1[1], mu_sigma_2[0], mu_sigma_2[0])
 
     @staticmethod 
     def _calculate_frechet_distance(mu1, sigma1, mu2, sigma2, eps=1e-6):
