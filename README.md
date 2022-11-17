@@ -92,6 +92,12 @@ Exemplary result
 
 ![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/time.png) 
 
+* Summary based on `inception` algorithm:
+
+`$ python3 -m videosum.run --input video.mp4 --output time.png --nframes 16 --height 1080 --width 1920 --algo inception`
+
+![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/inception.png) 
+
 * Summary based on `fid` algorithm:
 
 `$ python3 -m videosum.run --input video.mp4 --output time.png --nframes 16 --height 1080 --width 1920 --algo fid`
