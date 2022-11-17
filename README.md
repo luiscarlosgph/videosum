@@ -36,9 +36,9 @@ Options:
   * `--width`: width of the collage image.
   * `--algo`: algorithm used to select the key frames of the video.
     * `time`: evenly spaced frames are selected.
-    * `inception`: medoids retrieved with k-medoids clustering on InceptionV3 latent space vectors corresponding to each video frame. The clustering metric used to compute the distance between two latent vectors is the l2-norm.
-    * `fid` : medoids retrieved with k-medoids clustering on InceptionV3 latent space vectors corresponding to each video frame. The clustering metric used to compute the distance between two latent vectors is the [Frechet Inception Distance (FID)](https://en.wikipedia.org/wiki/Fr%C3%A9chet_inception_distance).
-    * `scda`: medoids retrieved with k-medoids clustering on SCDA image descriptors ([Wei et al. 2017 Selective Convolutional Descriptor Aggregation for Fine-Grained Image Retrieval](https://arxiv.org/abs/1604.04994)), but with latent tensor from InceptionV3 trained on ImageNet as opposed to VGG-16.
+    * `inception`: medoids retrieved with k-medoids clustering (l2-norm metric) on InceptionV3 latent space vectors corresponding to each video frame.
+    * `fid` : medoids retrieved with k-medoids clustering ([Frechet Inception Distance (FID)](https://en.wikipedia.org/wiki/Fr%C3%A9chet_inception_distance) metric) on InceptionV3 latent space vectors corresponding to each video frame.
+    * `scda`: medoids retrieved with k-medoids (l2-norm metric) clustering on SCDA image descriptors ([Wei et al. 2017 Selective Convolutional Descriptor Aggregation for Fine-Grained Image Retrieval](https://arxiv.org/abs/1604.04994)), but with latent tensor from InceptionV3 trained on ImageNet as opposed to VGG-16.
 
 
 Exemplary code snippet
