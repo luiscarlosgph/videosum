@@ -136,6 +136,66 @@ class VideoSummariser():
                 key_frames.append(im)
 
         return key_frames
+
+    def get_key_frames_inception(self, input_path):
+        """
+        @brief Get a list of key video frames. 
+        @details They key frames are selected by unsupervised clustering of 
+                 latent feature vectors corresponding to the video frames.
+                 The latent feature vector is obtained from Inception V3
+                 trained on ImageNet. The clustering method used is kmedoids.  
+
+        @param[in]  input_path  Path to the video file.
+        
+        @returns a list of Numpy/BGR images, range [0.0, 1.0], dtype = np.uint8. 
+        """
+        latent_vectors = []
+
+        # Initialise Inception network model
+        fid = videosum.FrechetInceptionDistance('vector')
+
+        # Collect feature vectors for all the frames
+        print('[INFO] Collecting feature vectors for all the frames ...')
+        reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
+        meta = reader.__next__()
+        w, h = meta['size']
+        for raw_frame in tqdm.tqdm(reader):
+            # Convert video frame into a BGR OpenCV/Numpy image
+            im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
+
+            # Compute latent feature vector for this video frame
+            vec = fid.get_latent_feature_vector(im)
+
+            # Add feature vector to our list
+            latent_vectors.append(vec)
+        print('[INFO] Done. Feature vectors computed.')
+
+        # Cluster the feature vectors using the Frechet Inception Distance 
+        print('[INFO] k-medoids clustering ...')
+        X = np.array(latent_vectors)
+        kmedoids = sklearn_extra.cluster.KMedoids(n_clusters=self.number_of_frames, 
+            method='pam',
+            init='k-medoids++',
+            random_state=0).fit(X)
+        indices = kmedoids.medoid_indices_.tolist()
+        print('[INFO] k-medoids clustering finished.')
+
+        # Retrieve the video frames corresponding to the cluster means
+        print('[INFO] Retrieving key frames ...')
+        key_frames = []
+        counter = -1
+        reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
+        for raw_frame in tqdm.tqdm(reader):
+            counter += 1
+            if counter in indices:
+                # Convert video frame into a BGR OpenCV/Numpy image
+                im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
+
+                # Add key frame to list
+                key_frames.append(im)
+        print('[INFO] Key frames obtained.')
+
+        return key_frames
         
     def get_key_frames_fid(self, input_path):
         """
@@ -334,9 +394,10 @@ class VideoSummariser():
     
     # Class attribute: supported key frame selection algorithms
     ALGOS = {
-        'time': get_key_frames_time,
-        'fid' : get_key_frames_fid,
-        'scda': get_key_frames_scda,
+        'time':      get_key_frames_time,
+        'inception': get_key_frames_inception,
+        'fid' :      get_key_frames_fid,
+        'scda':      get_key_frames_scda,
     }
 
 
