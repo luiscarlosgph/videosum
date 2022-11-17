@@ -16,6 +16,8 @@ import math
 import sklearn_extra.cluster
 import skimage.measure
 import scipy
+import scipy.spatial.distance
+import time
 
 # My imports
 import videosum
@@ -230,12 +232,15 @@ class VideoSummariser():
             latent_vectors.append(vec)
         print('[INFO] Done. Feature vectors computed.')
 
+        # Compute distance matrix
+        print('[INFO] Computing distance matrix ...')
+        X = videosum.numba_fid(np.array(latent_vectors))
+        print('[INFO] Done, distance matrix computed.')
+
         # Cluster the feature vectors using the Frechet Inception Distance 
         print('[INFO] k-medoids clustering ...')
-        X = np.array(latent_vectors)
-        fid_metric = videosum.FrechetInceptionDistance.frechet_inception_distance
         kmedoids = sklearn_extra.cluster.KMedoids(n_clusters=self.number_of_frames, 
-            metric=fid_metric,
+            metric='precomputed',
             method='pam',
             init='k-medoids++',
             random_state=0).fit(X)

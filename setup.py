@@ -21,6 +21,7 @@ setuptools.setup(name='videosum',
     install_requires = [
         'numpy', 
         'opencv-python',
+        'numba',
     ],
     long_description=long_description,
     long_description_content_type='text/markdown',

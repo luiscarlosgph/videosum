@@ -9,9 +9,34 @@
 import numpy as np
 import torch
 import scipy
+import numba
 
 # My imports
 import videosum
+
+
+@numba.jit(nopython=True)
+def numba_fid(X, eps=1e-6):
+    """
+    @brief Compute the Frechet distance matrix of a set of vectors.
+    @details
+        d^2 = ||mu_1 - mu_2||^2 + Tr(C_1 + C_2 - 2*sqrt(C_1*C_2))
+    """
+    fid = np.zeros((X.shape[0], X.shape[0]), dtype=np.float64)
+    for i in range(X.shape[0]):
+        for j in range(i + 1, X.shape[0]):
+            # Compute means
+            mu_1 = np.mean(X[i, :])
+            mu_2 = np.mean(X[j, :])
+
+            # Compute covariances (variances because it's univariate) 
+            C_1 = np.var(X[i, :]) + eps
+            C_2 = np.var(X[j, :]) + eps
+
+            # Compute FID
+            fid[i, j] = ((mu_1 - mu_2) ** 2) + (C_1 + C_2 - 2 * np.sqrt(C_1 * C_2))
+    fid = fid + fid.T
+    return fid
 
 
 class FrechetInceptionDistance():
