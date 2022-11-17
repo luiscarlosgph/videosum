@@ -329,17 +329,15 @@ class VideoSummariser():
 
             # Add feature vector to our list
             latent_vectors.append(scda)
-
-        # Compute mean and variance of every vector
         X = np.array(latent_vectors)
 
-        # Cluster the feature vectors using the Frechet Inception Distance 
+        # Cluster the feature vectors
         kmedoids = sklearn_extra.cluster.KMedoids(n_clusters=self.number_of_frames, 
             init='k-medoids++',
             random_state=0).fit(X)
         indices = kmedoids.medoid_indices_.tolist()
 
-        # Retrieve the video frames corresponding to the cluster means
+        # Retrieve the video frames corresponding to the cluster medoids
         key_frames = []
         counter = -1
         reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
