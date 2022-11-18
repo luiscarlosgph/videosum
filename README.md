@@ -69,7 +69,7 @@ cv2.imwrite('collage.jpg', im)
 # Retrieve a list of Numpy/OpenCV BGR images corresponding to the key frames of the video
 key_frames = vs.get_key_frames('video.mp4')       
 
-# Print the video frame indices of the key frames -after calling summarise() or get_key_frames()-
+# Print the video frame indices of the key frames, after calling summarise() or get_key_frames()
 print(vs.indices_)
 ```
 
