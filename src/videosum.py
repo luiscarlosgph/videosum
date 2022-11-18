@@ -26,28 +26,36 @@ import videosum
 
 class VideoSummariser():
     def __init__(self, algo, number_of_frames: int = 100, 
-            width: int = 1920, height: int = 1080):
+            width: int = 1920, height: int = 1080, time_segmentation=False,
+            segbar_height=32):
         """
         @brief   Summarise a video into a collage.
         @details The frames in the collage are evenly taken from the video. 
                  No fancy stuff.
 
-        @param[in]  algo              Algorithm to select key frames.
-        @param[in]  number_of_frames  Number of frames of the video you want
-                                      to see in the collage.
-        @param[in]  width             Width of the summary collage.
-        @param[in]  height            Height of the summary collage.
+        @param[in]  algo               Algorithm to select key frames.
+        @param[in]  number_of_frames   Number of frames of the video you want
+                                       to see in the collage.
+        @param[in]  width              Width of the summary collage.
+        @param[in]  height             Height of the summary collage.
+        @param[in]  time_segmentation  Set to True to show a time segmentation
+                                       under the video collage.
+        @param[in]  segbar_height      Height in pixels of the time
+                                       segmentation bar.
         """
         assert(algo in VideoSummariser.ALGOS)
         assert(number_of_frames > 0)
         assert(width > 0)
         assert(height > 0)
-
+        
+        # Store attributes
         self.algo = algo
         self.number_of_frames = number_of_frames
         self.width = width
         self.height = height
         self.form_factor = float(self.width) / self.height
+        self.time_segmentation = time_segmentation
+        self.segbar_height = segbar_height
 
         # Compute the width and height of each collage tile
         self.tile_height = self.height
@@ -64,6 +72,9 @@ class VideoSummariser():
         # Compute how many tiles per row and column
         self.tiles_per_row = self.width // self.tile_width
         self.tiles_per_col = self.height // self.tile_height 
+
+        # Initialise the variable that holds the video frame count 
+        self.frame_count_ = None
  
     @staticmethod
     def _how_many_rectangles_fit(tile_height, width, height):
@@ -123,7 +134,9 @@ class VideoSummariser():
         counter = interval
         idx = -1
         self.indices_ = []
+        self.frame_count_ = 0
         for raw_frame in tqdm.tqdm(reader):
+            self.frame_count_ += 1
             idx += 1
 
             # If we have collected all the frames we needed, mic out
@@ -167,7 +180,10 @@ class VideoSummariser():
         reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
         meta = reader.__next__()
         w, h = meta['size']
+        self.frame_count_ = 0
         for raw_frame in tqdm.tqdm(reader):
+            self.frame_count_ += 1
+
             # Convert video frame into a BGR OpenCV/Numpy image
             im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
 
@@ -239,7 +255,10 @@ class VideoSummariser():
         reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
         meta = reader.__next__()
         w, h = meta['size']
+        self.frame_count_ = 0
         for raw_frame in tqdm.tqdm(reader):
+            self.frame_count_ += 1
+
             # Convert video frame into a BGR OpenCV/Numpy image
             im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
 
@@ -317,7 +336,10 @@ class VideoSummariser():
         reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
         meta = reader.__next__()
         w, h = meta['size']
+        self.frame_count_ = 0
         for raw_frame in tqdm.tqdm(reader):
+            self.frame_count_ += 1
+
             # Convert video frame into a BGR OpenCV/Numpy image
             im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
 
@@ -425,18 +447,32 @@ class VideoSummariser():
         i = 0
         j = 0
         for im in key_frames:
-                # Insert image in the collage
-                self._insert_frame(im, i, j) 
+            # Insert image in the collage
+            self._insert_frame(im, i, j) 
 
-                # Update collage iterators
-                j += 1
-                if j == self.tiles_per_row:
-                    j = 0
-                    i += 1
+            # Update collage iterators
+            j += 1
+            if j == self.tiles_per_row:
+                j = 0
+                i += 1
 
         # Put dividing lines on the collage
         #for x in range(1, self.tiles_per_row):
         #    self.collage[:, x * self.tile_width] = 255
+
+        # Create the time segmentation bar under the collage
+        if self.time_segmentation:
+            segbar = np.ones((self.segbar_height, self.collage.shape[1], 3), 
+                dtype=np.uint8)
+            segbar *= np.array([84, 1, 68], np.uint8)
+            for i in self.indices_:
+                pos = round(self.collage.shape[1] * i / self.frame_count_)    
+                segbar[:, pos] = np.array([37, 231, 253], dtype=np.uint8)
+            collage_with_seg = np.zeros((self.collage.shape[0] + segbar.shape[0],
+                self.collage.shape[1], 3), dtype=self.collage.dtype) 
+            collage_with_seg[:self.collage.shape[0], :] = self.collage
+            collage_with_seg[self.collage.shape[0]:, :] = segbar
+            self.collage = collage_with_seg
 
         return self.collage
     

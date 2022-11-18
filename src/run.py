@@ -29,6 +29,7 @@ def help(short_option):
         '-x': 'Width of the collage (required: True)',
         '-y': 'Height of the collage (required: True)',
         '-a': 'Algorithm for frame selection, available options: time, frechet (required: True)',
+        '-t': 'Add time segmentation based on the key frame selection (required: False)',
     }
     return help_msg[short_option]
 
@@ -49,6 +50,8 @@ def parse_cmdline_params():
                         help=help('-y'))
     parser.add_argument('-a', '--algo', required=True, type=str,
                         help=help('-a'))
+    parser.add_argument('-t', '--time-segmentation', required=False, 
+                        default=False, type=bool, help=help('-t'))
 
     # Read parameters
     args = parser.parse_args()
@@ -72,7 +75,9 @@ def main():
     args = parse_cmdline_params()
     validate_cmdline_params(args)
 
-    vidsum = videosum.VideoSummariser(args.algo, args.nframes, args.width, args.height)
+    vidsum = videosum.VideoSummariser(args.algo, args.nframes, args.width, 
+                                      args.height, 
+                                      time_segmentation=args.time_segmentation)
     im = vidsum.summarise(args.input)
     cv2.imwrite(args.output, im)
 
