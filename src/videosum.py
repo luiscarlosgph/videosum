@@ -185,7 +185,7 @@ class VideoSummariser():
             method='pam',
             init='k-medoids++',
             random_state=0).fit(l2norm)
-        indices = sorted(kmedoids.medoid_indices_.tolist())
+        indices = sorted(kmedoids.medoid_indices_.tolist(), reverse=True)
         print('[INFO] k-medoids clustering finished.')
 
         # Retrieve the video frames corresponding to the cluster means
@@ -195,13 +195,18 @@ class VideoSummariser():
         reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
         for raw_frame in tqdm.tqdm(reader):
             counter += 1
-            if counter in indices:
+            if counter == indices[-1]:
                 # Convert video frame into a BGR OpenCV/Numpy image
                 im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
 
                 # Add key frame to list
                 key_frames.append(im)
+                
+                # Remove the center we just found
+                indices.pop()
 
+            if not indices:
+                break
         print('[INFO] Key frames obtained.')
 
         return key_frames
