@@ -18,6 +18,7 @@ import skimage.measure
 import scipy
 import scipy.spatial.distance
 import time
+import faiss
 
 # My imports
 import videosum
@@ -139,7 +140,7 @@ class VideoSummariser():
 
         return key_frames
 
-    def get_key_frames_inception(self, input_path):
+    def get_key_frames_inception(self, input_path, eps=1e-6):
         """
         @brief Get a list of key video frames. 
         @details They key frames are selected by unsupervised clustering of 
@@ -172,14 +173,19 @@ class VideoSummariser():
             latent_vectors.append(vec)
         print('[INFO] Done. Feature vectors computed.')
 
+        # Compute L2 distances
+        X = np.array(latent_vectors, dtype=np.float32)
+        mt = getattr(faiss, 'METRIC_L2')
+        l2norm = np.clip(faiss.pairwise_distances(X, X, mt), 0, None)
+
         # Cluster the feature vectors using the Frechet Inception Distance 
         print('[INFO] k-medoids clustering ...')
-        X = np.array(latent_vectors)
-        kmedoids = sklearn_extra.cluster.KMedoids(n_clusters=self.number_of_frames, 
+        kmedoids = sklearn_extra.cluster.KMedoids(n_clusters=self.number_of_frames,
+            metric='precomputed',
             method='pam',
             init='k-medoids++',
-            random_state=0).fit(X)
-        indices = kmedoids.medoid_indices_.tolist()
+            random_state=0).fit(l2norm)
+        indices = sorted(kmedoids.medoid_indices_.tolist())
         print('[INFO] k-medoids clustering finished.')
 
         # Retrieve the video frames corresponding to the cluster means
@@ -195,6 +201,7 @@ class VideoSummariser():
 
                 # Add key frame to list
                 key_frames.append(im)
+
         print('[INFO] Key frames obtained.')
 
         return key_frames
