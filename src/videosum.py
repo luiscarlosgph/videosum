@@ -301,6 +301,7 @@ class VideoSummariser():
         fid = videosum.FrechetInceptionDistance('tensor')
 
         # Collect feature vectors for all the frames
+        print('[INFO] Collecting feature vectors for all the frames ...')
         reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
         meta = reader.__next__()
         w, h = meta['size']
@@ -341,26 +342,45 @@ class VideoSummariser():
 
             # Add feature vector to our list
             latent_vectors.append(scda)
-        X = np.array(latent_vectors)
+        print('[INFO] Done. Feature vectors computed.')
+
+        # Compute L2 distances
+        print('[INFO] Computing distance matrix ...')
+        X = np.array(latent_vectors, dtype=np.float32)
+        mt = getattr(faiss, 'METRIC_L2')
+        l2norm = np.clip(faiss.pairwise_distances(X, X, mt), 0, None)
+        print('[INFO] Done, distance matrix computed.')
 
         # Cluster the feature vectors
+        print('[INFO] k-medoids clustering ...')
         kmedoids = sklearn_extra.cluster.KMedoids(n_clusters=self.number_of_frames, 
+            metric='precomputed',
             init='k-medoids++',
-            random_state=0).fit(X)
-        indices = kmedoids.medoid_indices_.tolist()
+            random_state=0).fit(l2norm)
+        print('[INFO] k-medoids clustering finished.')
+        indices = sorted(kmedoids.medoid_indices_.tolist(), reverse=True)
 
         # Retrieve the video frames corresponding to the cluster medoids
+        print('[INFO] Retrieving key frames ...')
         key_frames = []
         counter = -1
         reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
         for raw_frame in tqdm.tqdm(reader):
             counter += 1
-            if counter in indices:
+            if counter == indices[-1]:
                 # Convert video frame into a BGR OpenCV/Numpy image
                 im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
 
                 # Add key frame to list
                 key_frames.append(im)
+                
+                # Remove frame we just found
+                indices.pop()
+            
+            # Stop if we found all the frames
+            if not indices:
+                break
+        print('[INFO] Key frames obtained.')
 
         return key_frames
 
