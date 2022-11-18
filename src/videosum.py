@@ -121,7 +121,11 @@ class VideoSummariser():
         nframes = int(math.floor(meta['duration'] * meta['fps']))
         interval = nframes // self.number_of_frames
         counter = interval
+        idx = -1
+        self.indices_ = []
         for raw_frame in tqdm.tqdm(reader):
+            idx += 1
+
             # If we have collected all the frames we needed, mic out
             if len(key_frames) == self.number_of_frames:
                 break
@@ -137,6 +141,7 @@ class VideoSummariser():
             
                 # Insert video frame in our list of key frames
                 key_frames.append(im)
+                self.indices_.append(idx)
 
         return key_frames
 
@@ -186,6 +191,7 @@ class VideoSummariser():
             init='k-medoids++',
             random_state=0).fit(l2norm)
         indices = sorted(kmedoids.medoid_indices_.tolist(), reverse=True)
+        self.indices_ = [x for x in indices]
         print('[INFO] k-medoids clustering finished.')
 
         # Retrieve the video frames corresponding to the cluster means
@@ -256,7 +262,8 @@ class VideoSummariser():
             method='pam',
             init='k-medoids++',
             random_state=0).fit(X)
-        indices = kmedoids.medoid_indices_.tolist()
+        indices = sorted(kmedoids.medoid_indices_.tolist(), reverse=True)
+        self.indices_ = [x for x in indices]
         print('[INFO] k-medoids clustering finished.')
 
         # Retrieve the video frames corresponding to the cluster means
@@ -266,12 +273,17 @@ class VideoSummariser():
         reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
         for raw_frame in tqdm.tqdm(reader):
             counter += 1
-            if counter in indices:
+            if counter == indices[-1]:
                 # Convert video frame into a BGR OpenCV/Numpy image
                 im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
 
                 # Add key frame to list
                 key_frames.append(im)
+                
+                # Remove frame we just found
+                indices.pop()
+            if not indices:
+                break
         print('[INFO] Key frames obtained.')
 
         return key_frames
@@ -359,6 +371,7 @@ class VideoSummariser():
             random_state=0).fit(l2norm)
         print('[INFO] k-medoids clustering finished.')
         indices = sorted(kmedoids.medoid_indices_.tolist(), reverse=True)
+        self.indices_ = [x for x in indices]
 
         # Retrieve the video frames corresponding to the cluster medoids
         print('[INFO] Retrieving key frames ...')
