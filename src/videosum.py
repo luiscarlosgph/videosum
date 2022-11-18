@@ -75,6 +75,9 @@ class VideoSummariser():
 
         # Initialise the variable that holds the video frame count 
         self.frame_count_ = None
+
+        # Initialise the array that holds the label of each frame
+        self.labels_ = None
  
     @staticmethod
     def _how_many_rectangles_fit(tile_height, width, height):
@@ -208,6 +211,7 @@ class VideoSummariser():
             random_state=0).fit(l2norm)
         indices = sorted(kmedoids.medoid_indices_.tolist(), reverse=True)
         self.indices_ = [x for x in indices]
+        self.labels_ = kmedoids.labels_
         print('[INFO] k-medoids clustering finished.')
 
         # Retrieve the video frames corresponding to the cluster means
@@ -283,6 +287,7 @@ class VideoSummariser():
             random_state=0).fit(X)
         indices = sorted(kmedoids.medoid_indices_.tolist(), reverse=True)
         self.indices_ = [x for x in indices]
+        self.labels_ = kmedoids.labels_
         print('[INFO] k-medoids clustering finished.')
 
         # Retrieve the video frames corresponding to the cluster means
@@ -394,6 +399,7 @@ class VideoSummariser():
         print('[INFO] k-medoids clustering finished.')
         indices = sorted(kmedoids.medoid_indices_.tolist(), reverse=True)
         self.indices_ = [x for x in indices]
+        self.labels_ = kmedoids.labels_
 
         # Retrieve the video frames corresponding to the cluster medoids
         print('[INFO] Retrieving key frames ...')
@@ -462,12 +468,38 @@ class VideoSummariser():
 
         # Create the time segmentation bar under the collage
         if self.time_segmentation:
+            # Create an empty segmentation bar
             segbar = np.ones((self.segbar_height, self.collage.shape[1], 3), 
                 dtype=np.uint8)
-            segbar *= np.array([84, 1, 68], np.uint8)
+
+            # Loop over the cluster labels, changing the colour of the
+            # background whenever labels change
+            if self.algo == 'time':
+                # The whole bar of the same background colour
+                segbar *= np.array([84, 1, 68], np.uint8)
+            else:
+                colours = np.array([[84, 1, 68], [139, 82, 59]], dtype=np.uint8)
+                colour_idx = 0
+                prev_label = self.labels_[0]
+                for c, l in enumerate(self.labels_):
+                    # Change background colour if cluster changes
+                    if l != prev_label:
+                        colour_idx = int(not(colour_idx))
+                        prev_label = l
+
+                    # Convert frame index 'c' to bar index
+                    bar_idx = round(segbar.shape[1] * c / len(self.labels_))
+
+                    # Set colour for the column equivalent to the current frame
+                    segbar[:, bar_idx] = colours[colour_idx]
+
+            # Loop over the indices of the cluster medoids, inserting them onto
+            # the bar
             for i in self.indices_:
                 pos = round(self.collage.shape[1] * i / self.frame_count_)    
                 segbar[:, pos] = np.array([37, 231, 253], dtype=np.uint8)
+
+            # Stich the collage to the time segmentation bar
             collage_with_seg = np.zeros((self.collage.shape[0] + segbar.shape[0],
                 self.collage.shape[1], 3), dtype=self.collage.dtype) 
             collage_with_seg[:self.collage.shape[0], :] = self.collage
