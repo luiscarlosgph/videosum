@@ -33,7 +33,8 @@ class VideoReader:
             self.sampling_interval = int(round(float(self.meta_['fps']) / self.sampling_rate))
 
     def __iter__(self):
-        return self.reader_.__iter__()
+        self.iterator_ = self.reader_.__iter__()
+        return self
 
     def __next__(self):
         # Skip some frames if requested

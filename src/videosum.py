@@ -137,29 +137,12 @@ class VideoSummariser():
         w, h = reader.size
         nframes = int(math.floor(reader.duration * reader.fps))
 
-        # Prepare downsampling if needed
-        #if self.fps is not None:
-        #    nframes_downsampled = int(math.floor(reader.duration * self.fps))
-        #    downsampling_interval = int(round(float(nframes) / nframes_downsampled))
-        #    downsampling_counter = 0
-        #else:
-        #    downsampling_interval = None
-        #    downsampling_counter = None
-
         # Collect the collage frames from the video 
         interval = nframes // self.number_of_frames
         counter = interval
         self.indices_ = []
         self.frame_count_ = 0
         for raw_frame in tqdm.tqdm(reader):
-            # Downsample if requested 
-            #if downsampling_interval is not None:
-            #    downsampling_counter += 1 
-            #    if downsampling_counter < downsampling_interval:
-            #        continue
-            #    else:
-            #        downsampling_counter = 0
-            
             # Increase the internal frame count of the video summariser
             self.frame_count_ += 1
 
@@ -196,14 +179,15 @@ class VideoSummariser():
         """
         latent_vectors = []
 
+        # Initialise video reader
+        reader = videosum.VideoReader(input_path, sampling_rate=self.fps)
+        w, h = reader.size
+
         # Initialise Inception network model
-        fid = videosum.FrechetInceptionDistance('vector')
+        model = videosum.FrechetInceptionDistance('vector')
 
         # Collect feature vectors for all the frames
         print('[INFO] Collecting feature vectors for all the frames ...')
-        reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
-        meta = reader.__next__()
-        w, h = meta['size']
         self.frame_count_ = 0
         for raw_frame in tqdm.tqdm(reader):
             self.frame_count_ += 1
@@ -212,7 +196,7 @@ class VideoSummariser():
             im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
 
             # Compute latent feature vector for this video frame
-            vec = fid.get_latent_feature_vector(im)
+            vec = model.get_latent_feature_vector(im)
 
             # Add feature vector to our list
             latent_vectors.append(vec)
@@ -272,14 +256,15 @@ class VideoSummariser():
         """
         latent_vectors = []
 
+        # Initialise video reader
+        reader = videosum.VideoReader(input_path, sampling_rate=self.fps)
+        w, h = reader.size
+
         # Initialise Inception network model
-        fid = videosum.FrechetInceptionDistance('vector')
+        model = videosum.FrechetInceptionDistance('vector')
 
         # Collect feature vectors for all the frames
         print('[INFO] Collecting feature vectors for all the frames ...')
-        reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
-        meta = reader.__next__()
-        w, h = meta['size']
         self.frame_count_ = 0
         for raw_frame in tqdm.tqdm(reader):
             self.frame_count_ += 1
@@ -288,7 +273,7 @@ class VideoSummariser():
             im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
 
             # Compute latent feature vector for this video frame
-            vec = fid.get_latent_feature_vector(im)
+            vec = model.get_latent_feature_vector(im)
 
             # Add feature vector to our list
             latent_vectors.append(vec)
@@ -354,14 +339,15 @@ class VideoSummariser():
         """
         latent_vectors = []
 
+        # Initialise video reader
+        reader = videosum.VideoReader(input_path, sampling_rate=self.fps)
+        w, h = reader.size
+
         # Initialise Inception network model
-        fid = videosum.FrechetInceptionDistance('tensor')
+        model = videosum.FrechetInceptionDistance('tensor')
 
         # Collect feature vectors for all the frames
         print('[INFO] Collecting feature vectors for all the frames ...')
-        reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
-        meta = reader.__next__()
-        w, h = meta['size']
         self.frame_count_ = 0
         for raw_frame in tqdm.tqdm(reader):
             self.frame_count_ += 1
@@ -370,7 +356,7 @@ class VideoSummariser():
             im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
 
             # Compute latent feature vector for this video frame
-            tensor = fid.get_latent_feature_tensor(im)
+            tensor = model.get_latent_feature_tensor(im)
 
             # Sum tensor over channels
             aggregation_map = tensor.sum(axis=0)
