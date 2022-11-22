@@ -88,7 +88,7 @@ Exemplary result
 
 * Video (click on the thumbnail to watch the video in Youtube):
 
-[![Exemplary surgery video](https://raw.githubusercontent.com/luiscarlosgph/videosum/main/test/data/video.mp4)
+![](https://raw.githubusercontent.com/luiscarlosgph/videosum/main/test/data/video.mp4)
 
 * Summary based on `time` algorithm: 
 
