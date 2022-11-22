@@ -123,8 +123,8 @@ Timing
 | fid       | X        |
 | scda      | X        |
 
-`Time (s)` indicates how many seconds of summarisation are required for each second of video. 
-This way you can easily approximate how long each algorithm will take to summarise a video of any given length.
+`Time (s)` indicates how many seconds of summarisation are required for each second of raw video. 
+<!-- This way you can easily approximate how long each algorithm will take to summarise a video of any given length. -->
 
 Author
 ------
