@@ -124,7 +124,7 @@ Timing
 | scda      | X        |
 
 The `Time (s)` indicates how many seconds of summarisation are required for each second of video. 
-This way you can easily find out how long each algorithm will take to summarise an video of an arbitrary length.
+This way you can easily approximate how long each algorithm will take to summarise an video of an arbitrary length.
 
 Author
 ------
