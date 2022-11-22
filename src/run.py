@@ -13,6 +13,7 @@ import numpy as np
 import os
 import cv2
 import tqdm
+import time
 
 # My imports
 import videosum
@@ -81,7 +82,10 @@ def main():
     vidsum = videosum.VideoSummariser(args.algo, args.nframes, args.width, 
                                       args.height, 
                                       time_segmentation=args.time_segmentation)
+    tic = time.time()
     im = vidsum.summarise(args.input)
+    toc = time.time()
+    print("[INFO] Video summarised in {} seconds.".format(toc - tic))
     cv2.imwrite(args.output, im)
 
 
