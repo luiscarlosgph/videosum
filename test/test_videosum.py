@@ -17,7 +17,7 @@ import videosum
 
 
 def create_toy_video(num_colours: int = 16, width: int = 640, height: int = 480,
-                     fps=1, pix_fmt_in='rgb24', pix_fmt_out='yuv420p'):
+                     fps=30, pix_fmt_in='rgb24', pix_fmt_out='yuv420p'):
     """
     @returns the path to the toy video.
     """
@@ -27,12 +27,14 @@ def create_toy_video(num_colours: int = 16, width: int = 640, height: int = 480,
     # Produce all the frames of the video, one per colour
     frames = []
     for i in range(num_colours):
-        im = np.ones((height, width, 3), dtype=np.uint8) * palette[i]
-        frames.append(im)
+        for j in range(fps):
+            im = np.ones((height, width, 3), dtype=np.uint8) * palette[i]
+            frames.append(im)
     
     # Build path to the output video inside the temp folder
     filename = str(uuid.uuid4()) + '.mp4'
     path = os.path.join(tempfile.gettempdir(), filename)
+    print('Video path:', path)
 
     # Save the video to the temporary folder
     writer = imageio_ffmpeg.write_frames(path, (width, height), 
@@ -63,7 +65,7 @@ class TestVideosum(unittest.TestCase):
         height = 480
         nframes = 16
         vs = videosum.VideoSummariser('time', nframes, width, height, 
-                                      time_segmentation=1)
+                                      time_segmentation=1, fps=1)
 
         # Make collage
         collage = vs.summarise(video_path)

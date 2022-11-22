@@ -24,25 +24,34 @@ class VideoReader:
         self.pix_fmt = pix_fmt
         
         # Initialise video reader
-        self.reader_ = imageio_ffmpeg.read_frames(self.path, pix_fmt=self.pix_fmt) 
-        self.meta_ = self.reader_.__next__()
-
+        reader = imageio_ffmpeg.read_frames(self.path, pix_fmt=self.pix_fmt) 
+        self.meta_ = reader.__next__()
+        reader.close()
+        
         # Compute sampling interval if requested
         self.sampling_interval = 0
         if self.sampling_rate is not None:
             self.sampling_interval = int(round(float(self.meta_['fps']) / self.sampling_rate))
 
     def __iter__(self):
-        self.iterator_ = self.reader_.__iter__()
-        return self
+        # Initialise video reader
+        reader = imageio_ffmpeg.read_frames(self.path, pix_fmt=self.pix_fmt) 
+        reader.__next__()
+        
+        #self.iterator_ = self.reader_.__iter__()
+        #return self
+        for frame in reader:
+            yield frame
+        reader.close()
 
-    def __next__(self):
-        # Skip some frames if requested
-        if self.sampling_interval > 0:
-            for i in range(self.sampling_interval):
-                self.reader_.__next__()
 
-        return self.reader_.__next__()
+    #def __next__(self):
+    #    # Skip some frames if requested
+    #    if self.sampling_interval > 0:
+    #        for i in range(self.sampling_interval):
+    #            self.iterator_.__next__()
+    #
+    #    return self.iterator_.__next__()
 
     @property
     def width(self):
