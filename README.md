@@ -119,7 +119,7 @@ Timing
 | Method    | Time (s) |
 | --------- | -------- |
 | time      | 0.027    |
-| inception | X        |
+| inception | 0.668    |
 | fid       | X        |
 | scda      | X        |
 
