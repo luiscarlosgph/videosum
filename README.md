@@ -56,7 +56,7 @@ widtth = 1920
 height = 1080
 
 # Choose the algotrithm that selects the key frames
-algo = 'fid'  # The options are: 'time', 'inception', 'fid', 'scda'
+algo = 'inception'  # The options are: 'time', 'inception', 'fid', 'scda'
 
 # Create video summariser object
 vs = videosum.VideoSummariser(algo, nframes, width, height)
