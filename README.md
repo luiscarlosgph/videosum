@@ -34,11 +34,12 @@ Options:
   * `--nframes`: number of frames that you want to see in the collage image.
   * `--height`: height of the collage image.
   * `--width`: width of the collage image.
+  * `--time-segmentation`: set it to either 0 or `. If 1, the clustering results are displayed in a bar underneath the collage (i.e. the columns of the bar represent the frames of the video, and the colours represent the clustering label).
   * `--algo`: algorithm used to select the key frames of the video.
     * `time`: evenly spaced frames are selected.
-    * `inception`: medoids retrieved with k-medoids clustering (l2-norm metric) on InceptionV3 latent space vectors corresponding to each video frame.
-    * `fid` : medoids retrieved with k-medoids clustering ([Frechet Inception Distance](https://en.wikipedia.org/wiki/Fr%C3%A9chet_inception_distance) metric) on InceptionV3 latent space vectors corresponding to each video frame.
-    * `scda`: medoids retrieved with k-medoids (l2-norm metric) clustering on SCDA image descriptors ([Wei et al. 2017 Selective Convolutional Descriptor Aggregation for Fine-Grained Image Retrieval](https://arxiv.org/abs/1604.04994)) corresponding to each video frame. InceptionV3 trained on ImageNet as opposed to Wei et al. where authors used VGG-16.
+    * `inception`: k-medoids clustering (l2-norm metric) on InceptionV3 latent space vectors.
+    * `fid` : k-medoids clustering ([Frechet Inception Distance](https://en.wikipedia.org/wiki/Fr%C3%A9chet_inception_distance) metric) on InceptionV3 latent space vectors.
+    * `scda`: k-medoids clustering (l2-norm metric) on SCDA image descriptors ([Wei et al. 2017 Selective Convolutional Descriptor Aggregation for Fine-Grained Image Retrieval](https://arxiv.org/abs/1604.04994)). InceptionV3 was trained on ImageNet as opposed to Wei et al. where authors used VGG-16.
 
 
 Exemplary code snippet
