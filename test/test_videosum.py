@@ -63,7 +63,7 @@ class TestVideosum(unittest.TestCase):
         height = 480
         nframes = 16
         vs = videosum.VideoSummariser('time', nframes, width, height, 
-                                      time_segmentation=1, fps=1)
+                                      time_segmentation=1)
 
         # Make collage
         collage = vs.summarise(video_path)
