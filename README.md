@@ -116,14 +116,15 @@ Exemplary result
 Timing
 ------
 
-| Method    | Time consumed by the summarisation for each second of video (s) |
+| Method    | Time (s) |
 | --------- | -------- |
 | time      | 0.027    |
 | inception | X        |
 | fid       | X        |
 | scda      | X        |
 
-
+The `Time (s)` indicates how many seconds of summarisation are required for each second of video. 
+This way you can easily find out how long each algorithm will take to summarise an video of an arbitrary length.
 
 Author
 ------
