@@ -86,7 +86,7 @@ $ python3 test/test_videosum.py
 Exemplary result
 ----------------
 
-* Exemplary video [here](https://raw.githubusercontent.com/luiscarlosgph/videosum/main/test/data/video.mp4)
+* Exemplary video: [here](https://raw.githubusercontent.com/luiscarlosgph/videosum/main/test/data/video.mp4)
 
 * Summary based on `time` algorithm: 
 
