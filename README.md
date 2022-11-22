@@ -113,6 +113,18 @@ Exemplary result
 ![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/scda.png) 
 
 
+Timing
+------
+
+| Method    | Time (s) |
+| --------- | -------- |
+| time      | X        |
+| inception | X        |
+| fid       | X        |
+| scda      | X        |
+
+
+
 Author
 ------
 Luis Carlos Garcia Peraza Herrera (luiscarlos.gph@gmail.com), 2022.
