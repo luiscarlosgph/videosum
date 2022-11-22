@@ -19,6 +19,7 @@ import scipy
 import scipy.spatial.distance
 import time
 import faiss
+import seaborn as sns
 
 # My imports
 import videosum
@@ -471,33 +472,29 @@ class VideoSummariser():
             # Create an empty segmentation bar
             segbar = np.ones((self.segbar_height, self.collage.shape[1], 3), 
                 dtype=np.uint8)
-
-            # Loop over the cluster labels, changing the colour of the
-            # background whenever labels change
+            
+            # Colour the background of the segmentation bar
             if self.algo == 'time':
                 # The whole bar of the same background colour
-                segbar *= np.array([84, 1, 68], np.uint8)
+                bg_colour = [84, 1, 68]
+                segbar *= np.array(bg_colour, np.uint8)
             else:
-                colours = np.array([[84, 1, 68], [139, 82, 59]], dtype=np.uint8)
-                colour_idx = 0
-                prev_label = self.labels_[0]
+                palette = np.array(sns.color_palette("Set3", self.number_of_frames))
+                colours = (palette * 255.).astype(np.uint8)
                 for c, l in enumerate(self.labels_):
-                    # Change background colour if cluster changes
-                    if l != prev_label:
-                        colour_idx = int(not(colour_idx))
-                        prev_label = l
-
-                    # Convert frame index 'c' to bar index
+                    # Convert frame index 'c' to bar index (the video will 
+                    # typically have more frames than the number of pixels
+                    # corresponding to the width of the summary image
                     bar_idx = round(segbar.shape[1] * c / len(self.labels_))
 
                     # Set colour for the column equivalent to the current frame
-                    segbar[:, bar_idx] = colours[colour_idx]
-
-            # Loop over the indices of the cluster medoids, inserting them onto
-            # the bar
+                    segbar[:, bar_idx] = colours[l]
+            
+            # Add the key frame vertical lines to the segmentation bar
             for i in self.indices_:
-                pos = round(self.collage.shape[1] * i / self.frame_count_)    
-                segbar[:, pos] = np.array([37, 231, 253], dtype=np.uint8)
+                pos = round(self.collage.shape[1] * i / self.frame_count_)
+                key_frame_line_colour = [0, 0, 0]
+                segbar[:, pos] = np.array(key_frame_line_colour, dtype=np.uint8)
 
             # Stich the collage to the time segmentation bar
             collage_with_seg = np.zeros((self.collage.shape[0] + segbar.shape[0],

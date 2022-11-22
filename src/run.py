@@ -51,10 +51,13 @@ def parse_cmdline_params():
     parser.add_argument('-a', '--algo', required=True, type=str,
                         help=help('-a'))
     parser.add_argument('-t', '--time-segmentation', required=False, 
-                        default=False, type=bool, help=help('-t'))
+                        default=False, type=int, help=help('-t'))
 
     # Read parameters
     args = parser.parse_args()
+
+    # Modify parameters according to needs
+    args.time_segmentation = bool(args.time_segmentation)
     
     return args
 
