@@ -34,7 +34,7 @@ Options:
   * `--nframes`: number of frames that you want to see in the collage image.
   * `--height`: height of the collage image.
   * `--width`: width of the collage image.
-  * `--time-segmentation`: set it to either 0 or `. If 1, the clustering results are displayed in a bar underneath the collage (i.e. the columns of the bar represent the frames of the video, and the colours represent the clustering label).
+  * `--time-segmentation`: set it to either `0` or `1`. If 1, the clustering results are displayed in a bar underneath the collage (i.e. the columns of the bar represent the frames of the video, and the colours represent the clustering label).
   * `--algo`: algorithm used to select the key frames of the video.
     * `time`: evenly spaced frames are selected.
     * `inception`: k-medoids clustering (l2-norm metric) on InceptionV3 latent space vectors.
