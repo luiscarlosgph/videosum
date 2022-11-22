@@ -70,9 +70,9 @@ def validate_cmdline_params(args):
     """
     @brief Input directory must exist and output must not.
     """
-    if not os.path.isfile(args.input):
+    if not os.path.isfile(args.input) and not os.path.isdir(args.input):
         raise RuntimeError('[ERROR] Input file does not exist.')
-    if os.path.isfile(args.output):
+    if os.path.isfile(args.output) or os.path.isdir(args.output):
         raise RuntimeError('[ERROR] Output file already exists.')
     return args
 
@@ -81,16 +81,43 @@ def main():
     # Read command line parameters
     args = parse_cmdline_params()
     validate_cmdline_params(args)
-
+    
+    # Create video summariser
     vidsum = videosum.VideoSummariser(args.algo, args.nframes, args.width, 
                                       args.height, 
                                       time_segmentation=args.time_segmentation,
                                       fps=args.fps)
-    tic = time.time()
-    im = vidsum.summarise(args.input)
-    toc = time.time()
-    print("[INFO] Video summarised in {} seconds.".format(toc - tic))
-    cv2.imwrite(args.output, im)
+    
+    # Check whether the input is a file or a folder of videos
+    if os.path.isfile(args.input):
+        # The input is a file
+        tic = time.time()
+        im = vidsum.summarise(args.input)
+        toc = time.time()
+        print("[INFO] Video summarised in {} seconds.".format(toc - tic))
+        cv2.imwrite(args.output, im, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+    else:
+        # The input is a folder of videos
+        input_dir = args.input
+        output_dir = args.output
+        
+        # Create output folder
+        os.mkdir(output_dir)
+
+        # Gather the list of video filenames inside the folder
+        videos = [x for x in os.listdir(input_dir) if x.endswith('.mp4')]
+
+        for v in videos:
+            print("[INFO] Processing {} ...".format(v))
+
+            # Summarise video
+            input_path = os.path.join(input_dir, v)            
+            im = vidsum.summarise(input_path)
+
+            # Save summary to the output folder
+            fname, ext = os.path.splitext(v)
+            output_path = os.path.join(output_dir, fname + '.jpg') 
+            cv2.imwrite(output_path, im, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
 
 
 if __name__ == '__main__':
