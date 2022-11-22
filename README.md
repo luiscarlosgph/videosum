@@ -116,9 +116,9 @@ Exemplary result
 Timing
 ------
 
-| Method    | Time (s) |
+| Method    | Time consumed by the summarisation for each second of video (s) |
 | --------- | -------- |
-| time      | X        |
+| time      | 0.027    |
 | inception | X        |
 | fid       | X        |
 | scda      | X        |
