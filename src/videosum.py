@@ -476,8 +476,9 @@ class VideoSummariser():
             # Colour the background of the segmentation bar
             if self.algo == 'time':
                 # The whole bar of the same background colour
-                bg_colour = [84, 1, 68]
-                segbar *= np.array(bg_colour, np.uint8)
+                palette = np.array(sns.color_palette("Set3", 1))
+                bg_colour = (palette * 255.).astype(np.uint8)[0]
+                segbar *= bg_colour
             else:
                 palette = np.array(sns.color_palette("Set3", self.number_of_frames))
                 colours = (palette * 255.).astype(np.uint8)
