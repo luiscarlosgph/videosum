@@ -120,8 +120,8 @@ Timing
 | --------- | -------- |
 | time      | 0.027    |
 | inception | 0.668    |
-| fid       | X        |
-| scda      | X        |
+| fid       | 2.089    |
+| scda      | 0.583    |
 
 `Time (s)` indicates how many seconds of summarisation are required for each second of raw video. 
 <!-- This way you can easily approximate how long each algorithm will take to summarise a video of any given length. -->
