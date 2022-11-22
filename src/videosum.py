@@ -27,8 +27,8 @@ import videosum
 
 class VideoSummariser():
     def __init__(self, algo, number_of_frames: int = 100, 
-            width: int = 1920, height: int = 1080, time_segmentation=False,
-            segbar_height=32):
+            width: int = 1920, height: int = 1080, fps=None,
+            time_segmentation=False, segbar_height=32):
         """
         @brief   Summarise a video into a collage.
         @details The frames in the collage are evenly taken from the video. 
@@ -54,6 +54,7 @@ class VideoSummariser():
         self.number_of_frames = number_of_frames
         self.width = width
         self.height = height
+        self.fps = fps
         self.form_factor = float(self.width) / self.height
         self.time_segmentation = time_segmentation
         self.segbar_height = segbar_height
@@ -125,23 +126,42 @@ class VideoSummariser():
         
         @param[in]  input_path  Path to the video file.
 
-        @returns a list of Numpy/OpenCV BGR images.
+        @returns a list of Numpy/OpenCV BGR images. 
+                 After this method is executed the list self.indices_ will 
+                 hold the list of frame indices that represent the key frames.
         """
         key_frames = []
 
+        # Initialise video reader
+        reader = videosum.VideoReader(input_path, sampling_rate=self.fps)
+        w, h = reader.size
+        nframes = int(math.floor(reader.duration * reader.fps))
+
+        # Prepare downsampling if needed
+        #if self.fps is not None:
+        #    nframes_downsampled = int(math.floor(reader.duration * self.fps))
+        #    downsampling_interval = int(round(float(nframes) / nframes_downsampled))
+        #    downsampling_counter = 0
+        #else:
+        #    downsampling_interval = None
+        #    downsampling_counter = None
+
         # Collect the collage frames from the video 
-        reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
-        meta = reader.__next__()
-        w, h = meta['size']
-        nframes = int(math.floor(meta['duration'] * meta['fps']))
         interval = nframes // self.number_of_frames
         counter = interval
-        idx = -1
         self.indices_ = []
         self.frame_count_ = 0
         for raw_frame in tqdm.tqdm(reader):
+            # Downsample if requested 
+            #if downsampling_interval is not None:
+            #    downsampling_counter += 1 
+            #    if downsampling_counter < downsampling_interval:
+            #        continue
+            #    else:
+            #        downsampling_counter = 0
+            
+            # Increase the internal frame count of the video summariser
             self.frame_count_ += 1
-            idx += 1
 
             # If we have collected all the frames we needed, mic out
             if len(key_frames) == self.number_of_frames:
@@ -158,7 +178,7 @@ class VideoSummariser():
             
                 # Insert video frame in our list of key frames
                 key_frames.append(im)
-                self.indices_.append(idx)
+                self.indices_.append(self.frame_count_ - 1)
 
         return key_frames
 

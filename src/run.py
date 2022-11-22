@@ -31,6 +31,7 @@ def help(short_option):
         '-y': 'Height of the collage (required: True)',
         '-a': 'Algorithm for frame selection, available options: time, frechet (required: True)',
         '-t': 'Add time segmentation based on the key frame selection (required: False)',
+        '-f': 'Sampling frequency in fps (required: False)', 
     }
     return help_msg[short_option]
 
@@ -53,6 +54,8 @@ def parse_cmdline_params():
                         help=help('-a'))
     parser.add_argument('-t', '--time-segmentation', required=False, 
                         default=False, type=int, help=help('-t'))
+    parser.add_argument('-f', '--fps', required=False, 
+                        default=None, type=float, help=help('-f'))
 
     # Read parameters
     args = parser.parse_args()
@@ -81,7 +84,8 @@ def main():
 
     vidsum = videosum.VideoSummariser(args.algo, args.nframes, args.width, 
                                       args.height, 
-                                      time_segmentation=args.time_segmentation)
+                                      time_segmentation=args.time_segmentation,
+                                      fps=args.fps)
     tic = time.time()
     im = vidsum.summarise(args.input)
     toc = time.time()
