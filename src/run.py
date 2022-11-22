@@ -14,6 +14,7 @@ import os
 import cv2
 import tqdm
 import time
+import multiprocessing
 
 # My imports
 import videosum
@@ -77,19 +78,32 @@ def validate_cmdline_params(args):
     return args
 
 
+def process_video(input_path, output_path, args):
+    # Create video summariser
+    vidsum = videosum.VideoSummariser(args.algo, args.nframes, 
+                                      args.width, args.height, 
+                                      time_segmentation=args.time_segmentation,
+                                      fps=args.fps)
+
+    # Summarise video
+    im = vidsum.summarise(input_path)
+
+    # Save summary to the output folder
+    cv2.imwrite(output_path, im, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+
+
 def main():
     # Read command line parameters
     args = parse_cmdline_params()
     validate_cmdline_params(args)
     
-    # Create video summariser
-    vidsum = videosum.VideoSummariser(args.algo, args.nframes, args.width, 
-                                      args.height, 
-                                      time_segmentation=args.time_segmentation,
-                                      fps=args.fps)
-    
     # Check whether the input is a file or a folder of videos
     if os.path.isfile(args.input):
+        # Create video summariser
+        vidsum = videosum.VideoSummariser(args.algo, args.nframes, 
+                                          args.width, args.height, 
+                                          time_segmentation=args.time_segmentation,
+                                          fps=args.fps)
         # The input is a file
         tic = time.time()
         im = vidsum.summarise(args.input)
@@ -106,18 +120,21 @@ def main():
 
         # Gather the list of video filenames inside the folder
         videos = [x for x in os.listdir(input_dir) if x.endswith('.mp4')]
-
+        
+        # Build data input ready for batch processing
+        data_inputs = []
         for v in videos:
-            print("[INFO] Processing {} ...".format(v))
-
-            # Summarise video
-            input_path = os.path.join(input_dir, v)            
-            im = vidsum.summarise(input_path)
-
-            # Save summary to the output folder
-            fname, ext = os.path.splitext(v)
-            output_path = os.path.join(output_dir, fname + '.jpg') 
-            cv2.imwrite(output_path, im, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+            input_path = os.path.join(input_dir, v)
+            output_path = os.path.join(output_dir, os.path.splitext(v)[0] + '.jpg')
+            data_inputs.append((input_path, output_path, args))
+        
+        # Run batch processing
+        processes = 2 * multiprocessing.cpu_count()
+        pool = multiprocessing.Pool(processes=processes)
+        pool.starmap(process_video, data_inputs)
+        #for input_path, output_path, args in data_input:
+        #    print("[INFO] Processing {} ...".format(input_path))
+        #    process_video(input_path, output_path, args)
 
 
 if __name__ == '__main__':
