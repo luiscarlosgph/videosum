@@ -52,7 +52,7 @@ def create_toy_video(num_colours: int = 16, width: int = 640, height: int = 480,
 class TestVideosum(unittest.TestCase):
     
 
-    def test_time_summary(self):
+    def test_time_summary(self, eps=1e-6):
         """
         @brief Simple test to check that the collage still works with
                newer versions of the dependencies.
@@ -68,16 +68,19 @@ class TestVideosum(unittest.TestCase):
                                       time_segmentation=1, fps=1)
 
         # Make collage
-        collage = vs.summarise(video_path)
-        cv2.imwrite('test/data/time_dummy.jpg', collage, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+        new_collage_path = 'test/data/time_dummy_new.png'
+        new_collage = vs.summarise(video_path)
+        cv2.imwrite(new_collage_path, new_collage)
 
-        # Compare the collage with the one stored
-        old_collage = cv2.imread('test/data/time_dummy.jpg')
-
-        self.assertTrue(np.allclose(new_collage, old_collage))
+        # Compare the collage with the one stored in the test folder
+        old_collage_path = 'test/data/time_dummy.png'
+        old_collage = cv2.imread(old_collage_path, cv2.IMREAD_UNCHANGED)
+        diff = np.sum(np.abs(old_collage.astype(np.float32) - new_collage.astype(np.float32)))
+        self.assertTrue(diff < eps)
         
-        # Delete dummy video
+        # Delete dummy video and new collage
         os.unlink(video_path)
+        os.unlink(new_collage_path)
 
 
 if __name__ == '__main__':

@@ -4,7 +4,6 @@
 @author Luis C. Garcia Peraza Herrera (luiscarlos.gph@gmail.com).
 @date   22 Nov 2022.
 """
-
 import imageio_ffmpeg
 
 
@@ -23,35 +22,23 @@ class VideoReader:
         self.sampling_rate = sampling_rate
         self.pix_fmt = pix_fmt
         
-        # Initialise video reader
-        reader = imageio_ffmpeg.read_frames(self.path, pix_fmt=self.pix_fmt) 
-        self.meta_ = reader.__next__()
-        reader.close()
-        
-        # Compute sampling interval if requested
-        self.sampling_interval = 0
-        if self.sampling_rate is not None:
-            self.sampling_interval = int(round(float(self.meta_['fps']) / self.sampling_rate))
+        # Open video reader
+        if self.sampling_rate is None:
+            self.reader_ = imageio_ffmpeg.read_frames(self.path, 
+                                                      pix_fmt=self.pix_fmt)
+        else:
+            self.reader_ = imageio_ffmpeg.read_frames(self.path, 
+                pix_fmt=self.pix_fmt, 
+                output_params=['-filter:v', "fps={}".format(self.sampling_rate)])
+
+        # Get videeo info
+        self.meta_ = self.reader_.__next__()
 
     def __iter__(self):
-        # Initialise video reader
-        reader = imageio_ffmpeg.read_frames(self.path, pix_fmt=self.pix_fmt) 
-        reader.__next__()
-        
-        #self.iterator_ = self.reader_.__iter__()
-        #return self
-        for frame in reader:
-            yield frame
-        reader.close()
+        return self
 
-
-    #def __next__(self):
-    #    # Skip some frames if requested
-    #    if self.sampling_interval > 0:
-    #        for i in range(self.sampling_interval):
-    #            self.iterator_.__next__()
-    #
-    #    return self.iterator_.__next__()
+    def __next__(self):
+        return self.reader_.__next__()
 
     @property
     def width(self):
