@@ -34,7 +34,6 @@ def create_toy_video(num_colours: int = 16, width: int = 640, height: int = 480,
     # Build path to the output video inside the temp folder
     filename = str(uuid.uuid4()) + '.mp4'
     path = os.path.join(tempfile.gettempdir(), filename)
-    print('Video path:', path)
 
     # Save the video to the temporary folder
     writer = imageio_ffmpeg.write_frames(path, (width, height), 
@@ -54,7 +53,7 @@ class TestVideosum(unittest.TestCase):
 
     def test_time_summary(self, eps=1e-6):
         """
-        @brief Simple test to check that the collage still works with
+        @brief Simple test to check that the 'time' collage still works with
                newer versions of the dependencies.
         """
         # Create dummy video
@@ -74,6 +73,36 @@ class TestVideosum(unittest.TestCase):
 
         # Compare the collage with the one stored in the test folder
         old_collage_path = 'test/data/time_dummy.png'
+        old_collage = cv2.imread(old_collage_path, cv2.IMREAD_UNCHANGED)
+        diff = np.sum(np.abs(old_collage.astype(np.float32) - new_collage.astype(np.float32)))
+        self.assertTrue(diff < eps)
+        
+        # Delete dummy video and new collage
+        os.unlink(video_path)
+        os.unlink(new_collage_path)
+
+    def test_inception_summary(self, eps=1e-6):
+        """
+        @brief Simple test to check that the 'inception' collage still works 
+               with newer versions of the dependencies.
+        """
+        # Create dummy video
+        video_path = create_toy_video()
+
+        # Load video
+        width = 640
+        height = 480
+        nframes = 16
+        vs = videosum.VideoSummariser('inception', nframes, width, height, 
+                                      time_segmentation=1, fps=1)
+
+        # Make collage
+        new_collage_path = 'test/data/inception_dummy_new.png'
+        new_collage = vs.summarise(video_path)
+        cv2.imwrite(new_collage_path, new_collage)
+
+        # Compare the collage with the one stored in the test folder
+        old_collage_path = 'test/data/inception_dummy.png'
         old_collage = cv2.imread(old_collage_path, cv2.IMREAD_UNCHANGED)
         diff = np.sum(np.abs(old_collage.astype(np.float32) - new_collage.astype(np.float32)))
         self.assertTrue(diff < eps)
