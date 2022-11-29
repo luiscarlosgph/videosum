@@ -8,12 +8,10 @@
 """
 
 import argparse
-import imageio_ffmpeg 
 import numpy as np
 import cv2
 import tqdm
 import math
-import sklearn_extra.cluster
 import skimage.measure
 import scipy
 import scipy.spatial.distance

@@ -31,6 +31,7 @@ def get_key_frames_time(self, input_path):
         # Collect the collage frames from the video 
         interval = nframes // self.number_of_frames
         counter = interval
+        self.labels_ = []
         self.indices_ = []
         self.frame_count_ = 0
         for raw_frame in tqdm.tqdm(reader):
@@ -53,6 +54,16 @@ def get_key_frames_time(self, input_path):
                 # Insert video frame in our list of key frames
                 key_frames.append(im)
                 self.indices_.append(self.frame_count_ - 1)
+
+        # Build self.labels_ based on self.indices_
+        for i in range(self.frame_count_):
+            min_dist = np.inf
+            min_idx = -1
+            for j in range(len(self.indices_)):
+                if np.abs(i - self.indices_[j]) < min_dist:
+                    min_dist = np.abs(i - self.indices_[j])
+                    min_idx = j
+            self.labels_.append(min_idx)
 
         return key_frames
 

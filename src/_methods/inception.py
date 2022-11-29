@@ -4,6 +4,10 @@
 @date   29 Nov 2022
 """
 import numpy as np
+import tqdm
+import faiss
+import sklearn_extra.cluster
+import imageio_ffmpeg 
 
 # My imports 
 import videosum
