@@ -60,6 +60,11 @@ class VideoReader:
     def fps(self):
         return self.meta_['fps']
 
+    @staticmethod
+    def num_frames(path):
+        nframes, secs = imageio_ffmpeg.count_frames_and_secs(path)
+        return nframes
+
 
 if __name__ == '__main__':
     raise RuntimeError('[ERROR] The module videosum.videoreader is not a script.')

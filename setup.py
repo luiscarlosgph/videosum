@@ -16,8 +16,14 @@ setuptools.setup(name='videosum',
     author_email='luiscarlos.gph@gmail.com',
     license='MIT License',
     url='https://github.com/luiscarlosgph/endoseg',
-    packages=['videosum'],
-    package_dir={'videosum' : 'src'}, 
+    packages=[
+        'videosum',
+        'videosum._methods',
+    ],
+    package_dir={
+        'videosum'          : 'src',
+        'videosum._methods' : 'src/_methods',
+    }, 
     install_requires = [
         'numpy', 
         'opencv-python',

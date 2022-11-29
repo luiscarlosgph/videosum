@@ -118,52 +118,10 @@ class VideoSummariser():
         x_start = j * self.tile_width
         x_end = x_start + im_resized.shape[1] 
         self.collage[y_start:y_end, x_start:x_end] = im_resized
-
-    def get_key_frames_time(self, input_path):
-        """
-        @brief Get a list of key frames from the video. The key frames are
-               simply evenly spaced along the video.
-        
-        @param[in]  input_path  Path to the video file.
-
-        @returns a list of Numpy/OpenCV BGR images. 
-                 After this method is executed the list self.indices_ will 
-                 hold the list of frame indices that represent the key frames.
-        """
-        key_frames = []
-
-        # Initialise video reader
-        reader = videosum.VideoReader(input_path, sampling_rate=self.fps)
-        w, h = reader.size
-        nframes = int(math.floor(reader.duration * reader.fps))
-
-        # Collect the collage frames from the video 
-        interval = nframes // self.number_of_frames
-        counter = interval
-        self.indices_ = []
-        self.frame_count_ = 0
-        for raw_frame in tqdm.tqdm(reader):
-            # Increase the internal frame count of the video summariser
-            self.frame_count_ += 1
-
-            # If we have collected all the frames we needed, mic out
-            if len(key_frames) == self.number_of_frames:
-                break
-            
-            # If this frame is a key frame...
-            counter -= 1
-            if counter == 0:
-                counter = interval
-
-                # Convert video frame into a BGR OpenCV/Numpy image
-                im = np.frombuffer(raw_frame, 
-                        dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
-            
-                # Insert video frame in our list of key frames
-                key_frames.append(im)
-                self.indices_.append(self.frame_count_ - 1)
-
-        return key_frames
+    
+    # Import the different summarisation methods from their corresponding files
+    # They are not here to avoid having this file crowded
+    from ._methods.time import get_key_frames_time
 
     def get_key_frames_inception(self, input_path, eps=1e-6):
         """
@@ -435,6 +393,20 @@ class VideoSummariser():
     def get_key_frames(self, input_path):
         return VideoSummariser.ALGOS[self.algo](self, input_path)
 
+    def check_collage_validity(self, input_path, key_frames):
+        """
+        @brief Asserts that if there are enough frames to make a collage,
+               we should have a full collage.
+        @param[in]  input_path  Path to the video.
+        @param[in]  key_frames  List of key frames.
+        @returns None
+        """
+        nframes_in_video = videosum.VideoReader.num_frames(input_path) 
+        nframes_in_collage = len(key_frames)
+        nframes_requested = self.number_of_frames
+        if nframes_in_video > nframes_requested:
+            assert(nframes_in_collage == nframes_requested)
+
     def summarise(self, input_path):
         """
         @brief Create a collage of the video.  
@@ -443,10 +415,23 @@ class VideoSummariser():
 
         @returns a BGR image (numpy.ndarray) with a collage of the video.
         """
+        # Initialise list of frame cluster labels
+        self.labels_ = None
+
         # Get list of key frames
         key_frames = VideoSummariser.ALGOS[self.algo](self, input_path)
 
-        #assert(len(key_frames) == self.number_of_frames)
+        # Ensure that summariser actually filled the labels
+        assert(self.labels_ is not None)
+        assert(len(self.labels_) == videosum.VideoReader.num_frames(input_path))
+
+        # If the video has more frames than those requested, 
+        # the collage should have all the frames filled
+        self.check_collage_validity(input_path, key_frames)
+        
+        # Warn the user about the collage having less frames than requested,
+        # this is expected if the number of requested frames is higher than
+        # the number of frames of the video, but a problem otherwise
         if len(key_frames) < self.number_of_frames:
             print('[WARN] The key frame selection algorithm selected ' \
                 + 'less frames than you wanted.')
