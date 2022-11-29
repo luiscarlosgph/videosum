@@ -158,6 +158,40 @@ class TestVideosum(unittest.TestCase):
 
         # Remove temporary video file
         os.unlink(path)
+
+    def test_same_frames_read_at_different_fps(self, eps=1e-6):
+        # Create a dummy video of 16s at 30fps
+        path = random_temp_file_path() + '.mp4'
+        create_toy_video(path, fps=30)
+
+        # Read frames at 30fps
+        frames_30fps = []
+        reader_30fps = videosum.VideoReader(path, sampling_rate=30)
+        w, h = reader_30fps.size
+        for raw_frame in reader_30fps:
+            im = np.frombuffer(raw_frame, 
+                               dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
+            frames_30fps.append(im)
+
+        # Read frames at 1fps
+        frames_1fps = []
+        reader_1fps = videosum.VideoReader(path, sampling_rate=1)
+        for raw_frame in reader_1fps:
+            im = np.frombuffer(raw_frame, 
+                               dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
+            frames_1fps.append(im)
+
+        # Make sure that for each frame of the 1fps video there are 30 identical
+        # frames in the 30fps video
+        counter = 0
+        for f1 in frames_1fps:
+            f1 = f1.astype(np.float32)
+            init_counter = counter 
+            while counter < init_counter + 30:
+                f30 = frames_30fps[counter].astype(np.float32)
+                diff = np.abs(f30 - f1).sum()
+                self.assertTrue(diff < eps)
+                counter += 1
          
     def test_time_summary(self, eps=1e-6):
         """
@@ -190,7 +224,7 @@ class TestVideosum(unittest.TestCase):
         os.unlink(video_path)
         os.unlink(new_collage_path)
 
-    def test_inception_summary(self, eps=1e-6):
+    def test_same_inception_collage_at_different_fps(self, eps=1e-6):
         """
         @brief Simple test to check that the 'inception' collage still works 
                with newer versions of the dependencies.
@@ -198,16 +232,26 @@ class TestVideosum(unittest.TestCase):
         # Create dummy video
         video_path = random_temp_file_path() + '.mp4'
         create_toy_video(video_path, fps=30)
-
-        # Load video
+        
+        # Make collage at different fps
         width = 640
         height = 480
         nframes = 16
-        vs = videosum.VideoSummariser('inception', nframes, width, height, 
-                                      time_segmentation=1, fps=1)
+        vs_1fps = videosum.VideoSummariser('inception', nframes, width, height, 
+                                           time_segmentation=1, fps=1)
+        vs_30fps = videosum.VideoSummariser('inception', nframes, width, height, 
+                                           time_segmentation=1, fps=30)
+        collage_1fps = vs_1fps.summarise(video_path)
+        collage_30fps = vs_30fps.summarise(video_path)
+
+        diff = np.sum(np.abs(collage_1fps.astype(np.float32) - collage_30fps.astype(np.float32)))
+
+        # TODO
 
         # Make collage
         #new_collage_path = 'test/data/inception_dummy_new.png'
+
+        collage_1fps = random_temp_file_path() + '.png'
         #new_collage = vs.summarise(video_path)
         #cv2.imwrite(new_collage_path, new_collage)
 
@@ -218,7 +262,7 @@ class TestVideosum(unittest.TestCase):
         #self.assertTrue(diff < eps)
         
         # Delete dummy video and new collage
-        #os.unlink(video_path)
+        os.unlink(video_path)
         #os.unlink(new_collage_path)
 
 
