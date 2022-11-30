@@ -134,7 +134,7 @@ class VideoSummariser():
         @param[in]  key_frames  List of key frames.
         @returns None
         """
-        nframes_in_video = videosum.VideoReader.num_frames(input_path) 
+        nframes_in_video = videosum.VideoReader.num_frames(input_path, self.fps)
         nframes_in_collage = len(key_frames)
         nframes_requested = self.number_of_frames
         if nframes_in_video > nframes_requested:
@@ -156,7 +156,7 @@ class VideoSummariser():
 
         # Ensure that summariser actually filled the labels
         assert(self.labels_ is not None)
-        assert(len(self.labels_) == videosum.VideoReader.num_frames(input_path))
+        assert(len(self.labels_) == videosum.VideoReader.num_frames(input_path, self.fps))
 
         # If the video has more frames than those requested, 
         # the collage should have all the frames filled

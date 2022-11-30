@@ -61,9 +61,26 @@ class VideoReader:
         return self.meta_['fps']
 
     @staticmethod
-    def num_frames(path):
-        nframes, secs = imageio_ffmpeg.count_frames_and_secs(path)
-        return nframes
+    def num_frames(path, sampling_rate):
+        """
+        @brief Function to count the number of frames in a video.
+        @param[in]  path           Path to the video file.
+        @param[in]  sampling_rate  At how many fps you want to read the video.
+        @returns the number of frames as an integer.
+        """
+        # Create video reader
+        reader = imageio_ffmpeg.read_frames(path, pix_fmt='rgb24', 
+                output_params=['-filter:v', "fps={}".format(sampling_rate)])
+
+        # Read videeo info
+        _ = reader.__next__()
+
+        # Count the number of frames
+        count = 0
+        for _ in reader:
+            count += 1
+
+        return count
 
 
 if __name__ == '__main__':
