@@ -140,6 +140,61 @@ class VideoSummariser():
         if nframes_in_video > nframes_requested:
             assert(nframes_in_collage == nframes_requested)
 
+    def generate_segbar(self):
+        # Create an empty segmentation bar
+        segbar_width = self.collage.shape[1]
+        segbar = np.full((self.segbar_height, segbar_width, 3), 255, 
+            dtype=np.uint8)
+
+        # Create the colour palette, one colour per cluster
+        palette = np.array(sns.color_palette("Set3", self.number_of_frames))
+        colours = (palette * 255.).astype(np.uint8)
+
+        # Loop over segmentation bar columns
+        for c in range(segbar_width):
+            # Find the frame corresponding to this vertical bar
+            frame_idx = int(round(float(c) * len(self.labels_) / segbar_width))
+            frame_idx = np.clip(frame_idx, 0, len(self.labels_) - 1)
+
+            # Find the cluster index of the frame
+            cluster_idx = self.labels_[frame_idx]
+            
+            # Make the line of the colour of the cluster the frame belongs to
+            segbar[:, c] = colours[cluster_idx]
+        
+        # Add the key frame vertical lines to the segmentation bar
+        key_frame_line_colour = [0, 0, 0]
+        for i in self.indices_:
+            # Find the vertical bar corresponding to this frame index
+            idx = int(round(i * segbar_width / len(self.labels_)))
+            
+            # Colour the column corresponding to this key frame
+            segbar[:, idx] = key_frame_line_colour
+
+        # Colour the background of the segmentation bar
+        """
+        if self.algo == 'time':
+            # The whole bar of the same background colour
+            # FIXME: use the distance to the key frames to segment it with
+            #        colours (i.e. make use of self.labels_)
+            palette = np.array(sns.color_palette("Set3", 1))
+            bg_colour = (palette * 255.).astype(np.uint8)[0]
+            segbar *= bg_colour
+        else:
+            palette = np.array(sns.color_palette("Set3", self.number_of_frames))
+            colours = (palette * 255.).astype(np.uint8)
+            for c, l in enumerate(self.labels_):
+                # Convert frame index 'c' to bar index (the video will 
+                # typically have more frames than the number of pixels
+                # corresponding to the width of the summary image
+                bar_idx = round(segbar.shape[1] * c / len(self.labels_))
+
+                # Set colour for the column equivalent to the current frame
+                segbar[:, bar_idx] = colours[l]
+        """
+
+        return segbar
+
     def summarise(self, input_path):
         """
         @brief Create a collage of the video.  
@@ -191,37 +246,11 @@ class VideoSummariser():
         #for x in range(1, self.tiles_per_row):
         #    self.collage[:, x * self.tile_width] = 255
 
-        # Create the time segmentation bar under the collage
         if self.time_segmentation:
-            # Create an empty segmentation bar
-            segbar = np.ones((self.segbar_height, self.collage.shape[1], 3), 
-                dtype=np.uint8)
-            
-            # Colour the background of the segmentation bar
-            if self.algo == 'time':
-                # The whole bar of the same background colour
-                palette = np.array(sns.color_palette("Set3", 1))
-                bg_colour = (palette * 255.).astype(np.uint8)[0]
-                segbar *= bg_colour
-            else:
-                palette = np.array(sns.color_palette("Set3", self.number_of_frames))
-                colours = (palette * 255.).astype(np.uint8)
-                for c, l in enumerate(self.labels_):
-                    # Convert frame index 'c' to bar index (the video will 
-                    # typically have more frames than the number of pixels
-                    # corresponding to the width of the summary image
-                    bar_idx = round(segbar.shape[1] * c / len(self.labels_))
+            # Create the time segmentation bar
+            segbar = self.generate_segbar()
 
-                    # Set colour for the column equivalent to the current frame
-                    segbar[:, bar_idx] = colours[l]
-            
-            # Add the key frame vertical lines to the segmentation bar
-            for i in self.indices_:
-                pos = round(self.collage.shape[1] * i / self.frame_count_)
-                key_frame_line_colour = [0, 0, 0]
-                segbar[:, pos] = np.array(key_frame_line_colour, dtype=np.uint8)
-
-            # Stich the collage to the time segmentation bar
+            # Glue the time segmentation bar under the collage
             collage_with_seg = np.zeros((self.collage.shape[0] + segbar.shape[0],
                 self.collage.shape[1], 3), dtype=self.collage.dtype) 
             collage_with_seg[:self.collage.shape[0], :] = self.collage

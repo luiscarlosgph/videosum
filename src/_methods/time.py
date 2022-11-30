@@ -25,38 +25,29 @@ def get_key_frames_time(self, input_path):
 
         # Initialise video reader
         reader = videosum.VideoReader(input_path, sampling_rate=self.fps)
-        w, h = reader.size
-        nframes = int(math.floor(reader.duration * reader.fps))
 
-        # Collect the collage frames from the video 
-        interval = nframes // self.number_of_frames
-        counter = interval
-        self.labels_ = []
-        self.indices_ = []
+        # Get the properties of the video
+        w, h = reader.size
+        nframes = videosum.VideoReader.num_frames(input_path, self.fps)
+        
+        # We know the key frames straight away 
+        self.indices_ = np.round(np.linspace(0, nframes - 1, num=self.number_of_frames)).astype(int)
+
         self.frame_count_ = 0
         for raw_frame in tqdm.tqdm(reader):
-            # Increase the internal frame count of the video summariser
-            self.frame_count_ += 1
-
-            # If we have collected all the frames we needed, mic out
-            if len(key_frames) == self.number_of_frames:
-                break
-            
-            # If this frame is a key frame...
-            counter -= 1
-            if counter == 0:
-                counter = interval
-
+            if self.frame_count_ in self.indices_: 
                 # Convert video frame into a BGR OpenCV/Numpy image
                 im = np.frombuffer(raw_frame, 
                         dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
-            
+
                 # Insert video frame in our list of key frames
                 key_frames.append(im)
-                self.indices_.append(self.frame_count_ - 1)
+
+            self.frame_count_ += 1
 
         # Build self.labels_ based on self.indices_
-        for i in range(self.frame_count_):
+        self.labels_ = []
+        for i in range(nframes):
             min_dist = np.inf
             min_idx = -1
             for j in range(len(self.indices_)):
