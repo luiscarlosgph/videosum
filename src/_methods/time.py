@@ -33,9 +33,9 @@ def get_key_frames_time(self, input_path):
         # We know the key frames straight away 
         self.indices_ = np.round(np.linspace(0, nframes - 1, num=self.number_of_frames)).astype(int)
 
-        self.frame_count_ = 0
+        frame_count = 0
         for raw_frame in tqdm.tqdm(reader):
-            if self.frame_count_ in self.indices_: 
+            if frame_count in self.indices_: 
                 # Convert video frame into a BGR OpenCV/Numpy image
                 im = np.frombuffer(raw_frame, 
                         dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
@@ -43,7 +43,7 @@ def get_key_frames_time(self, input_path):
                 # Insert video frame in our list of key frames
                 key_frames.append(im)
 
-            self.frame_count_ += 1
+            frame_count += 1
 
         # Build self.labels_ based on self.indices_
         self.labels_ = []

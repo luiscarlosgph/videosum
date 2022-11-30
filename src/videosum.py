@@ -73,9 +73,6 @@ class VideoSummariser():
         self.tiles_per_row = self.width // self.tile_width
         self.tiles_per_col = self.height // self.tile_height 
 
-        # Initialise the variable that holds the video frame count 
-        self.frame_count_ = None
-
         # Initialise the array that holds the label of each frame
         self.labels_ = None
  

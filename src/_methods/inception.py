@@ -27,7 +27,8 @@ def get_key_frames_inception(self, input_path, eps=1e-6):
         latent_vectors = []
 
         # Initialise video reader
-        reader = videosum.VideoReader(input_path, sampling_rate=self.fps)
+        reader = videosum.VideoReader(input_path, sampling_rate=self.fps, 
+                                      pix_fmt='rgb24')
         w, h = reader.size
 
         # Initialise Inception network model
@@ -35,10 +36,7 @@ def get_key_frames_inception(self, input_path, eps=1e-6):
 
         # Collect feature vectors for all the frames
         print('[INFO] Collecting feature vectors for all the frames ...')
-        self.frame_count_ = 0
         for raw_frame in tqdm.tqdm(reader):
-            self.frame_count_ += 1
-
             # Convert video frame into a BGR OpenCV/Numpy image
             im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
 
@@ -54,37 +52,32 @@ def get_key_frames_inception(self, input_path, eps=1e-6):
         mt = getattr(faiss, 'METRIC_L2')
         l2norm = np.clip(faiss.pairwise_distances(X, X, mt), 0, None)
 
-        # Cluster the feature vectors using the Frechet Inception Distance 
+        # Cluster the feature vectors
         print('[INFO] k-medoids clustering ...')
         kmedoids = sklearn_extra.cluster.KMedoids(n_clusters=self.number_of_frames,
             metric='precomputed',
             method='pam',
             init='k-medoids++',
             random_state=0).fit(l2norm)
-        indices = sorted(kmedoids.medoid_indices_.tolist(), reverse=True)
-        self.indices_ = [x for x in indices]
+        self.indices_ = kmedoids.medoid_indices_
         self.labels_ = kmedoids.labels_
         print('[INFO] k-medoids clustering finished.')
 
         # Retrieve the video frames corresponding to the cluster means
         print('[INFO] Retrieving key frames ...')
         key_frames = []
-        counter = -1
-        reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
+        reader = videosum.VideoReader(input_path, sampling_rate=self.fps, 
+                                      pix_fmt='rgb24')
+        counter = 0
         for raw_frame in tqdm.tqdm(reader):
-            counter += 1
-            if counter == indices[-1]:
+            if counter in self.indices_:
                 # Convert video frame into a BGR OpenCV/Numpy image
                 im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
 
                 # Add key frame to list
                 key_frames.append(im)
                 
-                # Remove the center we just found
-                indices.pop()
-
-            if not indices:
-                break
+            counter += 1
         print('[INFO] Key frames obtained.')
 
         return key_frames
