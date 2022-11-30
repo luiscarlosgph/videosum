@@ -32,14 +32,10 @@ def create_toy_video(path, num_colours: int = 12, width: int = 640,
     # Produce all the frames of the video, one per colour
     frames = []
     for i in range(num_colours):
-        #noise = np.round((np.random.rand(height, width, 3) - 0.5)  * noise_range).astype(np.uint8)
         for j in range(fps):
             # Create video frame
             im = np.ones((height, width, 3), dtype=np.uint8) * palette[i]
             
-            # Add noise
-            #noisy_im = np.clip(im + noise, 0, 255)
-
             # Add frame to the video
             frames.append(im)
     
@@ -198,8 +194,7 @@ class TestVideosum(unittest.TestCase):
             while counter < init_counter + 30:
                 f30 = frames_30fps[counter].astype(np.float32)
                 diff = np.abs(f30 - f1).sum()
-                # FIXME: uncomment this
-                #self.assertTrue(diff < eps)
+                self.assertTrue(diff < eps)
                 counter += 1
 
         # Remove temporary video file
@@ -207,8 +202,8 @@ class TestVideosum(unittest.TestCase):
          
     def test_time_summary(self, eps=1e-6):
         """
-        @brief Simple test to check that the 'time' collage still works with
-               newer versions of the dependencies.
+        @brief Check that the summary for the 'time' method is identical to
+               the one created by previous versions of the package.
         """
         # Create dummy video
         video_path = random_temp_file_path() + '.mp4'
@@ -237,6 +232,10 @@ class TestVideosum(unittest.TestCase):
         os.unlink(new_collage_path)
 
     def test_inception_summary(self, eps=1e-6):
+        """
+        @brief Check that the summary for the 'inception' method is identical to
+               the one created by previous versions of the package.
+        """
         # Create dummy video
         video_path = random_temp_file_path() + '.mp4'
         create_toy_video(video_path, fps=30)
