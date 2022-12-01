@@ -29,7 +29,8 @@ def get_key_frames_fid(self, input_path):
         latent_vectors = []
 
         # Initialise video reader
-        reader = videosum.VideoReader(input_path, sampling_rate=self.fps)
+        reader = videosum.VideoReader(input_path, sampling_rate=self.fps, 
+                                      pix_fmt='rgb24')
         w, h = reader.size
 
         # Initialise Inception network model
