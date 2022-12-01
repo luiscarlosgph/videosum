@@ -263,7 +263,6 @@ class TestVideosum(unittest.TestCase):
         os.unlink(new_collage_path)
 
     
-    """
     def test_same_inception_collage_at_different_fps(self, eps=1e-6):
         # Create dummy video
         video_path = random_temp_file_path() + '.mp4'
@@ -272,43 +271,62 @@ class TestVideosum(unittest.TestCase):
         # Make collage at different fps
         width = 640
         height = 480
-        nframes = 16
+        nframes = 12
         vs_30fps = videosum.VideoSummariser('inception', nframes, width, height, 
-                                           time_segmentation=1, fps=30)
+                                           time_segmentation=0, fps=30)
         vs_60fps = videosum.VideoSummariser('inception', nframes, width, height, 
-                                           time_segmentation=1, fps=60)
-        collage_1fps = vs_1fps.summarise(video_path)
+                                           time_segmentation=0, fps=60)
         collage_30fps = vs_30fps.summarise(video_path)
+        collage_60fps = vs_60fps.summarise(video_path)
+            
+        # Make sure that there is no difference, the key frames should be the same
+        diff = np.sum(np.abs(collage_30fps.astype(np.float32) - collage_60fps.astype(np.float32)))
+        self.assertTrue(diff < eps)
 
-        # FIXME: debugging, remove this sentence to save the collage
-        #collage_path_1fps = random_temp_file_path() + '.png'
-        collage_path_30fps = random_temp_file_path() + '.png'
-        #cv2.imwrite(collage_path_1fps, collage_1fps)
-        cv2.imwrite(collage_path_30fps, collage_30fps)
-        #print("1fps:", collage_path_1fps)
-        print("30fps:", collage_path_30fps)
-
-        #diff = np.sum(np.abs(collage_1fps.astype(np.float32) - collage_30fps.astype(np.float32)))
-
-        # TODO
-
-        # Make collage
-        #new_collage_path = 'test/data/inception_dummy_new.png'
-
-        collage_1fps = random_temp_file_path() + '.png'
-        #new_collage = vs.summarise(video_path)
-        #cv2.imwrite(new_collage_path, new_collage)
-
-        # Compare the collage with the one stored in the test folder
-        #old_collage_path = 'test/data/inception_dummy.png'
-        #old_collage = cv2.imread(old_collage_path, cv2.IMREAD_UNCHANGED)
-        #diff = np.sum(np.abs(old_collage.astype(np.float32) - new_collage.astype(np.float32)))
-        #self.assertTrue(diff < eps)
-        
         # Delete dummy video and new collage
         os.unlink(video_path)
-        #os.unlink(new_collage_path)
-    """
+
+    def test_that_indices_and_labels_are_correctly_generated(self, eps=1e-6):
+        # Create dummy video
+        video_path = random_temp_file_path() + '.mp4'
+        create_toy_video(video_path, fps=30)
+        
+        # Create video summarisers for all the methods
+        width = 640
+        height = 480
+        nframes = 12
+        fps = 30
+        methods = {}
+        for method in videosum.VideoSummariser.ALGOS:
+            methods[method] = videosum.VideoSummariser(method, nframes, width, height, 
+                                                       time_segmentation=1, fps=fps)
+
+        # Check that self.indices_ and self.labels_ are None as we have not
+        # run any summary
+        for method in methods:
+            self.assertTrue(methods[method].indices_ is None)
+            self.assertTrue(methods[method].labels_ is None)
+
+        # Run all the summary methods
+        for method in methods:
+            # Summarise the video into a storyboard
+            methods[method].summarise(video_path)
+
+            # Assert that the number of labels corresponds to the number of 
+            # frames clustered
+            self.assertTrue(len(methods[method].labels_) == nframes * fps)
+
+            # Assert that we have the indices of each cluster center
+            indices = methods[method].indices_
+            self.assertTrue(len(indices) == nframes)
+
+            # The toy video displays 12 different colours, therefore the 
+            # indices of the cluster centers should be different
+            self.assertTrue(np.unique(indices).shape[0] == nframes)
+
+        # Delete dummy video and new collage
+        os.unlink(video_path)
+
 
 if __name__ == '__main__':
     unittest.main()

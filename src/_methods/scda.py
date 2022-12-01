@@ -1,23 +1,37 @@
 """
-@brief TODO
+@brief   Video frame clustering based on Selective Convolutional Descriptor 
+         Aggregation.
+
+@details They key frames are selected by unsupervised clustering of 
+         latent feature vectors corresponding to the video frames.
+         The latent feature vector is obtained as explained in 
+         Wei et al. 2017:
+
+         "Selective Convolutional Descriptor Aggregation for
+         Fine-Grained Image Retrieval"
+                 
+         The only difference with the paper is we use InceptionV3
+         to retrieve the latent tensor (as opposed to VGG-16).
+
+@author  Luis C. Garcia Peraza Herrera (luiscarlos.gph@gmail.com).
+@date    1 Dec 2022.
 """
+
+import numpy as np
+import tqdm
+import sklearn_extra.cluster
+import imageio_ffmpeg
+import skimage.measure
+import scipy.ndimage
+import faiss
+
+# My imports
+import videosum
 
 def get_key_frames_scda(self, input_path):
         """
         @brief Get a list of key video frames. 
-        @details They key frames are selected by unsupervised clustering of 
-                 latent feature vectors corresponding to the video frames.
-                 The latent feature vector is obtained as explained in 
-                 Wei et al. 2017:
-
-                 "Selective Convolutional Descriptor Aggregation for
-                  Fine-Grained Image Retrieval"
-                 
-                 The only difference with the paper is we use InceptionV3
-                 to retrieve the latent tensor (as opposed to VGG-16).
-
         @param[in]  input_path  Path to the video file.
-        
         @returns a list of Numpy/BGR images, range [0.0, 1.0], dtype = np.uint8. 
     
         """

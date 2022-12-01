@@ -1,3 +1,19 @@
+"""
+@brief  Summarise video as a storyboard where the frame descriptors are the
+        mean and the variance of the InceptionV3 feature vector. The 
+        distance metric used for clustering is Wasserstein-2. 
+
+@author Luis C. Garcia Peraza Herrera (luiscarlos.gph@gmail.com).
+@date   1 Dec 2022.
+"""
+import tqdm
+import numpy as np
+import sklearn_extra.cluster
+import imageio_ffmpeg
+
+# My imports
+import videosum
+
 def get_key_frames_fid(self, input_path):
         """
         @brief Get a list of key video frames. 

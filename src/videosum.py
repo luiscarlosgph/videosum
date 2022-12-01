@@ -75,6 +75,9 @@ class VideoSummariser():
 
         # Initialise the array that holds the label of each frame
         self.labels_ = None
+
+        # Initialise the array that holds the indices of the key frames
+        self.indices_ = None
  
     @staticmethod
     def _how_many_rectangles_fit(tile_height, width, height):
