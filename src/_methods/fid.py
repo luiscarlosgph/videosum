@@ -63,29 +63,29 @@ def get_key_frames_fid(self, input_path):
             method='pam',
             init='k-medoids++',
             random_state=0).fit(X)
-        indices = sorted(kmedoids.medoid_indices_.tolist(), reverse=True)
-        self.indices_ = [x for x in indices]
+        self.indices_ = kmedoids.medoid_indices_
         self.labels_ = kmedoids.labels_
         print('[INFO] k-medoids clustering finished.')
 
         # Retrieve the video frames corresponding to the cluster means
         print('[INFO] Retrieving key frames ...')
         key_frames = []
-        counter = -1
-        reader = imageio_ffmpeg.read_frames(input_path, pix_fmt='rgb24')
+        reader = videosum.VideoReader(input_path, sampling_rate=self.fps, 
+                                      pix_fmt='rgb24')
+        counter = 0
         for raw_frame in tqdm.tqdm(reader):
-            counter += 1
-            if counter == indices[-1]:
+            if counter in self.indices_:
                 # Convert video frame into a BGR OpenCV/Numpy image
                 im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
 
                 # Add key frame to list
                 key_frames.append(im)
                 
-                # Remove frame we just found
-                indices.pop()
-            if not indices:
-                break
+            counter += 1
         print('[INFO] Key frames obtained.')
 
         return key_frames
+
+
+if __name__ == '__main__':
+    raise RuntimeError('[ERROR] fid.py cannot be executed as a script.')
