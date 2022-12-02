@@ -24,6 +24,7 @@ def create_toy_video(path, num_colours: int = 12, width: int = 640,
                      height: int = 480, fps=30, pix_fmt_in='rgb24', 
                      pix_fmt_out='yuv420p'):
     """
+    @brief Creates a video that displays 12 colours, one colour per second.
     @returns the path to the toy video.
     """
     # Choose 16 random colours
@@ -68,6 +69,10 @@ def random_temp_file_path(length=10):
 class TestVideosum(unittest.TestCase):
 
     def test_video_reader_1fps(self, duration=12, fps=1, eps=1e-6):
+        """
+        @brief If the toy video displays 12 solid colour frames at 1fps, 
+               we should read 12 frames.
+        """
         # Create a dummy video of 12s at 1fps
         path = random_temp_file_path() + '.mp4'
         create_toy_video(path, fps=fps)
@@ -87,6 +92,9 @@ class TestVideosum(unittest.TestCase):
         os.unlink(path)
 
     def test_video_reader_30fps(self, duration=12, fps=30, eps=1e-6):
+        """
+        @brief We should read 12 * 30 frames from the toy video.
+        """
         # Create a dummy video of 12s at 30fps
         path = random_temp_file_path() + '.mp4'
         create_toy_video(path, fps=fps)
@@ -107,6 +115,10 @@ class TestVideosum(unittest.TestCase):
 
     def test_reading_30fps_as_1fps(self, duration=12, src_fps=30, dst_fps=1, 
                               eps=1e-6):
+        """
+        @brief Even when the toy video is recorded at 30 fps, if we read it
+               at 1fps we should read 12 frames, one per second.
+        """
         # Create a dummy video of 12s at 30fps
         path = random_temp_file_path() + '.mp4'
         create_toy_video(path, fps=src_fps)
@@ -127,6 +139,10 @@ class TestVideosum(unittest.TestCase):
 
     def test_reading_1fps_as_30fps(self, duration=12, src_fps=1, dst_fps=30,
                                    eps=1e-6):
+        """
+        @brief Even when the toy video is saved at 1fps we should be able to
+               read it at 30fps (with duplicated frames).
+        """
         # Create a dummy video of 12s at 1fps
         path = random_temp_file_path() + '.mp4'
         create_toy_video(path, fps=src_fps)
@@ -136,25 +152,6 @@ class TestVideosum(unittest.TestCase):
         self.assertTrue(np.abs(reader.duration - duration) < eps)
         
         # Count the number of frames, should be 12 * 30
-        count = 0
-        for i in reader:
-            count += 1
-        self.assertTrue(np.abs(count - duration * dst_fps) < eps)
-
-        # Remove temporary video file
-        os.unlink(path)
-
-    def test_reading_30fps_as_1fps(self, duration=12, src_fps=30, dst_fps=1,
-                                   eps=1e-6):
-        # Create a dummy video of 12s at 30fps
-        path = random_temp_file_path() + '.mp4'
-        create_toy_video(path, fps=src_fps)
-
-        # Check that the video is read as expected
-        reader = videosum.VideoReader(path, sampling_rate=dst_fps)
-        self.assertTrue(np.abs(reader.duration - duration) < eps)
-        
-        # Count the number of frames, should be 12 * 1
         count = 0
         for i in reader:
             count += 1
@@ -203,7 +200,8 @@ class TestVideosum(unittest.TestCase):
     def test_time_summary(self, eps=1e-6):
         """
         @brief Check that the summary for the 'time' method is identical to
-               the one created by previous versions of the package.
+               the one created by previous versions of the package (which
+               was visually inspected and appeared correct).
         """
         # Create dummy video
         video_path = random_temp_file_path() + '.mp4'
@@ -234,7 +232,8 @@ class TestVideosum(unittest.TestCase):
     def test_inception_summary(self, eps=1e-6):
         """
         @brief Check that the summary for the 'inception' method is identical to
-               the one created by previous versions of the package.
+               the one created by previous versions of the package (which 
+               appeared to be correct on visual inspection).
         """
         # Create dummy video
         video_path = random_temp_file_path() + '.mp4'
@@ -264,6 +263,10 @@ class TestVideosum(unittest.TestCase):
 
     
     def test_same_inception_collage_at_different_fps(self, eps=1e-6):
+        """
+        @brief No matter the FPS of the video there are 12 solid colors in the
+               frames of the video and they should be present in the collage.
+        """
         # Create dummy video
         video_path = random_temp_file_path() + '.mp4'
         create_toy_video(video_path, fps=30)
@@ -287,6 +290,10 @@ class TestVideosum(unittest.TestCase):
         os.unlink(video_path)
 
     def test_that_indices_and_labels_are_correctly_generated(self, eps=1e-6):
+        """
+        @brief self.labels_ and self.indices_ must be generate after the video
+               summarisation.
+        """
         # Create dummy video
         video_path = random_temp_file_path() + '.mp4'
         create_toy_video(video_path, fps=30)
@@ -323,6 +330,69 @@ class TestVideosum(unittest.TestCase):
             # The toy video displays 12 different colours, therefore the 
             # indices of the cluster centers should be different
             self.assertTrue(np.unique(indices).shape[0] == nframes)
+
+        # Delete dummy video and new collage
+        os.unlink(video_path)
+
+    def test_fid_method(self, eps=1e-6):
+        """
+        @brief The 'fid' method should not produce a result different to that
+               of the inception method as the toy video contains 12 different
+               colours that should be shown in the collage.
+        """
+        # Create dummy video
+        video_path = random_temp_file_path() + '.mp4'
+        create_toy_video(video_path, fps=30)
+
+        # Define collage properties
+        width = 640
+        height = 480
+        nframes = 12
+        
+        # Produce the collage with the inception method
+        inception_vs = videosum.VideoSummariser('inception', nframes, width, height, 
+                                                time_segmentation=0, fps=30)
+        inception_collage = inception_vs.summarise(video_path)
+
+        # Produce the collage with the the fid method
+        fid_vs = videosum.VideoSummariser('fid', nframes, width, height, 
+                                          time_segmentation=0, fps=30)
+        fid_collage = fid_vs.summarise(video_path)
+
+        # Check that the collages produced by both methods are identical
+        diff = np.abs(inception_collage.astype(np.float32) - fid_collage.astype(np.float32))
+        self.assertTrue(np.sum(diff) < eps)
+
+        # Delete dummy video and new collage
+        os.unlink(video_path)
+    
+    def test_scda_method(self, eps=1e-6):
+        """
+        @brief The 'scda' method should produce a collage with 12 colours as
+               that produced by the inception method. 
+        """
+        # Create dummy video
+        video_path = random_temp_file_path() + '.mp4'
+        create_toy_video(video_path, fps=30)
+
+        # Define collage properties
+        width = 640
+        height = 480
+        nframes = 12
+        
+        # Produce the collage with the inception method
+        inception_vs = videosum.VideoSummariser('inception', nframes, width, height, 
+                                                time_segmentation=0, fps=30)
+        inception_collage = inception_vs.summarise(video_path)
+
+        # Produce the collage with the the scda method
+        scda_vs = videosum.VideoSummariser('scda', nframes, width, height, 
+                                          time_segmentation=0, fps=30)
+        scda_collage = scda_vs.summarise(video_path)
+
+        # Check that the collages produced by both methods are identical
+        diff = np.abs(inception_collage.astype(np.float32) - scda_collage.astype(np.float32))
+        self.assertTrue(np.sum(diff) < eps)
 
         # Delete dummy video and new collage
         os.unlink(video_path)
