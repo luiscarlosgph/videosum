@@ -29,7 +29,9 @@ class VideoReader:
         else:
             self.reader_ = imageio_ffmpeg.read_frames(self.path, 
                 pix_fmt=self.pix_fmt, 
-                output_params=['-filter:v', "fps={}".format(self.sampling_rate)])
+                output_params=[
+                    '-filter:v', "fps={}".format(self.sampling_rate),
+                ])
 
         # Get videeo info
         self.meta_ = self.reader_.__next__()

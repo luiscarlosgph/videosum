@@ -101,7 +101,32 @@ class VideoSummariser():
         tiles_per_col = height // tile_height
 
         return tiles_per_row * tiles_per_col 
+    
+    @staticmethod
+    def transition_indices(labels):
+        """
+        @brief This method provides the indices of the boundary frames.
 
+        @details  After the summarisation, the video frames are clustered into
+                  classes. This means that there will be a video frame that
+                  belongs to class X followed by another frame that belongs to 
+                  class Y. This method detects this transitions and returns a
+                  list of the Y frames, i.e. the first frames after a class
+                  transition.
+        @param[in]  labels  Pass the self.labels_ produced after calling
+                            the summarise() method.
+        @returns a list of indices.
+        """
+        transition_frames = []
+
+        # Loop over the labels of all the video frames
+        prev_class = None
+        for idx, l in enumerate(labels):
+            if l != prev_class:
+                transition_frames.append(idx)
+                prev_class = l
+
+        return transition_frames
 
     def _insert_frame(self, im, i, j):
         """@brief Insert image into the collage."""
