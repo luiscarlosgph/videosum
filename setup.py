@@ -32,5 +32,5 @@ setuptools.setup(name='videosum',
     ],
     long_description=long_description,
     long_description_content_type='text/markdown',
-    #test_suite = 'tests',
+    test_suite='test',
 )
