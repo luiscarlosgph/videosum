@@ -114,8 +114,20 @@ Exemplary result
 ![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/scda.jpg) 
 
 
-Timing
-------
+Run unit testing
+----------------
+
+```
+$ python3 setup.py test
+```
+
+
+Run timing script
+-----------------
+
+```bash
+$ python3 -m videosum.timing 
+```
 
 | Method    | Time (s) |
 | --------- | -------- |
@@ -126,6 +138,7 @@ Timing
 
 `Time (s)` indicates how many seconds of summarisation are required for each second of raw video. 
 <!-- This way you can easily approximate how long each algorithm will take to summarise a video of any given length. -->
+
 
 Author
 ------
