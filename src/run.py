@@ -1,8 +1,9 @@
 """
-@brief   Module to summarise a video into N frames. There are a lot of methods
+@brief   Package to summarise a video into N frames. There are a lot of methods
          for video summarisation, and a lot of repositories in GitHub, but
-         none of them seems to work out of the box. This module contains a 
+         none of them seems to work out of the box. This package contains a 
          simple way of doing it.
+
 @author  Luis C. Garcia Peraza Herrera (luiscarlos.gph@gmail.com).
 @date    18 May 2022.
 """
@@ -40,7 +41,7 @@ def help(short_option):
 def parse_cmdline_params():
     """@returns The argparse args object."""
     # Create command line parser
-    parser = argparse.ArgumentParser(description='Upload LEMON dataset to Synapse.')
+    parser = argparse.ArgumentParser(description='Easy-to-use video summarisation.')
     parser.add_argument('-i', '--input', required=True, type=str, 
                         help=help('-i'))
     parser.add_argument('-o', '--output', required=True, type=str, 

@@ -23,15 +23,18 @@ class VideoReader:
         self.pix_fmt = pix_fmt
         
         # Open video reader
+        input_params = None
         if self.sampling_rate is None:
-            self.reader_ = imageio_ffmpeg.read_frames(self.path, 
-                                                      pix_fmt=self.pix_fmt)
+            self.reader_ = imageio_ffmpeg.read_frames(self.path,
+                                                      pix_fmt=self.pix_fmt,
+                                                      input_params=input_params)
         else:
             self.reader_ = imageio_ffmpeg.read_frames(self.path, 
                 pix_fmt=self.pix_fmt, 
                 output_params=[
                     '-filter:v', "fps={}".format(self.sampling_rate),
-                ])
+                ],
+                input_params=input_params)
 
         # Get videeo info
         self.meta_ = self.reader_.__next__()
