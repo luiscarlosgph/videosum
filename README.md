@@ -77,14 +77,6 @@ print(vs.indices_)
 ```
 
 
-Run unit tests
---------------
-Run this from the root directory of the repository:
-```
-$ python3 test/test_videosum.py
-```
-
-
 Exemplary result
 ----------------
 
