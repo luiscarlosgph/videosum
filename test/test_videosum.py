@@ -394,7 +394,40 @@ class TestVideosum(unittest.TestCase):
         diff = np.abs(inception_collage.astype(np.float32) - scda_collage.astype(np.float32))
         self.assertTrue(np.sum(diff) < eps)
 
-        # Delete dummy video and new collage
+        # Delete dummy video
+        os.unlink(video_path)
+
+    def test_transition_frames(self):
+        """
+        @brief If we create a video of 12s at 1fps, displaying a different
+               colour for every frame, the key frames are the same as the 
+               transition frames.
+        """
+        # Create dummy video
+        video_path = random_temp_file_path() + '.mp4'
+        create_toy_video(video_path, fps=1)
+
+        # Define collage properties
+        width = 640
+        height = 480
+        number_of_images = 12
+        
+        # Summarise video
+        vs = videosum.VideoSummariser('inception', number_of_images, width, 
+                                      height, time_segmentation=0, fps=1)
+        inception_collage = vs.summarise(video_path)
+
+        # Assert that there are 12 key frames
+        self.assertTrue(len(vs.labels_) == number_of_images)
+
+        # Assert that there are 12 transition frames
+        ti = vs.transition_indices(vs.indices_)
+        self.assertEqual(len(ti), number_of_images)
+
+        # The key frames and the transition frames should be the same
+        self.assertEqual(set(vs.indices_), set(ti))
+
+        # Delete dummy video
         os.unlink(video_path)
 
 

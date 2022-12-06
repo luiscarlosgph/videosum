@@ -23,18 +23,17 @@ class VideoReader:
         self.pix_fmt = pix_fmt
         
         # Open video reader
-        input_params = None
         if self.sampling_rate is None:
             self.reader_ = imageio_ffmpeg.read_frames(self.path,
-                                                      pix_fmt=self.pix_fmt,
-                                                      input_params=input_params)
+                input_params=['-hide_banner'],
+                pix_fmt=self.pix_fmt)
         else:
             self.reader_ = imageio_ffmpeg.read_frames(self.path, 
                 pix_fmt=self.pix_fmt, 
+                input_params=['-hide_banner'],
                 output_params=[
                     '-filter:v', "fps={}".format(self.sampling_rate),
-                ],
-                input_params=input_params)
+                ])
 
         # Get videeo info
         self.meta_ = self.reader_.__next__()
@@ -66,7 +65,7 @@ class VideoReader:
         return self.meta_['fps']
 
     @staticmethod
-    def num_frames(path, sampling_rate):
+    def num_frames(path: str, sampling_rate: int = None):
         """
         @brief Function to count the number of frames in a video.
         @param[in]  path           Path to the video file.
@@ -74,7 +73,12 @@ class VideoReader:
         @returns the number of frames as an integer.
         """
         # Create video reader
-        reader = imageio_ffmpeg.read_frames(path, pix_fmt='rgb24', 
+        if sampling_rate is None:
+            reader = imageio_ffmpeg.read_frames(path, pix_fmt='rgb24', 
+                input_params=['-hide_banner'])
+        else:
+            reader = imageio_ffmpeg.read_frames(path, pix_fmt='rgb24', 
+                input_params=['-hide_banner'],
                 output_params=['-filter:v', "fps={}".format(sampling_rate)])
 
         # Read videeo info
