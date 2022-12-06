@@ -122,15 +122,12 @@ Run timing script
 $ python3 -m videosum.timing 
 ```
 
-| Method    | Time (s) |
-| --------- | -------- |
-| time      | 0.027    |
-| inception | 0.668    |
-| fid       | 2.089    |
-| scda      | 0.583    |
-
-`Time (s)` indicates how many seconds of summarisation are required for each second of raw video. 
-<!-- This way you can easily approximate how long each algorithm will take to summarise a video of any given length. -->
+| Method | Time for a 1h video sampled at 1fps |
+| ------ | ----------------------------------- |
+| time       | 13s |
+| inception  | 86s |
+| fid        | 216s |
+| scda       | 74s |
 
 
 Author
