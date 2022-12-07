@@ -84,25 +84,33 @@ Exemplary result
 
 * Summary based on `time` algorithm: 
 
-`$ python3 -m videosum.run --input test/data/video.mp4 --output test/data/time.jpg --nframes 16 --height 1080 --width 1920 --algo time --time-segmentation 1`
+```
+$ python3 -m videosum.run --input test/data/video.mp4 --output test/data/time.jpg --nframes 16 --height 1080 --width 1920 --algo time --time-segmentation 1
+```
 
 ![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/time.jpg) 
 
 * Summary based on `inception` algorithm:
 
-`$ python3 -m videosum.run --input test/data/video.mp4 --output test/data/inception.jpg --nframes 16 --height 1080 --width 1920 --algo inception --time-segmentation 1`
+```
+$ python3 -m videosum.run --input test/data/video.mp4 --output test/data/inception.jpg --nframes 16 --height 1080 --width 1920 --algo inception --time-segmentation 1
+```
 
 ![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/inception.jpg) 
 
 * Summary based on `fid` algorithm:
 
-`$ python3 -m videosum.run --input test/data/video.mp4 --output test/data/fid.jpg --nframes 16 --height 1080 --width 1920 --algo fid --time-segmentation 1`
+```
+$ python3 -m videosum.run --input test/data/video.mp4 --output test/data/fid.jpg --nframes 16 --height 1080 --width 1920 --algo fid --time-segmentation 1
+```
 
 ![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/fid.jpg) 
 
 * Summary based on `scda` algorithm:
 
-`$ python3 -m videosum.run --input test/data/video.mp4 --output test/data/scda.jpg --nframes 16 --height 1080 --width 1920 --algo scda --time-segmentation 1`
+```
+$ python3 -m videosum.run --input test/data/video.mp4 --output test/data/scda.jpg --nframes 16 --height 1080 --width 1920 --algo scda --time-segmentation 1
+```
 
 ![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/scda.jpg) 
 
