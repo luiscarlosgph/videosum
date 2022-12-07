@@ -83,6 +83,9 @@ print(vs.labels_)
 Exemplary result
 ----------------
 
+The storyboards have a bar underneath that is produced when the `--time-segmentation 1` option is passed. 
+This bar shows how frames have been clustered over time, with a colour for each cluster, and black vertical lines representing the key frames.
+
 * Exemplary video: [here](https://raw.githubusercontent.com/luiscarlosgph/videosum/main/test/data/video.mp4)
 
 * Summary based on `time` algorithm: 
