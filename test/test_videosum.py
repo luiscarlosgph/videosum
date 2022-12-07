@@ -220,7 +220,7 @@ class TestVideosum(unittest.TestCase):
         cv2.imwrite(new_collage_path, new_collage)
 
         # Compare the collage with the one stored in the test folder
-        old_collage_path = 'test/data/time_collage.png'
+        old_collage_path = 'test/data/test_time.png'
         old_collage = cv2.imread(old_collage_path, cv2.IMREAD_UNCHANGED)
         diff = np.sum(np.abs(old_collage.astype(np.float32) - new_collage.astype(np.float32)))
         self.assertTrue(diff < eps)
@@ -252,7 +252,7 @@ class TestVideosum(unittest.TestCase):
         cv2.imwrite(new_collage_path, new_collage)
         
         # Compare the collage with the one stored in the test folder
-        old_collage_path = 'test/data/inception_collage.png'
+        old_collage_path = 'test/data/test_inception.png'
         old_collage = cv2.imread(old_collage_path, cv2.IMREAD_UNCHANGED)
         diff = np.sum(np.abs(old_collage.astype(np.float32) - new_collage.astype(np.float32)))
         self.assertTrue(diff < eps)
