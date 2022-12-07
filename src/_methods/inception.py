@@ -58,7 +58,7 @@ def get_key_frames_inception(self, input_path, eps=1e-6, time_smoothing=0.):
     l2norm = np.clip(faiss.pairwise_distances(X, X, mt), 0, None)
 
     # Minmax normalisation of the distance matrix
-    l2norm = l2norm / np.max(l2norm)
+    l2norm /= np.max(l2norm)
 
     # Compute the distance matrix with time smoothing if requested
     fdm = videosum.VideoSummariser.frame_distance_matrix(l2norm.shape[0])

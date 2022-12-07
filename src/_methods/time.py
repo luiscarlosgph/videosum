@@ -10,12 +10,14 @@ import numpy as np
 import videosum
 
 
-def get_key_frames_time(self, input_path):
+def get_key_frames_time(self, input_path, time_smoothing=0.):
         """
         @brief Get a list of key frames from the video. The key frames are
                simply evenly spaced along the video.
         
-        @param[in]  input_path  Path to the video file.
+        @param[in]  input_path      Path to the video file.
+        @param[in]  time_smoothing  This parameter is ignored, as this method
+                                    clusters frames based solely on time.
 
         @returns a list of Numpy/OpenCV BGR images. 
                  After this method is executed the list self.indices_ will 
