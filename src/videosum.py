@@ -26,7 +26,7 @@ import videosum
 class VideoSummariser():
     def __init__(self, algo, number_of_frames: int = 100, 
             width: int = 1920, height: int = 1080, fps=None,
-            time_segmentation=False, segbar_height=32):
+            time_segmentation=False, segbar_height=32, time_smoothing=0.):
         """
         @brief   Summarise a video into a collage.
         @details The frames in the collage are evenly taken from the video. 
@@ -42,10 +42,13 @@ class VideoSummariser():
         @param[in]  segbar_height      Height in pixels of the time
                                        segmentation bar.
         """
+        # Sanity checks
         assert(algo in VideoSummariser.ALGOS)
         assert(number_of_frames > 0)
         assert(width > 0)
         assert(height > 0)
+        if (algo == 'time' and time_smoothing > 1e-6):
+            raise ValueError('[ERROR] You cannot use time smoothing with the time algorithm.')
         
         # Store attributes
         self.algo = algo
@@ -56,6 +59,7 @@ class VideoSummariser():
         self.form_factor = float(self.width) / self.height
         self.time_segmentation = time_segmentation
         self.segbar_height = segbar_height
+        self.time_smoothing = time_smoothing
 
         # Compute the width and height of each collage tile
         self.tile_height = self.height
@@ -102,6 +106,20 @@ class VideoSummariser():
 
         return tiles_per_row * tiles_per_col 
     
+    def _insert_frame(self, im, i, j):
+        """@brief Insert image into the collage."""
+
+        # Resize frame to the right tile size
+        im_resized = cv2.resize(im, (self.tile_width, self.tile_height), 
+                                interpolation = cv2.INTER_LANCZOS4)
+
+        # Insert image within the collage
+        y_start = i * self.tile_height
+        y_end = y_start + im_resized.shape[0] 
+        x_start = j * self.tile_width
+        x_end = x_start + im_resized.shape[1] 
+        self.collage[y_start:y_end, x_start:x_end] = im_resized
+    
     @staticmethod
     def transition_indices(labels):
         """
@@ -127,20 +145,33 @@ class VideoSummariser():
                 prev_class = l
 
         return transition_frames
+    
+    @staticmethod
+    def frame_distance_matrix(n: int):
+        """
+        @brief Compute the normalised distance matrix of rows and columns. 
+        @details The distance matrix of rows and columns is (assuming only four
+                 frames):
 
-    def _insert_frame(self, im, i, j):
-        """@brief Insert image into the collage."""
+                    0 1 2 3
+                    1 0 1 2
+                    2 1 0 1
+                    3 2 1 0
+                  
+                 The normalised version is simply a minmax normalisation of the
+                 matrix above.
+        """
+        # Create lower triangular distance matrix
+        dist = np.zeros((n, n), dtype=np.float32)
+        for i in range(n):
+            for j in range(0, i):
+                dist[i, j] = np.abs(i - j)
 
-        # Resize frame to the right tile size
-        im_resized = cv2.resize(im, (self.tile_width, self.tile_height), 
-                                interpolation = cv2.INTER_LANCZOS4)
+        # Fill the upper triangular part
+        dist = dist + dist.T
 
-        # Insert image within the collage
-        y_start = i * self.tile_height
-        y_end = y_start + im_resized.shape[0] 
-        x_start = j * self.tile_width
-        x_end = x_start + im_resized.shape[1] 
-        self.collage[y_start:y_end, x_start:x_end] = im_resized
+        # Normalise matrix to [0, 1]
+        return dist / np.max(dist)
     
     # Import the different summarisation methods from their corresponding files
     from ._methods.time import get_key_frames_time
@@ -149,7 +180,8 @@ class VideoSummariser():
     from ._methods.scda import get_key_frames_scda
 
     def get_key_frames(self, input_path):
-        return VideoSummariser.ALGOS[self.algo](self, input_path)
+        return VideoSummariser.ALGOS[self.algo](self, input_path,
+            time_smoothing=self.time_smoothing)
 
     def check_collage_validity(self, input_path, key_frames):
         """
@@ -196,28 +228,6 @@ class VideoSummariser():
             # Colour the column corresponding to this key frame
             segbar[:, idx] = key_frame_line_colour
 
-        # Colour the background of the segmentation bar
-        """
-        if self.algo == 'time':
-            # The whole bar of the same background colour
-            # FIXME: use the distance to the key frames to segment it with
-            #        colours (i.e. make use of self.labels_)
-            palette = np.array(sns.color_palette("Set3", 1))
-            bg_colour = (palette * 255.).astype(np.uint8)[0]
-            segbar *= bg_colour
-        else:
-            palette = np.array(sns.color_palette("Set3", self.number_of_frames))
-            colours = (palette * 255.).astype(np.uint8)
-            for c, l in enumerate(self.labels_):
-                # Convert frame index 'c' to bar index (the video will 
-                # typically have more frames than the number of pixels
-                # corresponding to the width of the summary image
-                bar_idx = round(segbar.shape[1] * c / len(self.labels_))
-
-                # Set colour for the column equivalent to the current frame
-                segbar[:, bar_idx] = colours[l]
-        """
-
         return segbar
 
     def summarise(self, input_path):
@@ -232,7 +242,8 @@ class VideoSummariser():
         self.labels_ = None
 
         # Get list of key frames
-        key_frames = VideoSummariser.ALGOS[self.algo](self, input_path)
+        key_frames = VideoSummariser.ALGOS[self.algo](self, input_path,
+            time_smoothing=self.time_smoothing)
 
         # Ensure that summariser actually filled the labels
         assert(self.labels_ is not None)
@@ -288,6 +299,7 @@ class VideoSummariser():
     ALGOS = {
         'time':      get_key_frames_time,
         'inception': get_key_frames_inception,
+        'inceptime': get_key_frames_inceptime,
         'fid' :      get_key_frames_fid,
         'scda':      get_key_frames_scda,
     }

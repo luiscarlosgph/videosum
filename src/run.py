@@ -34,6 +34,7 @@ def help(short_option):
         '-a': 'Algorithm for frame selection, available options: time, frechet (required: True)',
         '-t': 'Add time segmentation based on the key frame selection (required: False)',
         '-f': 'Sampling frequency in fps (required: False)', 
+        '-s': 'Time smoothing factor (required: False)',
     }
     return help_msg[short_option]
 
@@ -58,6 +59,8 @@ def parse_cmdline_params():
                         default=False, type=int, help=help('-t'))
     parser.add_argument('-f', '--fps', required=False, 
                         default=None, type=float, help=help('-f'))
+    parser.add_argument('-s', '--time-smoothing', required=False, 
+                        default=0., type=float, help=help('-s'))
 
     # Read parameters
     args = parser.parse_args()
@@ -84,7 +87,8 @@ def process_video(input_path, output_path, args):
     vidsum = videosum.VideoSummariser(args.algo, args.nframes, 
                                       args.width, args.height, 
                                       time_segmentation=args.time_segmentation,
-                                      fps=args.fps)
+                                      fps=args.fps,
+                                      time_smoothing=args.time_smoothing)
 
     # Summarise video
     im = vidsum.summarise(input_path)
@@ -104,7 +108,8 @@ def main():
         vidsum = videosum.VideoSummariser(args.algo, args.nframes, 
                                           args.width, args.height, 
                                           time_segmentation=args.time_segmentation,
-                                          fps=args.fps)
+                                          fps=args.fps, 
+                                          time_smoothing=args.time_smoothing)
         # The input is a file
         tic = time.time()
         im = vidsum.summarise(args.input)
