@@ -61,6 +61,9 @@ def get_key_frames_fid(self, input_path, time_smoothing=0.):
         X = videosum.numba_fid(np.array(latent_vectors))
         print('[INFO] Done, distance matrix computed.')
 
+        # Minmax normalisation of distance matrix
+        X /= np.max(X)
+
         # Time smoothing 
         fdm = videosum.VideoSummariser.frame_distance_matrix(X.shape[0])
         dist = (1. - time_smoothing) * X + time_smoothing * fdm
