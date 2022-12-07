@@ -37,7 +37,7 @@ Options:
   * `--width`: width of the collage image.
   * `--time-segmentation`: set it to either `0` or `1`. If 1, the clustering results are displayed in a bar underneath the collage (i.e. the columns of the bar represent the frames of the video, and the colours represent the clustering label).
   * `--fps`: number of frames you want to read per second of video, used to downsample the input video and have less frames to describe and cluster.
-  * `--time-smoothing`: weight in the range [0.0, 1.0] that regulates the importance of time for clustering frames. A higher weight will result in a segmentation of frames over time closer to that of the 'time' method.
+  * `--time-smoothing`: weight in the range `[0.0, 1.0]` that regulates the importance of time for clustering frames. A higher weight will result in a segmentation of frames over time closer to that of the 'time' method.
   * `--algo`: algorithm used to select the key frames of the video.
     * `time`: evenly spaced frames are selected.
     * `inception`: k-medoids clustering (l2-norm metric) on InceptionV3 latent space vectors.
