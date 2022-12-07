@@ -14,7 +14,7 @@ import imageio_ffmpeg
 # My imports
 import videosum
 
-def get_key_frames_fid(self, input_path):
+def get_key_frames_fid(self, input_path, time_smoothing=0.):
         """
         @brief Get a list of key video frames. 
         @details They key frames are selected by unsupervised clustering of 
@@ -22,7 +22,11 @@ def get_key_frames_fid(self, input_path):
                  The latent feature vector is obtained from Inception V3
                  trained on ImageNet. The clustering method used is kmedoids.  
 
-        @param[in]  input_path  Path to the video file.
+        @param[in]  input_path      Path to the video file.
+        @param[in]  time_smoothing  Weight of the time smoothing factor. 
+                                    Higher values make the clustering closer
+                                    to the 'time' method. The maximum value
+                                    is 1.
         
         @returns a list of Numpy/BGR images, range [0.0, 1.0], dtype = np.uint8. 
         """
@@ -57,13 +61,17 @@ def get_key_frames_fid(self, input_path):
         X = videosum.numba_fid(np.array(latent_vectors))
         print('[INFO] Done, distance matrix computed.')
 
+        # Time smoothing 
+        fdm = videosum.VideoSummariser.frame_distance_matrix(X.shape[0])
+        dist = (1. - time_smoothing) * X + time_smoothing * fdm
+
         # Cluster the feature vectors using the Frechet Inception Distance 
         print('[INFO] k-medoids clustering ...')
         kmedoids = sklearn_extra.cluster.KMedoids(n_clusters=self.number_of_frames, 
             metric='precomputed',
             method='pam',
             init='k-medoids++',
-            random_state=0).fit(X)
+            random_state=0).fit(dist)
         self.indices_ = kmedoids.medoid_indices_
         self.labels_ = kmedoids.labels_
         print('[INFO] k-medoids clustering finished.')

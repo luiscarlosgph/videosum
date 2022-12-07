@@ -62,7 +62,7 @@ def get_key_frames_inception(self, input_path, eps=1e-6, time_smoothing=0.):
 
     # Compute the distance matrix with time smoothing if requested
     fdm = videosum.VideoSummariser.frame_distance_matrix(l2norm.shape[0])
-    dist = (1 - time_smoothing) * l2norm + time_smoothing * fdm
+    dist = (1. - time_smoothing) * l2norm + time_smoothing * fdm
 
     # Cluster the feature vectors
     print('[INFO] k-medoids clustering ...')

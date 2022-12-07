@@ -299,7 +299,6 @@ class VideoSummariser():
     ALGOS = {
         'time':      get_key_frames_time,
         'inception': get_key_frames_inception,
-        'inceptime': get_key_frames_inceptime,
         'fid' :      get_key_frames_fid,
         'scda':      get_key_frames_scda,
     }
