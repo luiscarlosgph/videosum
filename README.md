@@ -49,7 +49,7 @@ Options:
 Run video summarisation on multiple videos
 ------------------------------------------
 
-Pointing the command line parameter `-i` or `--input` to a folder of videos is enough. Obviously, the output `-o` or `--output` indicates the path to an output folder. 
+Pointing the command line parameter `-i` or `--input` to a folder of videos is enough. In this case, the path indicated by `-o` or `--output` will be used as output folder, each video summary will have the same filename as the video but a `.jpg` file extension. 
 
 The parameter `--processes` allows you to select the number of videos to summarise in parallel. This is necessary because some of the summarisation methods use GPU memory, which is typically a limiting factor. If the number of processes is too high you might get a CUDA out of memory error.
 
