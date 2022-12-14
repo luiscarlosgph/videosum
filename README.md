@@ -45,6 +45,16 @@ Options:
     * `scda`: k-medoids clustering (l2-norm metric) on SCDA image descriptors ([Wei et al. 2017 Selective Convolutional Descriptor Aggregation for Fine-Grained Image Retrieval](https://arxiv.org/abs/1604.04994)). InceptionV3 was trained on ImageNet as opposed to Wei et al. where authors used VGG-16.
 
 
+Run video summarisation on multiple videos
+------------------------------------------
+
+Simply pointing the command line parameter `-i` or `--input` to a folder will make it for running a parallel summarisation of all the videos inside the folder. The parameter `--processes` allows you to select the number of videos to summarise in parallel. This is necessary because some of the summarisation methods use GPU memory, which is typically a limiting factor. If the number of processes is too high you might get a CUDA out of memory error.
+
+```bash
+$ python3 -m videosum.run -i <input_folder> -o <output_folder> -n 16 --width 1920 --height 1080 -a inception --fps 1 --time-segmentation 1 --processes 6
+```
+
+
 Exemplary code snippet
 ----------------------
 ```python
