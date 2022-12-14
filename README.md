@@ -27,7 +27,7 @@ $ python3 setup.py install --user
 Run video summarisation on a single video
 -----------------------------------------
 ```
-$ python3 -m videosum.run --input video.mp4 --output collage.jpg --nframes 100 --height 1080 -width 1920 --algo time
+$ python3 -m videosum.run --input video.mp4 --output collage.jpg --nframes 100 --height 1080 --width 1920 --algo time
 ```
 Options:
   * `--input`: path to the input video file.
