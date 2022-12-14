@@ -38,6 +38,7 @@ Options:
   * `--time-segmentation`: set it to either `0` or `1`. If 1, the clustering results are displayed in a bar underneath the collage (i.e. the columns of the bar represent the frames of the video, and the colours represent the clustering label).
   * `--fps`: number of frames you want to read per second of video, used to downsample the input video and have less frames to describe and cluster.
   * `--time-smoothing`: weight in the range `[0.0, 1.0]` that regulates the importance of time for clustering frames. A higher weight will result in a segmentation of frames over time closer to that of the `time` method.
+  * `--processes`: number of processes to use when summarising a folder of videos.
   * `--algo`: algorithm used to select the key frames of the video.
     * `time`: evenly spaced frames are selected.
     * `inception`: k-medoids clustering (l2-norm metric) on InceptionV3 latent space vectors.
@@ -48,10 +49,12 @@ Options:
 Run video summarisation on multiple videos
 ------------------------------------------
 
-Simply pointing the command line parameter `-i` or `--input` to a folder will make it for running a parallel summarisation of all the videos inside the folder. The parameter `--processes` allows you to select the number of videos to summarise in parallel. This is necessary because some of the summarisation methods use GPU memory, which is typically a limiting factor. If the number of processes is too high you might get a CUDA out of memory error.
+Pointing the command line parameter `-i` or `--input` to a folder of videos is enough. Obviously, the output `-o` or `--output` indicates the path to an output folder. 
+
+The parameter `--processes` allows you to select the number of videos to summarise in parallel. This is necessary because some of the summarisation methods use GPU memory, which is typically a limiting factor. If the number of processes is too high you might get a CUDA out of memory error.
 
 ```bash
-$ python3 -m videosum.run -i <input_folder> -o <output_folder> -n 16 --width 1920 --height 1080 -a inception --fps 1 --time-segmentation 1 --processes 6
+$ python3 -m videosum.run -i <input_folder> -o <output_folder> -n 16 --width 1920 --height 1080 -a inception --fps 1 --time-segmentation 1 --processes 5
 ```
 
 
