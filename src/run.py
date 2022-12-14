@@ -35,6 +35,7 @@ def help(short_option):
         '-t': 'Add time segmentation based on the key frame selection (required: False)',
         '-f': 'Sampling frequency in fps (required: False)', 
         '-s': 'Time smoothing factor (required: False)',
+        '-p': 'Number of processes (required: False)',
     }
     return help_msg[short_option]
 
@@ -61,6 +62,9 @@ def parse_cmdline_params():
                         default=None, type=float, help=help('-f'))
     parser.add_argument('-s', '--time-smoothing', required=False, 
                         default=0., type=float, help=help('-s'))
+    parser.add_argument('-p', '--processes', required=False,
+                        default=multiprocessing.cpu_count(), type=int, 
+                        help=help('-p'))
 
     # Read parameters
     args = parser.parse_args()
@@ -135,8 +139,7 @@ def main():
             data_inputs.append((input_path, output_path, args))
         
         # Run batch processing
-        processes = 2 * multiprocessing.cpu_count()
-        pool = multiprocessing.Pool(processes=processes)
+        pool = multiprocessing.Pool(processes=args.processes)
         pool.starmap(process_video, data_inputs)
         #for input_path, output_path, args in data_input:
         #    print("[INFO] Processing {} ...".format(input_path))
