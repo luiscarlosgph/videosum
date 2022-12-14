@@ -80,9 +80,11 @@ def validate_cmdline_params(args):
     @brief Input directory must exist and output must not.
     """
     if not os.path.isfile(args.input) and not os.path.isdir(args.input):
-        raise RuntimeError('[ERROR] Input file does not exist.')
-    if os.path.isfile(args.output) or os.path.isdir(args.output):
+        raise RuntimeError('[ERROR] Input file or folder does not exist.')
+
+    if os.path.isfile(args.output):
         raise RuntimeError('[ERROR] Output file already exists.')
+
     return args
 
 
@@ -126,10 +128,18 @@ def main():
         output_dir = args.output
         
         # Create output folder
-        os.mkdir(output_dir)
+        if not os.path.isdir(output_dir):
+            os.mkdir(output_dir)
 
         # Gather the list of video filenames inside the folder
         videos = [x for x in os.listdir(input_dir) if x.endswith('.mp4')]
+        prev_len = len(videos)
+
+        # Filter out the videos that have been already summarised
+        already_summarised = [x.split('.jpg')[0] + '.mp4' \
+            for x in os.listdir(output_dir) if x.endswith('.jpg')]
+        videos = [x for x in videos if x not in already_summarised] 
+        print("[INFO] {} videos have been already summarised.".format(prev_len - len(videos)))
         
         # Build data input ready for batch processing
         data_inputs = []
