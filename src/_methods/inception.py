@@ -52,28 +52,35 @@ def get_key_frames_inception(self, input_path, eps=1e-6, time_smoothing=0.):
         latent_vectors.append(vec)
     print('[INFO] Done. Feature vectors computed.')
 
-    # Compute L2 distances
-    X = np.array(latent_vectors, dtype=np.float32)
-    mt = getattr(faiss, 'METRIC_L2')
-    l2norm = np.clip(faiss.pairwise_distances(X, X, mt), 0, None)
+    # There is no point to cluster if we have less frames in the video 
+    # than the number of frames that fit in the collage
+    if len(latent_vectors) < self.number_of_frames:
+        # All the frames go in the collage 
+        self.indices_ = list(range(len(latent_vectors)))
+        self.labels_ = list(range(len(latent_vectors)))
+    else:
+        # Compute L2 distances
+        X = np.array(latent_vectors, dtype=np.float32)
+        mt = getattr(faiss, 'METRIC_L2')
+        l2norm = np.clip(faiss.pairwise_distances(X, X, mt), 0, None)
 
-    # Minmax normalisation of the distance matrix
-    l2norm /= np.max(l2norm)
+        # Minmax normalisation of the distance matrix
+        l2norm /= np.max(l2norm)
 
-    # Compute the distance matrix with time smoothing if requested
-    fdm = videosum.VideoSummariser.frame_distance_matrix(l2norm.shape[0])
-    dist = (1. - time_smoothing) * l2norm + time_smoothing * fdm
+        # Compute the distance matrix with time smoothing if requested
+        fdm = videosum.VideoSummariser.frame_distance_matrix(l2norm.shape[0])
+        dist = (1. - time_smoothing) * l2norm + time_smoothing * fdm
 
-    # Cluster the feature vectors
-    print('[INFO] k-medoids clustering ...')
-    kmedoids = sklearn_extra.cluster.KMedoids(n_clusters=self.number_of_frames,
-        metric='precomputed',
-        method='pam',
-        init='k-medoids++',
-        random_state=0).fit(dist)
-    self.indices_ = kmedoids.medoid_indices_
-    self.labels_ = kmedoids.labels_
-    print('[INFO] k-medoids clustering finished.')
+        # Cluster the feature vectors
+        print('[INFO] k-medoids clustering ...')
+        kmedoids = sklearn_extra.cluster.KMedoids(n_clusters=self.number_of_frames,
+            metric='precomputed',
+            method='pam',
+            init='k-medoids++',
+            random_state=0).fit(dist)
+        self.indices_ = kmedoids.medoid_indices_
+        self.labels_ = kmedoids.labels_
+        print('[INFO] k-medoids clustering finished.')
 
     # Retrieve the video frames corresponding to the cluster means
     print('[INFO] Retrieving key frames ...')
@@ -84,7 +91,8 @@ def get_key_frames_inception(self, input_path, eps=1e-6, time_smoothing=0.):
     for raw_frame in tqdm.tqdm(reader):
         if counter in self.indices_:
             # Convert video frame into a BGR OpenCV/Numpy image
-            im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
+            im = np.frombuffer(raw_frame, 
+                dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
 
             # Add key frame to list
             key_frames.append(im)
