@@ -9,13 +9,14 @@
 """
 
 import argparse
-import imageio_ffmpeg 
+import imageio_ffmpeg
 import numpy as np
 import os
 import cv2
 import tqdm
 import time
 import multiprocessing
+import logging
 
 # My imports
 import videosum
@@ -36,6 +37,7 @@ def help(short_option):
         '-f': 'Sampling frequency in fps (required: False)', 
         '-s': 'Time smoothing factor (required: False)',
         '-p': 'Number of processes (required: False)',
+        '-l': 'Path to the log file (required: False)',
     }
     return help_msg[short_option]
 
@@ -65,6 +67,8 @@ def parse_cmdline_params():
     parser.add_argument('-p', '--processes', required=False,
                         default=multiprocessing.cpu_count(), type=int, 
                         help=help('-p'))
+    parser.add_argument('-l', '--log', required=False, default='summary.log',
+                        type=str, help=help('-l'))
 
     # Read parameters
     args = parser.parse_args()
@@ -96,17 +100,35 @@ def process_video(input_path, output_path, args):
                                       fps=args.fps,
                                       time_smoothing=args.time_smoothing)
 
-    # Summarise video
-    im = vidsum.summarise(input_path)
+    try:
+        # Summarise video
+        im = vidsum.summarise(input_path)
 
-    # Save summary to the output folder
-    cv2.imwrite(output_path, im, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+        # Save summary to the output folder
+        cv2.imwrite(output_path, im, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+    except IOError as e:
+        logging.info("The video {} is broken. Skipping.".format(os.path.basename(input_path)))
+
+
+def setup_logging(logfile_path):
+    """
+    @brief Sets up the logging to file.
+
+    @param[in]  logfile_path  Path to the logfile, typically passed on in the
+                              command line.
+    """
+    logging.basicConfig(filename=logfile_path, filemode='a',
+        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+        datefmt='%H:%M:%S', level=logging.DEBUG)
 
 
 def main():
     # Read command line parameters
     args = parse_cmdline_params()
     validate_cmdline_params(args)
+
+    # Setup logging
+    setup_logging(args.log)
     
     # Check whether the input is a file or a folder of videos
     if os.path.isfile(args.input):
