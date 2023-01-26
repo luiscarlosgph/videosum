@@ -195,7 +195,11 @@ class VideoSummariser():
         nframes_in_collage = len(key_frames)
         nframes_requested = self.number_of_frames
         if nframes_in_video > nframes_requested:
-            assert(nframes_in_collage == nframes_requested)
+            if nframes_in_collage != nframes_requested:
+                print("[ERROR] There are {} frames ".format(nframes_in_video) \
+                        + "in [{}], but the collage ".format(input_path) \
+                        + "only has {} ".format(nframes_in_collage) \
+                        + "out of the {} requested.".format(nframes_requested))
 
     def generate_segbar(self):
         # Create an empty segmentation bar
