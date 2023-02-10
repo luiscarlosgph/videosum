@@ -169,28 +169,28 @@ If you have 2D RGB images and you want to obtain a feature vector for them, you 
    ```
 
 2. Extract feature vectors for your images:
-```python
-import cv2
-import videosum
+   ```python
+   import cv2
+   import videosum
 
-# Read a BGR image from file
-im = cv2.imread('test/data/test_time.png', cv2.IMREAD_UNCHANGED)
+   # Read a BGR image from file
+   im = cv2.imread('test/data/test_time.png', cv2.IMREAD_UNCHANGED)
 
-# Extract latent space spatial feature vector for the image
-model = videosum.FrechetInceptionDistance('vector')
-vec = model.get_latent_feature_vector(im)
+   # Extract latent space spatial feature vector for the image
+   model = videosum.FrechetInceptionDistance('vector')
+   vec = model.get_latent_feature_vector(im)
 
-# Print vector dimensions
-print(vec)
-print('Shape:', vec.shape)
-```
+   # Print vector dimensions
+   print(vec)
+   print('Shape:', vec.shape)
+   ```
 
-The output:
+   The output:
 
-```
-[0.34318596 0.11794803 0.04767929 ... 0.09731872 0.         1.1942172 ]
-Shape: (2048,)
-```
+   ```python
+   [0.34318596 0.11794803 0.04767929 ... 0.09731872 0.         1.1942172 ]
+   Shape: (2048,)
+   ```
 
 
 Author
