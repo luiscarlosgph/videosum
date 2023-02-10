@@ -158,6 +158,41 @@ $ python3 -m videosum.timing
 | scda       | 74s |
 
 
+Use this package as an unsupervised spatial feature extractor
+-------------------------------------------------------------
+
+If you have 2D RGB images and you want to obtain a feature vector for them, you can do so like this:
+
+1. Install `videosum` Python package:
+   ```
+   $ pip install videosum --user
+   ```
+
+2. Extract feature vectors for your images:
+```python
+import cv2
+import videosum
+
+# Read a BGR image from file
+im = cv2.imread('test/data/test_time.png', cv2.IMREAD_UNCHANGED)
+
+# Extract latent space spatial feature vector for the image
+model = videosum.FrechetInceptionDistance('vector')
+vec = model.get_latent_feature_vector(im)
+
+# Print vector dimensions
+print(vec)
+print('Shape:', vec.shape)
+```
+
+The output:
+
+```
+[0.34318596 0.11794803 0.04767929 ... 0.09731872 0.         1.1942172 ]
+Shape: (2048,)
+```
+
+
 Author
 ------
 Luis Carlos Garcia Peraza Herrera (luiscarlos.gph@gmail.com), 2022.
