@@ -34,7 +34,8 @@ def numba_fid(X, eps=1e-6):
             C_2 = np.var(X[j, :]) + eps
 
             # Compute FID
-            fid[i, j] = ((mu_1 - mu_2) ** 2) + (C_1 + C_2 - 2 * np.sqrt(C_1 * C_2))
+            #fid[i, j] = ((mu_1 - mu_2) ** 2) + (C_1 + C_2 - 2 * np.sqrt(C_1 * C_2))
+            fid[i, j] = np.sqrt(((mu_1 - mu_2) ** 2) + ((C_1 - C_2) ** 2))
     fid = fid + fid.T
     return fid
 
