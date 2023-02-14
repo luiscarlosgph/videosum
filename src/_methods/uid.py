@@ -58,7 +58,7 @@ def get_key_frames_uid(self, input_path, time_smoothing=0.):
 
         # Compute distance matrix
         print('[INFO] Computing distance matrix ...')
-        X = videosum.numba_fid(np.array(latent_vectors))
+        X = videosum.numba_uid(np.array(latent_vectors))
         print('[INFO] Done, distance matrix computed.')
 
         # Minmax normalisation of distance matrix
@@ -100,4 +100,4 @@ def get_key_frames_uid(self, input_path, time_smoothing=0.):
 
 
 if __name__ == '__main__':
-    raise RuntimeError('[ERROR] fid.py cannot be executed as a script.')
+    raise RuntimeError('[ERROR] uid.py cannot be executed as a script.')
