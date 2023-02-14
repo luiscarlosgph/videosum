@@ -26,7 +26,8 @@ import videosum
 class VideoSummariser():
     def __init__(self, algo, number_of_frames: int = 100, 
             width: int = 1920, height: int = 1080, fps=None,
-            time_segmentation=False, segbar_height=32, time_smoothing=0.):
+            time_segmentation=False, segbar_height=32, time_smoothing=0.,
+            compute_fid=False):
         """
         @brief   Summarise a video into a collage.
         @details The frames in the collage are evenly taken from the video. 
@@ -41,6 +42,9 @@ class VideoSummariser():
                                        under the video collage.
         @param[in]  segbar_height      Height in pixels of the time
                                        segmentation bar.
+        @param[in]  compute_fid        Set it to True if you want a report on
+                                       the FID of the summary to the whole
+                                       video.
         """
         # Sanity checks
         assert(algo in VideoSummariser.ALGOS)
@@ -60,6 +64,7 @@ class VideoSummariser():
         self.time_segmentation = time_segmentation
         self.segbar_height = segbar_height
         self.time_smoothing = time_smoothing
+        self.compute_fid = compute_fid
 
         # Compute the width and height of each collage tile
         self.tile_height = self.height
@@ -296,22 +301,42 @@ class VideoSummariser():
             collage_with_seg[:self.collage.shape[0], :] = self.collage
             collage_with_seg[self.collage.shape[0]:, :] = segbar
             self.collage = collage_with_seg
-
-        print("[INFO] Summary FID: {}".format(self.fid_storyboard_vs_video()))
+        
+        # Report the FID between the summary and the whole video if requested
+        if self.compute_fid:
+            print("[INFO] Summary FID: {}".format(self.fid_storyboard_vs_video(input_path, key_frames)))
 
         return self.collage
 
-    def fid_storyboard_vs_video(self):
+    def fid_storyboard_vs_video(self, input_path, key_frames):
+        print("[INFO] Computing FID of the storyboard vs video ...")
+
+        # Initialise InceptionV3 model
+        model = videosum.FrechetInceptionDistance('vector')
+
         # Compute the multivariate Gaussian of the summary
-        # TODO
-        for 
+        story_fv = [model.get_latent_feature_vector(im) for im in key_frames]
+        story_mu = np.mean(story_fv, axis=0)
+        story_cov = np.cov(story_fv, rowvar=False)
 
         # Compute the multivariate Gaussian of the whole video 
         # (including the summary of course)
-        # TODO
+        video_fv = []
+        reader = videosum.VideoReader(input_path, sampling_rate=self.fps, 
+                                      pix_fmt='rgb24')
+        w, h = reader.size
+        for raw_frame in tqdm.tqdm(reader):
+            im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
+            video_fv.append(model.get_latent_feature_vector(im))
+        video_mu = np.mean(video_fv, axis=0)
+        video_cov = np.cov(video_fv, rowvar=False)
+
+        assert(story_mu.shape == video_mu.shape)
+        assert(story_cov.shape == video_cov.shape)
 
         # Compute 2-Wasserstein distance
-        # TODO
+        emd = videosum.FrechetInceptionDistance._calculate_frechet_distance(
+            story_mu, story_cov, video_mu, video_cov)
 
         return emd
     

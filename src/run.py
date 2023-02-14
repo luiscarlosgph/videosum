@@ -38,6 +38,7 @@ def help(short_option):
         '-s': 'Time smoothing factor (required: False)',
         '-p': 'Number of processes (required: False)',
         '-l': 'Path to the log file (required: False)',
+        '-m': 'Compute FID between storyboard and video (required: False)',
     }
     return help_msg[short_option]
 
@@ -69,6 +70,8 @@ def parse_cmdline_params():
                         help=help('-p'))
     parser.add_argument('-l', '--log', required=False, default='summary.log',
                         type=str, help=help('-l'))
+    parser.add_argument('-m', '--metric', required=False, default=False,
+                        type=bool, help=help('-m'))
 
     # Read parameters
     args = parser.parse_args()
@@ -101,7 +104,8 @@ def process_video(input_path, output_path, args):
                                       args.width, args.height, 
                                       time_segmentation=args.time_segmentation,
                                       fps=args.fps,
-                                      time_smoothing=args.time_smoothing)
+                                      time_smoothing=args.time_smoothing,
+                                      compute_fid=args.metric)
 
     try:
         # Summarise video
@@ -140,7 +144,8 @@ def main():
                                           args.width, args.height, 
                                           time_segmentation=args.time_segmentation,
                                           fps=args.fps, 
-                                          time_smoothing=args.time_smoothing)
+                                          time_smoothing=args.time_smoothing,
+                                          compute_fid=args.metric)
         # The input is a file
         tic = time.time()
         im = vidsum.summarise(args.input)
