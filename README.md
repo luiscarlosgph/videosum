@@ -73,7 +73,7 @@ widtth = 1920
 height = 1080
 
 # Choose the algotrithm that selects the key frames
-algo = 'inception'  # The options are: 'time', 'inception', 'fid', 'scda'
+algo = 'inception'  # The options are: 'time', 'inception', 'uid', 'scda'
 
 # Create video summariser object
 vs = videosum.VideoSummariser(algo, nframes, width, height)
@@ -119,13 +119,13 @@ $ python3 -m videosum.run --input test/data/video.mp4 --output test/data/incepti
 
 ![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/inception.jpg) 
 
-* Summary based on `fid` algorithm:
+* Summary based on `uid` algorithm:
 
 ```
-$ python3 -m videosum.run --input test/data/video.mp4 --output test/data/fid.jpg --nframes 16 --height 1080 --width 1920 --algo fid --time-segmentation 1
+$ python3 -m videosum.run --input test/data/video.mp4 --output test/data/uid.jpg --nframes 16 --height 1080 --width 1920 --algo uid --time-segmentation 1
 ```
 
-![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/fid.jpg) 
+![](https://github.com/luiscarlosgph/videosum/blob/main/test/data/uid.jpg) 
 
 * Summary based on `scda` algorithm:
 
@@ -155,7 +155,7 @@ $ python3 -m videosum.timing
 | ------ | ----------------------------------- |
 | time       | 13s |
 | inception  | 86s |
-| fid        | 216s |
+| uid        | 216s |
 | scda       | 74s |
 
 
