@@ -297,7 +297,23 @@ class VideoSummariser():
             collage_with_seg[self.collage.shape[0]:, :] = segbar
             self.collage = collage_with_seg
 
+        print("[INFO] Summary FID: {}".format(self.fid_storyboard_vs_video()))
+
         return self.collage
+
+    def fid_storyboard_vs_video(self):
+        # Compute the multivariate Gaussian of the summary
+        # TODO
+        for 
+
+        # Compute the multivariate Gaussian of the whole video 
+        # (including the summary of course)
+        # TODO
+
+        # Compute 2-Wasserstein distance
+        # TODO
+
+        return emd
     
     # Class attribute: supported key frame selection algorithms
     ALGOS = {
