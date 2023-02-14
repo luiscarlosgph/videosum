@@ -14,7 +14,7 @@ import imageio_ffmpeg
 # My imports
 import videosum
 
-def get_key_frames_fid(self, input_path, time_smoothing=0.):
+def get_key_frames_uid(self, input_path, time_smoothing=0.):
         """
         @brief Get a list of key video frames. 
         @details They key frames are selected by unsupervised clustering of 

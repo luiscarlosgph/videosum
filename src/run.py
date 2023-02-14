@@ -89,7 +89,7 @@ def validate_cmdline_params(args):
     if os.path.isfile(args.output):
         raise RuntimeError('[ERROR] Output file already exists.')
 
-    if args.algo not in videosum.ALGOS: 
+    if args.algo not in videosum.VideoSummariser.ALGOS: 
         raise ValueError("[ERROR] The method {} does not exist.".format(args.algo))
 
     return args
