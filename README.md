@@ -42,7 +42,7 @@ Options:
   * `--algo`: algorithm used to select the key frames of the video.
     * `time`: evenly spaced frames are selected.
     * `inception`: k-medoids clustering (l2-norm metric) on InceptionV3 latent space vectors.
-    * `uid` : in order to compute the distance between two images, their InceptionV3 latent space vectors are computed. A univariate Gaussian is estimated (for each image being compared) from the latent vectors. The 2-Wasserstein distance is computed between the two Gaussians and used as clustering metric for k-medoids.
+    * `uid` : in order to compute the distance between two images their InceptionV3 latent space vectors are computed, a univariate Gaussian is estimated for each of the two latent vectors, and the 2-Wasserstein distance is computed between the two Gaussians and used as clustering metric for k-medoids.
     <!-- k-medoids clustering on 2-Wasserstein distances computed between univariate Gaussians estimated from the ([Frechet Inception Distance](https://en.wikipedia.org/wiki/Fr%C3%A9chet_inception_distance) metric) on InceptionV3 latent space vectors.-->
     * `scda`: k-medoids clustering (l2-norm metric) on SCDA image descriptors ([Wei et al. 2017 Selective Convolutional Descriptor Aggregation for Fine-Grained Image Retrieval](https://arxiv.org/abs/1604.04994)). In this package we use InceptionV3 as opposed to VGG-16, which was the model used by Wei et al.
 
