@@ -43,7 +43,7 @@ Options:
     * `time`: evenly spaced frames are selected.
     * `inception`: k-medoids clustering (l2-norm metric) on InceptionV3 latent space vectors.
     * `fid` : k-medoids clustering ([Frechet Inception Distance](https://en.wikipedia.org/wiki/Fr%C3%A9chet_inception_distance) metric) on InceptionV3 latent space vectors.
-    * `scda`: k-medoids clustering (l2-norm metric) on SCDA image descriptors ([Wei et al. 2017 Selective Convolutional Descriptor Aggregation for Fine-Grained Image Retrieval](https://arxiv.org/abs/1604.04994)). InceptionV3 was trained on ImageNet as opposed to Wei et al. where authors used VGG-16.
+    * `scda`: k-medoids clustering (l2-norm metric) on SCDA image descriptors ([Wei et al. 2017 Selective Convolutional Descriptor Aggregation for Fine-Grained Image Retrieval](https://arxiv.org/abs/1604.04994)), except that here we use InceptionV3 as opposed to VGG-16 which was the model used by Wei et al.
 
 
 Run video summarisation on multiple videos
