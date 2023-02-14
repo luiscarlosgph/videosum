@@ -20,7 +20,7 @@ for video in ${videos[@]}; do
     for size in ${sizes[@]}; do
       rm -f $tmp_file
       echo "[INFO] Running method $method on $video with size $size ..."
-      fid=`python3 -m videosum.run --input $video --output $tmp_file --nframes $size --height 1080 --width 1920 --algo $method --time-segmentation 1 --time-smoothing 0.0 --metric True | grep 'Summary FID' | cut -d" " -f4`
+      fid=`python3 -m videosum.run --input $video --output $tmp_file --nframes $size --height 1080 --width 1920 --algo $method --time-segmentation 0 --time-smoothing 0.0 --metric True | grep 'Summary FID' | cut -d" " -f4`
       scores+="$video,$method,$size,$fid\n"
     done
   done
