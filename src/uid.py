@@ -16,13 +16,13 @@ import videosum
 
 
 @numba.jit(nopython=True)
-def numba_fid(X, eps=1e-6):
+def numba_uid(X, eps=1e-6):
     """
     @brief Compute the Frechet distance matrix of a set of vectors.
     @details
         d^2 = ||mu_1 - mu_2||^2 + Tr(C_1 + C_2 - 2*sqrt(C_1*C_2))
     """
-    fid = np.zeros((X.shape[0], X.shape[0]), dtype=np.float64)
+    uid = np.zeros((X.shape[0], X.shape[0]), dtype=np.float64)
     for i in range(X.shape[0]):
         for j in range(i + 1, X.shape[0]):
             # Compute means
@@ -34,10 +34,10 @@ def numba_fid(X, eps=1e-6):
             C_2 = np.var(X[j, :]) + eps
 
             # Compute FID
-            #fid[i, j] = ((mu_1 - mu_2) ** 2) + (C_1 + C_2 - 2 * np.sqrt(C_1 * C_2))
-            fid[i, j] = np.sqrt(((mu_1 - mu_2) ** 2) + ((C_1 - C_2) ** 2))
-    fid = fid + fid.T
-    return fid
+            #uid[i, j] = ((mu_1 - mu_2) ** 2) + (C_1 + C_2 - 2 * np.sqrt(C_1 * C_2))
+            uid[i, j] = np.sqrt(((mu_1 - mu_2) ** 2) + ((C_1 - C_2) ** 2))
+    uid = uid + uid.T
+    return uid
 
 
 class FrechetInceptionDistance():

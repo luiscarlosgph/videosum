@@ -176,7 +176,7 @@ class VideoSummariser():
     # Import the different summarisation methods from their corresponding files
     from ._methods.time import get_key_frames_time
     from ._methods.inception import get_key_frames_inception
-    from ._methods.fid import get_key_frames_fid 
+    from ._methods.uid import get_key_frames_uid 
     from ._methods.scda import get_key_frames_scda
 
     def get_key_frames(self, input_path):
@@ -303,7 +303,7 @@ class VideoSummariser():
     ALGOS = {
         'time':      get_key_frames_time,
         'inception': get_key_frames_inception,
-        'fid' :      get_key_frames_fid,
+        'uid' :      get_key_frames_uid,
         'scda':      get_key_frames_scda,
     }
 
