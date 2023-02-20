@@ -39,6 +39,7 @@ Options:
   * `--fps`: number of frames you want to read per second of video, used to downsample the input video and have less frames to describe and cluster.
   * `--time-smoothing`: weight in the range `[0.0, 1.0]` that regulates the importance of time for clustering frames. A higher weight will result in a segmentation of frames over time closer to that of the `time` method.
   * `--processes`: number of processes to use when summarising a folder of videos.
+  * `--metric`: set it to True if you want to compute the [Frechet Inception Distance](https://en.wikipedia.org/wiki/Fr%C3%A9chet_inception_distance) between the frames in the summary and the frames in the original video.
   * `--algo`: algorithm used to select the key frames of the video.
     * `time`: evenly spaced frames are selected.
     * `inception`: k-medoids clustering (l2-norm metric) on InceptionV3 latent space vectors.
