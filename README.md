@@ -178,7 +178,8 @@ If you have 2D RGB images and you want to obtain a feature vector for them, you 
    # Read a BGR image from file
    im = cv2.imread('test/data/test_time.png', cv2.IMREAD_UNCHANGED)
 
-   # Extract latent space spatial feature vector for the image
+   # Extract latent space spatial feature vector for the image, 
+   # you can pass an image of shape (H, W, 3) or a batch of images of shape (B, H, W, 3)
    model = videosum.InceptionFeatureExtractor('vector')
    vec = model.get_latent_feature_vector(im)
 
