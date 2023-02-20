@@ -76,8 +76,8 @@ def main():
             if line_count > 0:
                 #data['video'].append(row[0])
                 data['Method'].append(row[1])
-                data['Size'].append(row[2])
-                data['FID'].append(row[3])
+                data['Size'].append(float(row[2]))
+                data['FID'].append(float(row[3]))
             line_count += 1
     df = pd.DataFrame.from_dict(data)
     
@@ -86,8 +86,12 @@ def main():
 
     # Generate FID vs no. images for all the methods
     lp = sns.lineplot(data=df, x='Size', y='FID', hue='Method')
+    lp.set(title='Storyboard vs Video')
     fig = lp.get_figure()
     plt.legend(loc='upper right')
+    plt.xlim([0, 70])
+    plt.ylim([40, 250])
+    plt.tight_layout()
     fig.savefig(args.output)
 
     

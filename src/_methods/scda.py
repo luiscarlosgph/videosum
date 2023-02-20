@@ -24,9 +24,11 @@ import imageio_ffmpeg
 import skimage.measure
 import scipy.ndimage
 import faiss
+import numba
 
 # My imports
 import videosum
+
 
 
 def get_key_frames_scda(self, input_path, time_smoothing=0.):
@@ -41,7 +43,26 @@ def get_key_frames_scda(self, input_path, time_smoothing=0.):
     @returns a list of Numpy/BGR images, range [0.0, 1.0], dtype = np.uint8. 
 
     """
-    latent_vectors = []
+
+    @numba.jit(nopython=True)
+    def numba_cosine_dist(X):
+        dist = np.zeros((X.shape[0], X.shape[0]), dtype=np.float64)
+        for i in range(X.shape[0]):
+            for j in range(i + 1, X.shape[0]):
+                # Compute cosine similarity
+                u = X[i, :]
+                v = X[j, :]
+                u_l2 = np.sqrt(np.sum(u ** 2))
+                v_l2 = np.sqrt(np.sum(v ** 2))
+                cos_sim = np.dot(u, v) / (u_l2 * v_l2)
+                
+
+                # Compute cosine distance
+                #cos_dist = 1 - cos_sim
+                #dist[i, j] = min(0., max(2., cos_dist))
+                dist[i, j] = 1 - cos_sim 
+        dist += dist.T
+        return dist
 
     # Initialise video reader
     reader = videosum.VideoReader(input_path, sampling_rate=self.fps,
@@ -53,6 +74,7 @@ def get_key_frames_scda(self, input_path, time_smoothing=0.):
 
     # Collect feature vectors for all the frames
     print('[INFO] Collecting feature vectors for all the frames ...')
+    latent_vectors = []
     for raw_frame in tqdm.tqdm(reader):
         # Convert video frame into a BGR OpenCV/Numpy image
         im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
@@ -92,19 +114,16 @@ def get_key_frames_scda(self, input_path, time_smoothing=0.):
         latent_vectors.append(scda)
     print('[INFO] Done. Feature vectors computed.')
 
-    # Compute L2 distances
-    print('[INFO] Computing distance matrix ...')
+    # Compute cosine distances
     X = np.array(latent_vectors, dtype=np.float32)
-    mt = getattr(faiss, 'METRIC_L2')
-    l2norm = np.clip(faiss.pairwise_distances(X, X, mt), 0, None)
-    print('[INFO] Done, distance matrix computed.')
+    cos_dist = numba_cosine_dist(X)
 
     # Minmax normalisation of the l2norm distances
-    l2norm /= np.max(l2norm)
+    cos_dist /= np.max(cos_dist)
 
     # Compute the distance matrix with time smoothing if requested
-    fdm = videosum.VideoSummariser.frame_distance_matrix(l2norm.shape[0])
-    dist = (1. - time_smoothing) * l2norm + time_smoothing * fdm
+    fdm = videosum.VideoSummariser.frame_distance_matrix(cos_dist.shape[0])
+    dist = (1. - time_smoothing) * cos_dist + time_smoothing * fdm
 
     # Cluster the feature vectors
     print('[INFO] k-medoids clustering ...')

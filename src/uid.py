@@ -18,9 +18,21 @@ import videosum
 @numba.jit(nopython=True)
 def numba_uid(X, eps=1e-6):
     """
-    @brief Compute the Frechet distance matrix of a set of vectors.
-    @details
-        d^2 = ||mu_1 - mu_2||^2 + Tr(C_1 + C_2 - 2*sqrt(C_1*C_2))
+    @brief   The Frechet Inception Distance is computed between two 
+             distributions. Here we just have a list of feature vectors. 
+             Inspired by FID, in this function we define the 
+             Univariate Inception Distance (UID), and compute a distance
+             matrix from each vector in X to each other vector in X.
+
+    @details In this function we assume that each feature vector contains
+             many samples from the same univariate Gaussian distribution.
+             That is, to compare two feature vectors we estimate the mean
+             and std of each feature vector and compare the univariate 
+             Gaussian distributions: 
+
+             uid = sqrt((u_1 - u_2)**2 + (sigma_1 - sigma_2)**2)
+             
+    @details a distance matrix.
     """
     uid = np.zeros((X.shape[0], X.shape[0]), dtype=np.float64)
     for i in range(X.shape[0]):
@@ -30,13 +42,12 @@ def numba_uid(X, eps=1e-6):
             mu_2 = np.mean(X[j, :])
 
             # Compute covariances (variances because it's univariate) 
-            C_1 = np.var(X[i, :]) + eps
-            C_2 = np.var(X[j, :]) + eps
+            C_1 = np.std(X[i, :]) + eps
+            C_2 = np.std(X[j, :]) + eps
 
-            # Compute FID
-            #uid[i, j] = ((mu_1 - mu_2) ** 2) + (C_1 + C_2 - 2 * np.sqrt(C_1 * C_2))
+            # Compute UID
             uid[i, j] = np.sqrt(((mu_1 - mu_2) ** 2) + ((C_1 - C_2) ** 2))
-    uid = uid + uid.T
+    uid += uid.T
     return uid
 
 
