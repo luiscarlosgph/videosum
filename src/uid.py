@@ -51,7 +51,7 @@ def numba_uid(X, eps=1e-6):
     return uid
 
 
-class FrechetInceptionDistance():
+class InceptionFeatureExtractor():
     def __init__(self, mode: str, device: str = 'cuda'):
         self.mode = mode
         self.device = device
@@ -111,7 +111,7 @@ class FrechetInceptionDistance():
 
     @staticmethod
     def frechet_inception_distance(vec1, vec2):
-        return FrechetInceptionDistance._calculate_frechet_distance(
+        return InceptionFeatureExtractor._calculate_frechet_distance(
             np.mean(vec1), np.cov(vec1), np.mean(vec2), np.cov(vec2))
     
     #@staticmethod
@@ -125,7 +125,7 @@ class FrechetInceptionDistance():
     #    @param[in]  mu_sigma_2  Numpy array of arrays [[means], [covs]] for 
     #                            distribution 2.
     #    """
-    #    return FrechetInceptionDistance._calculate_frechet_distance(
+    #    return InceptionFeatureExtractor._calculate_frechet_distance(
     #        mu_sigma_1[0], mu_sigma_1[1], mu_sigma_2[0], mu_sigma_2[0])
 
     @staticmethod 

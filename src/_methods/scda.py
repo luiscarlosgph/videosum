@@ -70,7 +70,7 @@ def get_key_frames_scda(self, input_path, time_smoothing=0.):
     w, h = reader.size
 
     # Initialise Inception network model
-    model = videosum.FrechetInceptionDistance('tensor')
+    model = videosum.InceptionFeatureExtractor('tensor')
 
     # Collect feature vectors for all the frames
     print('[INFO] Collecting feature vectors for all the frames ...')

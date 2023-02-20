@@ -37,7 +37,7 @@ def get_key_frames_inception(self, input_path, eps=1e-6, time_smoothing=0.):
     w, h = reader.size
 
     # Initialise Inception network model
-    model = videosum.FrechetInceptionDistance('vector')
+    model = videosum.InceptionFeatureExtractor('vector')
 
     # Collect feature vectors for all the frames
     print('[INFO] Collecting feature vectors for all the frames ...')

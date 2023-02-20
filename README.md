@@ -179,7 +179,7 @@ If you have 2D RGB images and you want to obtain a feature vector for them, you 
    im = cv2.imread('test/data/test_time.png', cv2.IMREAD_UNCHANGED)
 
    # Extract latent space spatial feature vector for the image
-   model = videosum.FrechetInceptionDistance('vector')
+   model = videosum.InceptionFeatureExtractor('vector')
    vec = model.get_latent_feature_vector(im)
 
    # Print vector dimensions

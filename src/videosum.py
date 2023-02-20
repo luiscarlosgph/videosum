@@ -312,7 +312,7 @@ class VideoSummariser():
         print("[INFO] Computing FID of the storyboard vs video ...")
 
         # Initialise InceptionV3 model
-        model = videosum.FrechetInceptionDistance('vector')
+        model = videosum.InceptionFeatureExtractor('vector')
 
         # Compute the multivariate Gaussian of the summary
         story_fv = [model.get_latent_feature_vector(im) for im in key_frames]
@@ -335,7 +335,7 @@ class VideoSummariser():
         assert(story_cov.shape == video_cov.shape)
 
         # Compute 2-Wasserstein distance
-        emd = videosum.FrechetInceptionDistance._calculate_frechet_distance(
+        emd = videosum.InceptionFeatureExtractor._calculate_frechet_distance(
             story_mu, story_cov, video_mu, video_cov)
 
         return emd
