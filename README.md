@@ -180,7 +180,8 @@ If you have 2D RGB images and you want to obtain a feature vector for them, you 
 
    # Extract latent space spatial feature vector for the image
    model = videosum.InceptionFeatureExtractor('vector')
-   vec = model.get_latent_feature_vector(im)  # Here you can pass an image (H, W, 3) or a batch of images (B, H, W, 3)
+   vec = model.get_latent_feature_vector(im)  # Here you can pass an image (H, W, 3) 
+                                              # or a batch of images (B, H, W, 3)
 
    # Print vector dimensions
    print(vec)
