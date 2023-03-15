@@ -3,6 +3,22 @@ Description
 Code for the `videosum` Python package. Given a video file, this package produces a single-image storyboard that summarises the video.
 
 
+Citation
+--------
+
+If you use this code in your research, please cite:
+
+```
+@article{GarciaPerazaHerrera2023,
+	author = {Luis C. Garcia-Peraza-Herrera and Sebastien Ourselin and Tom Vercauteren},
+	title = {VideoSum: A Python Library for Surgical Video Summarization},
+ journal = {arXiv preprint},
+	year = {2023}
+}
+```
+<!--journal = {arXiv preprint arXiv:1512.03385},-->
+
+
 Install dependencies
 --------------------
 * Ubuntu/Debian:
