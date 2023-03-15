@@ -12,7 +12,7 @@ If you use this code in your research, please cite:
 @article{GarciaPerazaHerrera2023,
 	author = {Luis C. Garcia-Peraza-Herrera and Sebastien Ourselin and Tom Vercauteren},
 	title = {VideoSum: A Python Library for Surgical Video Summarization},
- journal = {arXiv preprint},
+        journal = {arXiv preprint},
 	year = {2023}
 }
 ```
