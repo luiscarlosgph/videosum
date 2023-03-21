@@ -12,11 +12,10 @@ If you use this code in your research, please cite [the paper](https://arxiv.org
 @article{GarciaPerazaHerrera2023,
 	author = {Luis C. Garcia-Peraza-Herrera and Sebastien Ourselin and Tom Vercauteren},
 	title = {VideoSum: A Python Library for Surgical Video Summarization},
-        journal = {arXiv preprint},
+        journal = {arXiv preprint arXiv:2303.10173},
 	year = {2023}
 }
 ```
-<!--journal = {arXiv preprint arXiv:1512.03385},-->
 
 
 Install dependencies
@@ -25,6 +24,7 @@ Install dependencies
 ```
 $ sudo apt install ffmpeg
 ```
+
 
 Install with pip
 ----------------
