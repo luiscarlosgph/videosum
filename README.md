@@ -6,7 +6,7 @@ Code for the `videosum` Python package. Given a video file, this package produce
 Citation
 --------
 
-If you use this code in your research, please cite [the paper](doc/paper.pdf):
+If you use this code in your research, please cite [the paper](https://arxiv.org/abs/2303.10173):
 
 ```
 @article{GarciaPerazaHerrera2023,
