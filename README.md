@@ -214,7 +214,7 @@ If you have 2D RGB images and you want to obtain a feature vector for them, you 
 
 Author
 ------
-Luis Carlos Garcia Peraza Herrera (luiscarlos.gph@gmail.com), 2022-2023.
+Luis Carlos Garcia Peraza Herrera (luiscarlos.gph@gmail.com), 2022-present.
 
 
 License
