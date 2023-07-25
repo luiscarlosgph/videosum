@@ -15,7 +15,7 @@ setuptools.setup(name='videosum',
     author='Luis C. Garcia-Peraza Herrera',
     author_email='luiscarlos.gph@gmail.com',
     license='MIT License',
-    url='https://github.com/luiscarlosgph/endoseg',
+    url='https://github.com/luiscarlosgph/videosum',
     packages=[
         'videosum',
         'videosum._methods',
