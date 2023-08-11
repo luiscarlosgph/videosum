@@ -30,7 +30,8 @@ Install dependencies
    * In Ubuntu/Debian: `$ sudo apt install swig` 
    * In Mac: `$ brew install swig` 
 
-* Python packages: `$ python3 -m pip install numpy cython numba --user`
+* [faiss-gpu](https://github.com/facebookresearch/faiss): 
+   * TODO 
 
 
 Install with pip
