@@ -18,7 +18,7 @@ If you use this code in your research, please cite [the paper](https://arxiv.org
 ```
 
 
-Install dependencies
+Install dependencies (you cannot skip this step)
 --------------------
 
 * [ffmpeg](https://www.ffmpeg.org):
