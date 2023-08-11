@@ -30,7 +30,7 @@ Use the package from a Docker container
 
 If you want to quickly try the package, this is the easiest way, provided that you Docker installed with GPU support. If you do not have it, you can follow [this](https://github.com/luiscarlosgph/how-to/tree/main/docker) tutorial to install Docker with GPU support.
 
-[TODO]
+[TODO: coming soon]
 
 Alternatively, you can install the package from `pip` or from source, following the next sections of this README.
 
