@@ -30,7 +30,7 @@ Install dependencies
    * In Ubuntu/Debian: `$ sudo apt install swig` 
    * In Mac: `$ brew install swig` 
 
-* Python packages: `$ python3 -m pip install numpy cython --user`
+* Python packages: `$ python3 -m pip install numpy cython numba --user`
 
 
 Install with pip
