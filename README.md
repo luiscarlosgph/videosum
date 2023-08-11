@@ -47,6 +47,7 @@ If you want to quickly try the package, this is the easiest way, provided that y
 
    ```bash
    $ docker run --name videosum --runtime nvidia luiscarlosgph/videosum:latest &
+   $ docker exec -it videosum /bin/bash
    ```
 
 Alternatively, you can install the package from `pip` or from source, following the next sections of this README.
