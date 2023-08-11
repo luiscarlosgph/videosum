@@ -49,6 +49,15 @@ RUN /bin/zsh -c "source $HOME/.zshrc && pyenv global $PYTHON_VERSION"
 # Install ffmpeg
 RUN DEBIAN_FRONTEND=noninteractive apt install -y ffmpeg
 
+# Install swig
+RUN DEBIAN_FRONTEND=noninteractive apt install -y swig
+
+# Install Intel MKL
+RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB && gpg --dearmor GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB && mv GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB.gpg /usr/share/keyrings/oneapi-archive-keyring.gpg
+RUN echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" > /etc/apt/sources.list.d/oneAPI.list
+RUN apt update
+RUN apt install intel-basekit
+
 # Start services and run the user-specified command
 ADD files/entrypoint.sh /opt/entrypoint.sh
 RUN chmod +x /opt/entrypoint.sh
