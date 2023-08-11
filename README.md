@@ -28,12 +28,12 @@ Supported platforms
 Install dependencies (you cannot skip this step)
 --------------------
 
-* [ffmpeg](https://www.ffmpeg.org): in Ubuntu/Debian run `$ sudo apt install ffmpeg`
+* [ffmpeg](https://www.ffmpeg.org): in Ubuntu/Debian run `$ sudo apt install ffmpeg` to install it.
    <!-- * In Mac: `$ brew install ffmpeg`
    * For other platforms check [this link](https://www.ffmpeg.org/download.html).
   -->
 
-* [Swig](https://www.swig.org): in Ubuntu/Debian run `$ sudo apt install swig`
+* [swig](https://www.swig.org): in Ubuntu/Debian run `$ sudo apt install swig` to install it.
    <!-- * In Mac: `$ brew install swig` -->
 
 * [faiss-gpu](https://github.com/facebookresearch/faiss): 
