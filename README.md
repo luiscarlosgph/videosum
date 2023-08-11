@@ -40,7 +40,7 @@ Install dependencies (you cannot skip this step)
 * [faiss-gpu](https://github.com/facebookresearch/faiss): 
    * The requirements are:
       * A C++17 compiler (with support for OpenMP version 2 or higher):
-         * `g++` supports C++17 since version 7, and OpenMP 4.5 is fully supported for C and C++ since `g++` version 6, so you should have a `g++` version >= 7.
+         * `g++` supports C++17 since version 7 (which also supports OpenMP 4.5), so you should have a `g++` version >= 7.
          * In Ubuntu `22.04`, the `g++` version is `11.4.0`, which complies with both requirements, to install it run: `$ sudo apt install build-essential cmake`
       * A BLAS implementation (use Intel MKL for best performance), see [this]() tutorial on how to install it.
       * CUDA toolkit, see [this] tutorial on how to install it.
