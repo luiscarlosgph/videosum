@@ -40,12 +40,12 @@ Install dependencies
 
 **WARNING:** if you are not using the videosum Python package via Docker (as explained in the previous section), but you are planning to install it in your natively in your system, you must install the dependencies as explained in this section, you cannot skip this step.
 
-* [ffmpeg](https://www.ffmpeg.org): in Ubuntu/Debian run `$ sudo apt install ffmpeg` to install it.
+* [ffmpeg](https://www.ffmpeg.org): in Ubuntu/Debian, run `$ sudo apt install ffmpeg` to install it.
    <!-- * In Mac: `$ brew install ffmpeg`
    * For other platforms check [this link](https://www.ffmpeg.org/download.html).
   -->
 
-* [swig](https://www.swig.org): in Ubuntu/Debian run `$ sudo apt install swig` to install it.
+* [swig](https://www.swig.org): in Ubuntu/Debian, run `$ sudo apt install swig` to install it.
    <!-- * In Mac: `$ brew install swig` -->
 
 * [faiss-gpu](https://github.com/facebookresearch/faiss): follow [this](https://github.com/luiscarlosgph/how-to/tree/main/faiss) tutorial to install it.
