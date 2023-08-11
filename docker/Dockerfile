@@ -46,6 +46,9 @@ RUN echo 'eval "$(pyenv init --path)"' >> $HOME/.zshrc
 RUN /bin/zsh -c "source $HOME/.zshrc && pyenv install $PYTHON_VERSION"
 RUN /bin/zsh -c "source $HOME/.zshrc && pyenv global $PYTHON_VERSION"
 
+# Install ffmpeg
+RUN DEBIAN_FRONTEND=noninteractive apt install -y ffmpeg
+
 # Start services and run the user-specified command
 ADD files/entrypoint.sh /opt/entrypoint.sh
 RUN chmod +x /opt/entrypoint.sh
