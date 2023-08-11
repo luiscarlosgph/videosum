@@ -23,6 +23,7 @@ Install dependencies
 * Ubuntu/Debian:
 ```
 $ sudo apt install ffmpeg
+$ python3 -m pip install numpy cython --user
 ```
 
 
