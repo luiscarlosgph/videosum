@@ -25,8 +25,16 @@ Supported platforms
 * Python >= 3.10
 
 
-Install dependencies (you cannot skip this step)
---------------------
+Use the package from a Docker container
+---------------------------------------
+
+If you want to quickly try the package, this is the easiest way, provided that you Docker installed with GPU support. If you do not have it, you can follow [this](https://github.com/luiscarlosgph/how-to/tree/main/docker) tutorial to install Docker with GPU support.
+
+TODO
+
+
+Install dependencies (you cannot skip this step if you )
+------------------------------------------------
 
 * [ffmpeg](https://www.ffmpeg.org): in Ubuntu/Debian run `$ sudo apt install ffmpeg` to install it.
    <!-- * In Mac: `$ brew install ffmpeg`
