@@ -38,7 +38,7 @@ Alternatively, you can install the package from `pip` or from source, following 
 Install dependencies 
 --------------------
 
-**If you are not using the package via Docker, as explained in the previous section, but you are install it in your system, you cannot skip this step.**
+**If you are not using the videosum Python package via Docker (as explained in the previous section), but you are planning to install it in your natively in your system, you must install the dependencies as explained in this section, you cannot skip this step.**
 
 * [ffmpeg](https://www.ffmpeg.org): in Ubuntu/Debian run `$ sudo apt install ffmpeg` to install it.
    <!-- * In Mac: `$ brew install ffmpeg`
