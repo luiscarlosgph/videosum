@@ -20,11 +20,13 @@ If you use this code in your research, please cite [the paper](https://arxiv.org
 
 Install dependencies
 --------------------
-* Ubuntu/Debian:
-```
-$ sudo apt install ffmpeg
-$ python3 -m pip install numpy cython --user
-```
+
+* [ffmpeg](https://www.ffmpeg.org):
+   * In Ubuntu/Debian: `$ sudo apt install ffmpeg`
+   * In Mac: `$ brew install ffmpeg`
+   * For other platforms check [this link](https://www.ffmpeg.org/download.html).
+
+* Python packages: `$ python3 -m pip install numpy cython --user`
 
 
 Install with pip
