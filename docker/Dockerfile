@@ -39,12 +39,12 @@ RUN echo 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64:${LD_LIBRARY_PATH}' >> $H
 
 # Install Python's pyenv environment
 ENV PYTHON_VERSION="3.10"
-RUN sudo -u $USER git clone https://github.com/pyenv/pyenv.git $HOME/.pyenv
-RUN sudo -u $USER echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.zshrc
-RUN sudo -u $USER echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.zshrc
-RUN sudo -u $USER echo 'eval "$(pyenv init --path)"' >> $HOME/.zshrc
-RUN sudo -u $USER /bin/zsh -c "source $HOME/.zshrc && pyenv install $PYTHON_VERSION"
-RUN sudo -u $USER /bin/zsh -c "source $HOME/.zshrc && pyenv global $PYTHON_VERSION"
+RUN git clone https://github.com/pyenv/pyenv.git $HOME/.pyenv
+RUN echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.zshrc
+RUN echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.zshrc
+RUN echo 'eval "$(pyenv init --path)"' >> $HOME/.zshrc
+RUN /bin/zsh -c "source $HOME/.zshrc && pyenv install $PYTHON_VERSION"
+RUN /bin/zsh -c "source $HOME/.zshrc && pyenv global $PYTHON_VERSION"
 
 # Start services and run the user-specified command
 ADD files/entrypoint.sh /opt/entrypoint.sh
