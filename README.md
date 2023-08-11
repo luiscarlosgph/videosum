@@ -51,7 +51,7 @@ If you want to quickly try the package, this is the easiest way, provided that y
 
 4. Get a terminal on the container:
    ```bash
-   $ docker exec -it videosum /bin/bash
+   $ docker exec -it videosum /bin/zsh
    ```
 
 Alternatively, you can install the package from `pip` or from source, following the next sections of this README.
