@@ -35,8 +35,10 @@ If you want to quickly try the package, this is the easiest way, provided that y
 Alternatively, you can install the package from `pip` or from source, following the next sections of this README.
 
 
-Install dependencies (if you are not using the Docker container, you cannot skip this step)
--------------------------------------------------------------------------------------------
+Install dependencies 
+--------------------
+
+**If you are not using the package via Docker, as explained in the previous section, but you are install it in your system, you cannot skip this step.**
 
 * [ffmpeg](https://www.ffmpeg.org): in Ubuntu/Debian run `$ sudo apt install ffmpeg` to install it.
    <!-- * In Mac: `$ brew install ffmpeg`
