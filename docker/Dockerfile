@@ -1,6 +1,6 @@
 # @brief  Image with support for: CUDA runtime and pyenv.
 # @author Luis C. Garcia Peraza Herrera (luiscarlos.gph@gmail.com).
-# @date   27 September 2022.
+# @date   11 Aug 2023.
 
 # Image info
 FROM nvidia/cuda:10.2-cudnn8-runtime
