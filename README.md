@@ -26,6 +26,10 @@ Install dependencies
    * In Mac: `$ brew install ffmpeg`
    * For other platforms check [this link](https://www.ffmpeg.org/download.html).
 
+* [Swig](https://www.swig.org):
+   * In Ubuntu/Debian: `$ sudo apt install swig` 
+   * In Mac: `$ brew install swig` 
+
 * Python packages: `$ python3 -m pip install numpy cython --user`
 
 
