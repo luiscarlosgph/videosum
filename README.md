@@ -34,12 +34,12 @@ If you want to quickly try the package, this is the easiest way, provided that y
 
    ```bash
    $ git clone https://github.com/luiscarlosgph/videosum.git
+   $ cd videosum/docker
    ```
    
 2. Build Docker image:
 
    ```bash
-   $ cd videosum/docker
    $ docker build -t luiscarlosgph/videosum:latest .
    ```
    
