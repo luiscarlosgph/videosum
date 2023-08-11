@@ -21,7 +21,7 @@ If you use this code in your research, please cite [the paper](https://arxiv.org
 Supported platforms
 -------------------
 
-* Ubuntu >= 22.04
+* Ubuntu >= 20.04
 * Python >= 3.10
 
 
