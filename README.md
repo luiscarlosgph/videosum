@@ -30,12 +30,12 @@ Install dependencies (you cannot skip this step)
 
 * [ffmpeg](https://www.ffmpeg.org):
    * In Ubuntu/Debian: `$ sudo apt install ffmpeg`
-   * In Mac: `$ brew install ffmpeg`
+   <!-- * In Mac: `$ brew install ffmpeg` -->
    * For other platforms check [this link](https://www.ffmpeg.org/download.html).
 
 * [Swig](https://www.swig.org):
    * In Ubuntu/Debian: `$ sudo apt install swig` 
-   * In Mac: `$ brew install swig` 
+   <!-- * In Mac: `$ brew install swig` -->
 
 * [faiss-gpu](https://github.com/facebookresearch/faiss): 
    * The requirements are:
