@@ -56,7 +56,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt install -y swig
 RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB && gpg --dearmor GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB && mv GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB.gpg /usr/share/keyrings/oneapi-archive-keyring.gpg
 RUN echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" > /etc/apt/sources.list.d/oneAPI.list
 RUN apt update
-RUN apt install intel-basekit
+RUN DEBIAN_FRONTEND=noninteractive apt install -y intel-basekit
 
 # Start services and run the user-specified command
 ADD files/entrypoint.sh /opt/entrypoint.sh
