@@ -30,11 +30,24 @@ Use the package from a Docker container
 
 If you want to quickly try the package, this is the easiest way, provided that you Docker installed with GPU support. If you do not have it, you can follow [this](https://github.com/luiscarlosgph/how-to/tree/main/docker) tutorial to install Docker with GPU support.
 
-```bash
-$ git clone https://github.com/luiscarlosgph/videosum.git
-$ cd videosum/docker
-$ docker build -t luiscarlosgph/videosum:latest .
-```
+1. Download repository:
+
+   ```bash
+   $ git clone https://github.com/luiscarlosgph/videosum.git
+   ```
+   
+2. Build Docker image:
+
+   ```bash
+   $ cd videosum/docker
+   $ docker build -t luiscarlosgph/videosum:latest .
+   ```
+   
+$ Run `videosum` Docker container:
+
+   ```bash
+   docker run --name videosum --runtime nvidia luiscarlosgph/videosum:latest &
+   ```
 
 Alternatively, you can install the package from `pip` or from source, following the next sections of this README.
 
