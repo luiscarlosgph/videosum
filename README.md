@@ -43,10 +43,10 @@ If you want to quickly try the package, this is the easiest way, provided that y
    $ docker build -t luiscarlosgph/videosum:latest .
    ```
    
-$ Run `videosum` Docker container:
+3. Run `videosum` Docker container:
 
    ```bash
-   docker run --name videosum --runtime nvidia luiscarlosgph/videosum:latest &
+   $ docker run --name videosum --runtime nvidia luiscarlosgph/videosum:latest &
    ```
 
 Alternatively, you can install the package from `pip` or from source, following the next sections of this README.
