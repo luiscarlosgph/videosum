@@ -15,7 +15,7 @@ RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machi
 # Install commonly used packages
 RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt upgrade -y
-RUN DEBIAN_FRONTEND=noninteractive apt install -y apt-utils aptitude sudo vim zsh wget curl git net-tools tmux locales build-essential cmake build-essential zlib1g-dev libbz2-dev libreadline-dev libssl-dev libsqlite3-dev libffi-dev liblzma-dev tk-dev ncurses-dev
+RUN DEBIAN_FRONTEND=noninteractive apt install -y apt-utils aptitude sudo vim zsh wget curl git net-tools tmux locales build-essential build-essential zlib1g-dev libbz2-dev libreadline-dev libssl-dev libsqlite3-dev libffi-dev liblzma-dev tk-dev ncurses-dev
 
 # Install locales
 RUN locale-gen en_US.UTF-8
@@ -57,6 +57,14 @@ RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCT
 RUN echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" > /etc/apt/sources.list.d/oneAPI.list
 RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install -y intel-basekit
+
+# Install last version of CMake
+ENV CMAKE_VERSION="v3.27.2"
+RUN DEBIAN_FRONTEND=noninteractive apt remove --purge --auto-remove -y cmake
+RUN git clone https://github.com/Kitware/CMake.git && cd CMake && git checkout $CMAKE_VERSION && ./bootstrap && make -j && make install
+
+# Install faiss
+# TODO
 
 # Start services and run the user-specified command
 ADD files/entrypoint.sh /opt/entrypoint.sh
