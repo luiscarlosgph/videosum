@@ -22,6 +22,7 @@ Supported platforms
 -------------------
 
 * Ubuntu >= 20.04
+* CUDA 11.4
 * Python >= 3.10
 
 
