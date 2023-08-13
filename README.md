@@ -71,7 +71,7 @@ Install dependencies
 * [swig](https://www.swig.org): in Ubuntu/Debian, run `$ sudo apt install swig` to install it.
    <!-- * In Mac: `$ brew install swig` -->
 
-* [faiss-gpu](https://github.com/facebookresearch/faiss): there are [several](https://github.com/facebookresearch/faiss/blob/main/INSTALL.md) ways to install this library. In my system I do it like [this](https://github.com/luiscarlosgph/how-to/tree/main/faiss).
+* [faiss-gpu](https://github.com/facebookresearch/faiss): there are [several](https://github.com/facebookresearch/faiss/blob/main/INSTALL.md) ways to install this library. In my system, I do it like [this](https://github.com/luiscarlosgph/how-to/tree/main/faiss).
 
 
 Install with pip
