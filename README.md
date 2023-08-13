@@ -46,7 +46,7 @@ If you want to quickly try the package, this is the easiest way, provided that y
 3. Run `videosum` Docker container:
 
    ```bash
-   $ docker run --name videosum --runtime nvidia luiscarlosgph/videosum:latest &
+   $ docker run --name videosum --runtime nvidia --user $(id -u):$(id -g) luiscarlosgph/videosum:latest &
    ```
 
 4. Get a terminal on the container:
