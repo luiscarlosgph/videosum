@@ -40,7 +40,7 @@ If you want to quickly try the package, this is the easiest way, provided that y
 2. Build Docker image:
 
    ```bash
-   $ docker build -t luiscarlosgph/videosum:latest .
+   $ docker build --build-arg USER=$(whoami) -t luiscarlosgph/videosum:latest .
    ```
    
 3. Run `videosum` Docker container:
