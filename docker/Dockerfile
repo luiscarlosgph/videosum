@@ -23,7 +23,7 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-# Add user 'docker' with password 'docker' and give sudo powers
+# Set user environment variables
 ENV USER="root"
 ENV HOME="/root"
 
@@ -33,7 +33,7 @@ RUN chmod +x $HOME/install.sh
 RUN $HOME/install.sh --unattended
 RUN sed -i 's/robbyrussell/terminalparty/g' $HOME/.zshrc
 
-# Add CUDA environment variables to the 'docker' user
+# Point PATH and LD_LIBRARY_PATH to the CUDA directories
 RUN echo 'export PATH=/usr/local/cuda/bin:${PATH}' >> $HOME/.zshrc
 RUN echo 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64:${LD_LIBRARY_PATH}' >> $HOME/.zshrc
 
@@ -63,16 +63,20 @@ ENV CMAKE_VERSION="v3.27.2"
 RUN DEBIAN_FRONTEND=noninteractive apt remove --purge --auto-remove -y cmake
 RUN cd /opt && git clone https://github.com/Kitware/CMake.git && cd CMake && git checkout $CMAKE_VERSION && ./bootstrap && make -j && make install
 
-# Install faiss
+# Install numpy with MKL support
+RUN cd /opt && git clone https://github.com/numpy/numpy.git
+
+# TODO: this line below has to be removed and a numpy linked to MKL needs to be installed
 RUN /bin/zsh -c "source $HOME/.zshrc && pip install numpy"
-RUN apt remove -y --purge --auto-remove cmake
+
+# Install faiss
 RUN cd /opt && git clone https://github.com/facebookresearch/faiss.git
 RUN cd /opt/faiss && git checkout v1.7.4 && mkdir build 
-RUN cd /opt/faiss/build && cmake -DFAISS_ENABLE_GPU=ON -DFAISS_ENABLE_PYTHON=ON -DBUILD_TESTING=ON -DBUILD_SHARED_LIBS=ON -DFAISS_ENABLE_C_API=ON -DCMAKE_BUILD_TYPE=Release -DFAISS_OPT_LEVEL=avx2 -DBLA_VENDOR=Intel10_64_dyn -DBLA_VENDOR=Intel10_64_dyn -DMKL_LIBRARIES="-l/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.so -l/opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_sequential.so" -DCUDAToolkit_ROOT=/usr/local/cuda -DPython_EXECUTABLE=/root/.pyenv/shims/python -DPython_INCLUDE_DIRS=/root/.pyenv/versions/3.10.12/include -DPython_LIBRARIES=/root/.pyenv/versions/3.10.12/lib ..
+RUN cd /opt/faiss/build && cmake -DFAISS_ENABLE_GPU=ON -DFAISS_ENABLE_PYTHON=ON -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON -DFAISS_ENABLE_C_API=ON -DCMAKE_BUILD_TYPE=Release -DFAISS_OPT_LEVEL=avx2 -DBLA_VENDOR=Intel10_64_dyn -DMKL_LIBRARIES="-L/opt/intel/oneapi/mkl/latest/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core" -DCUDAToolkit_ROOT=/usr/local/cuda -DPython_EXECUTABLE=$HOME/.pyenv/shims/python -DPython_INCLUDE_DIRS=$HOME/.pyenv/versions/3.10.12/include -DPython_LIBRARIES=$HOME/.pyenv/versions/3.10.12/lib ..
 RUN cd /opt/faiss/build && make -j faiss
 RUN cd /opt/faiss/build && make -j swigfaiss 
-#RUN cd /opt/faiss/build && make install
-#RUN cd /opt/faiss/build/faiss/python && python setup.py install
+RUN cd /opt/faiss/build && make install
+RUN cd /opt/faiss/build/faiss/python && python setup.py install
 
 # Start services and run the user-specified command
 ADD files/entrypoint.sh /opt/entrypoint.sh
