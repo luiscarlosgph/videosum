@@ -40,16 +40,19 @@ If you want to quickly try the package, this is the easiest way, provided that y
 2. Build Docker image:
 
    ```bash
-   $ docker build -t luiscarlosgph/videosum:latest .
+   $ docker build --build-arg USER=$(whoami) -t luiscarlosgph/videosum:latest .
    ```
    
 3. Run `videosum` Docker container:
 
    ```bash
-   $ docker run --name videosum --runtime nvidia --user $(id -u):$(id -g) luiscarlosgph/videosum:latest &
+   $ docker run --volume <path_outside_docker>:/mnt/videos --name videosum --runtime nvidia --user $(id -u):$(id -g) luiscarlosgph/videosum:latest &
    ```
+   
+   `<path_outside_docker>` should be replaced by the directory where you have the videos that you want to summarise.
+   Inside the Docker container, you will find the videos in `/mnt/videos`.
 
-4. Get a terminal on the container:
+5. Get a terminal on the container:
    ```bash
    $ docker exec -it videosum /bin/zsh
    ```
@@ -71,6 +74,8 @@ Install dependencies
    <!-- * In Mac: `$ brew install swig` -->
 
 * [faiss-gpu](https://github.com/facebookresearch/faiss): there are [several](https://github.com/facebookresearch/faiss/blob/main/INSTALL.md) ways to install this library. I do it like [this](https://github.com/luiscarlosgph/how-to/tree/main/faiss).
+
+A good way to see all the commands that need to be executed to install all the dependencies is by checking the [Dockerfile](https://github.com/luiscarlosgph/videosum/blob/main/docker/Dockerfile).
 
 
 Install with pip
