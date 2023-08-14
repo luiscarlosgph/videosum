@@ -29,6 +29,7 @@ Use the package from a Docker container
 ---------------------------------------
 
 If you want to quickly try the package, this is the easiest way, provided that you Docker installed with GPU support. If you do not have it, you can follow [this](https://github.com/luiscarlosgph/how-to/tree/main/docker) tutorial to install Docker with GPU support.
+Alternatively, you can install the `videosum` package from `pip` or from source, following the next sections of this README.
 
 1. Download repository:
 
@@ -46,19 +47,23 @@ If you want to quickly try the package, this is the easiest way, provided that y
 3. Run `videosum` Docker container:
 
    ```bash
-   $ docker run --volume <path_outside_docker>:/mnt/videos --name videosum --runtime nvidia --user $(id -u):$(id -g) luiscarlosgph/videosum:latest &
+   $ docker run --volume $HOME:/mnt/user_home --name videosum --runtime nvidia --user $(id -u):$(id -g) luiscarlosgph/videosum:latest &
    ```
    
-   `<path_outside_docker>` should be replaced by the directory where you have the videos that you want to summarise.
-   Inside the Docker container, you will find the videos in `/mnt/videos`.
+   The `--volume` argument mounts your home directory (outside the container) into the directory `/mnt/user_home` inside the container.
+   This is so that you can access the videos that need to be summarised from within the container, and also save the output storyboards
+   in a folder that is accessible from outside the Docker container. 
 
 5. Get a terminal on the container:
    ```bash
    $ docker exec -it videosum /bin/zsh
    ```
 
-Alternatively, you can install the package from `pip` or from source, following the next sections of this README.
-
+6. Summarise the test video:
+   ```bash
+   $ python -m videosum.run --input /opt/videosum/test/data/video.mp4 --output /mnt/user_home/storyboard.jpg --nframes 100 --height 1080 --width 1920 --algo inception
+   ```
+   After running this command you should have the summary of the test video saved as `storyboard.jpg` in you home directory.
 
 Install dependencies 
 --------------------
