@@ -24,18 +24,15 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 # Set user environment variables
-ENV USER="root"
-ENV HOME="/root"
+ARG USER
+ENV HOME="/home/$USER"
+RUN mkdir $HOME
 
 # Intall oh-my-zsh so we have a nice terminal
 RUN wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O $HOME/install.sh
 RUN chmod +x $HOME/install.sh 
 RUN $HOME/install.sh --unattended
 RUN sed -i 's/robbyrussell/terminalparty/g' $HOME/.zshrc
-
-# Point PATH and LD_LIBRARY_PATH to the CUDA directories
-RUN echo 'export PATH=/usr/local/cuda/bin:${PATH}' >> $HOME/.zshrc
-RUN echo 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64:${LD_LIBRARY_PATH}' >> $HOME/.zshrc
 
 # Install Python's pyenv environment
 ENV PYTHON_VERSION="3.10"
@@ -58,25 +55,37 @@ RUN echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https:/
 RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install -y intel-basekit
 
+# Point PATH and LD_LIBRARY_PATH to the CUDA directories
+RUN echo 'export PATH=/usr/local/cuda/bin:${PATH}' >> $HOME/.zshrc
+RUN echo 'export LD_LIBRARY_PATH=/opt/intel/oneapi/mkl/latest/lib/intel64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}' >> $HOME/.zshrc
+
 # Install last version of CMake
 ENV CMAKE_VERSION="v3.27.2"
 RUN DEBIAN_FRONTEND=noninteractive apt remove --purge --auto-remove -y cmake
 RUN cd /opt && git clone https://github.com/Kitware/CMake.git && cd CMake && git checkout $CMAKE_VERSION && ./bootstrap && make -j && make install
 
 # Install numpy with MKL support
+ENV NUMPY_VERSION="v1.21.5"
 RUN cd /opt && git clone https://github.com/numpy/numpy.git
-
-# TODO: this line below has to be removed and a numpy linked to MKL needs to be installed
-RUN /bin/zsh -c "source $HOME/.zshrc && pip install numpy"
+RUN cd /opt/numpy && git checkout $NUMPY_VERSION
+RUN cd /opt/numpy && echo "[mkl]" >> site.cfg
+RUN cd /opt/numpy && echo "library_dirs = /opt/intel/oneapi/mkl/latest/lib/intel64" >> site.cfg
+RUN cd /opt/numpy && echo "include_dirs = /opt/intel/oneapi/mkl/latest/include" >> site.cfg
+RUN cd /opt/numpy && echo "libraries = mkl_rt" >> site.cfg
+RUN /bin/zsh -c "source $HOME/.zshrc && cd /opt/numpy && pip install ."
 
 # Install faiss
 RUN cd /opt && git clone https://github.com/facebookresearch/faiss.git
 RUN cd /opt/faiss && git checkout v1.7.4 && mkdir build 
-RUN cd /opt/faiss/build && cmake -DFAISS_ENABLE_GPU=ON -DFAISS_ENABLE_PYTHON=ON -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON -DFAISS_ENABLE_C_API=ON -DCMAKE_BUILD_TYPE=Release -DFAISS_OPT_LEVEL=avx2 -DBLA_VENDOR=Intel10_64_dyn -DMKL_LIBRARIES="-L/opt/intel/oneapi/mkl/latest/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core" -DCUDAToolkit_ROOT=/usr/local/cuda -DPython_EXECUTABLE=$HOME/.pyenv/shims/python -DPython_INCLUDE_DIRS=$HOME/.pyenv/versions/3.10.12/include -DPython_LIBRARIES=$HOME/.pyenv/versions/3.10.12/lib ..
+RUN /bin/zsh -c "source $HOME/.zshrc && cd /opt/faiss/build && cmake -DFAISS_ENABLE_GPU=ON -DFAISS_ENABLE_PYTHON=ON -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON -DFAISS_ENABLE_C_API=ON -DCMAKE_BUILD_TYPE=Release -DFAISS_OPT_LEVEL=avx2 -DBLA_VENDOR=Intel10_64_dyn -DMKL_LIBRARIES='-L/opt/intel/oneapi/mkl/latest/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core' -DCUDAToolkit_ROOT=/usr/local/cuda -DPython_EXECUTABLE=$HOME/.pyenv/shims/python -DPython_INCLUDE_DIRS=$HOME/.pyenv/versions/3.10.12/include -DPython_LIBRARIES=$HOME/.pyenv/versions/3.10.12/lib .."
 RUN cd /opt/faiss/build && make -j faiss
 RUN cd /opt/faiss/build && make -j swigfaiss 
 RUN cd /opt/faiss/build && make install
-RUN cd /opt/faiss/build/faiss/python && python setup.py install
+RUN /bin/zsh -c "source $HOME/.zshrc && cd /opt/faiss/build/faiss/python && python setup.py install"
+
+# Install videosum
+RUN cd /opt && git clone https://github.com/luiscarlosgph/videosum.git
+RUN /bin/zsh -c "source $HOME/.zshrc && cd /opt/videosum && python setup.py install" 
 
 # Start services and run the user-specified command
 ADD files/entrypoint.sh /opt/entrypoint.sh
