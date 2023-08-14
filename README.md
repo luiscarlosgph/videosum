@@ -49,7 +49,8 @@ If you want to quickly try the package, this is the easiest way, provided that y
    $ docker run --volume <path_outside_docker>:/mnt/videos --name videosum --runtime nvidia --user $(id -u):$(id -g) luiscarlosgph/videosum:latest &
    ```
    
-   `<path_outside_docker>` should be replaced by the directory where you have the videos that you want to summarise. The directory will be mounted in `/mnt/videos` inside the Docker container.
+   `<path_outside_docker>` should be replaced by the directory where you have the videos that you want to summarise.
+   Inside the Docker container, you will find the videos in `/mnt/videos`.
 
 5. Get a terminal on the container:
    ```bash
