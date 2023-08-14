@@ -75,6 +75,8 @@ Install dependencies
 
 * [faiss-gpu](https://github.com/facebookresearch/faiss): there are [several](https://github.com/facebookresearch/faiss/blob/main/INSTALL.md) ways to install this library. I do it like [this](https://github.com/luiscarlosgph/how-to/tree/main/faiss).
 
+A good way to see all the commands that need to be executed to install all the dependencies is by checking the [Dockerfile](https://github.com/luiscarlosgph/videosum/blob/main/docker/Dockerfile).
+
 
 Install with pip
 ----------------
