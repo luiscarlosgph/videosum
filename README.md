@@ -41,7 +41,7 @@ Alternatively, you can install the `videosum` package from `pip` or from source,
 2. Build Docker image:
 
    ```bash
-   $ docker build --build-arg USER=$(whoami) -t luiscarlosgph/videosum:latest .
+   $ docker build --build-arg USER=$(whoami) --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t luiscarlosgph/videosum:latest .
    ```
    
 3. Run `videosum` Docker container:
