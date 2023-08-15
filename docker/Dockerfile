@@ -15,7 +15,7 @@ RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machi
 # Install commonly used packages
 RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt upgrade -y
-RUN DEBIAN_FRONTEND=noninteractive apt install -y apt-utils aptitude sudo vim zsh wget curl git net-tools tmux locales build-essential build-essential zlib1g-dev libbz2-dev libreadline-dev libssl-dev libsqlite3-dev libffi-dev liblzma-dev tk-dev ncurses-dev
+RUN DEBIAN_FRONTEND=noninteractive apt install -y apt-utils aptitude sudo vim zsh wget curl git net-tools tmux locales build-essential zlib1g-dev libbz2-dev libreadline-dev libssl-dev libsqlite3-dev libffi-dev liblzma-dev tk-dev ncurses-dev
 
 # Install locales
 RUN locale-gen en_US.UTF-8
@@ -40,7 +40,7 @@ RUN sudo -u $USER $HOME/install.sh --unattended
 RUN sudo -u $USER sed -i 's/robbyrussell/terminalparty/g' $HOME/.zshrc
 
 # Install Python's pyenv environment
-ENV PYTHON_VERSION="3.10"
+ENV PYTHON_VERSION="3.10.12"
 RUN sudo -u $USER git clone https://github.com/pyenv/pyenv.git $HOME/.pyenv
 RUN sudo -u $USER echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.zshrc
 RUN sudo -u $USER echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.zshrc
@@ -77,13 +77,13 @@ RUN cd /opt/numpy && echo "[mkl]" >> site.cfg
 RUN cd /opt/numpy && echo "library_dirs = /opt/intel/oneapi/mkl/latest/lib/intel64" >> site.cfg
 RUN cd /opt/numpy && echo "include_dirs = /opt/intel/oneapi/mkl/latest/include" >> site.cfg
 RUN cd /opt/numpy && echo "libraries = mkl_rt" >> site.cfg
-RUN /bin/zsh -c "source $HOME/.zshrc && cd /opt/numpy && pip install ."
+RUN sudo -u $USER /bin/zsh -c "source $HOME/.zshrc && cd /opt/numpy && pip install ."
 
 # Install faiss
 ENV FAISS_VERSION="v1.7.4"
 RUN cd /opt && git clone https://github.com/facebookresearch/faiss.git
 RUN cd /opt/faiss && git checkout $FAISS_VERSION && mkdir build 
-RUN /bin/zsh -c "source $HOME/.zshrc && cd /opt/faiss/build && cmake -DFAISS_ENABLE_GPU=ON -DFAISS_ENABLE_PYTHON=ON -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON -DFAISS_ENABLE_C_API=ON -DCMAKE_BUILD_TYPE=Release -DFAISS_OPT_LEVEL=avx2 -DBLA_VENDOR=Intel10_64_dyn -DMKL_LIBRARIES='-L/opt/intel/oneapi/mkl/latest/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core' -DCUDAToolkit_ROOT=/usr/local/cuda -DPython_EXECUTABLE=$HOME/.pyenv/shims/python -DPython_INCLUDE_DIRS=$HOME/.pyenv/versions/3.10.12/include -DPython_LIBRARIES=$HOME/.pyenv/versions/3.10.12/lib .."
+RUN /bin/zsh -c "source $HOME/.zshrc && cd /opt/faiss/build && cmake -DFAISS_ENABLE_GPU=ON -DFAISS_ENABLE_PYTHON=ON -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON -DFAISS_ENABLE_C_API=ON -DCMAKE_BUILD_TYPE=Release -DFAISS_OPT_LEVEL=avx2 -DBLA_VENDOR=Intel10_64_dyn -DMKL_LIBRARIES='-L/opt/intel/oneapi/mkl/latest/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core' -DCUDAToolkit_ROOT=/usr/local/cuda -DPython_EXECUTABLE=$HOME/.pyenv/shims/python -DPython_INCLUDE_DIRS=$HOME/.pyenv/versions/$PYTHON_VERSION/include -DPython_LIBRARIES=$HOME/.pyenv/versions/$PYTHON_VERSION/lib .."
 RUN cd /opt/faiss/build && make -j faiss
 RUN cd /opt/faiss/build && make -j swigfaiss 
 RUN cd /opt/faiss/build && make install
