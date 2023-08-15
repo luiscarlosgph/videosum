@@ -47,7 +47,7 @@ Alternatively, you can install the `videosum` package from `pip` or from source,
 3. Run `videosum` Docker container:
 
    ```bash
-   $ docker run --volume $HOME:/mnt/user_home --name videosum --runtime nvidia --user $(id -u):$(id -g) luiscarlosgph/videosum:latest &
+   $ docker run --volume $HOME:/mnt/user_home --name videosum --runtime nvidia luiscarlosgph/videosum:latest &
    ```
    
    The `--volume` argument mounts your home directory (outside the container) into the directory `/mnt/user_home` inside the container.
