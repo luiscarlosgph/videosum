@@ -63,6 +63,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt install -y intel-basekit intel-aikit
 # Point PATH and LD_LIBRARY_PATH to the CUDA directories
 RUN echo 'export PATH=/usr/local/cuda/bin:${PATH}' >> $HOME/.zshrc
 RUN echo 'export LD_LIBRARY_PATH=/opt/intel/oneapi/mkl/latest/lib/intel64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}' >> $HOME/.zshrc
+RUN echo '/opt/intel/oneapi/intelpython/latest/lib/libiomp5.so' >> /etc/ld.so.preload
 
 # Install last version of CMake
 ENV CMAKE_VERSION="v3.27.2"
@@ -77,6 +78,7 @@ RUN cd /opt/numpy && echo "[mkl]" >> site.cfg
 RUN cd /opt/numpy && echo "library_dirs = /opt/intel/oneapi/mkl/latest/lib/intel64" >> site.cfg
 RUN cd /opt/numpy && echo "include_dirs = /opt/intel/oneapi/mkl/latest/include" >> site.cfg
 RUN cd /opt/numpy && echo "libraries = mkl_rt" >> site.cfg
+RUN chown -R $USER:$USER /opt/numpy
 RUN sudo -u $USER /bin/zsh -c "source $HOME/.zshrc && cd /opt/numpy && pip install ."
 
 # Install faiss
@@ -87,7 +89,7 @@ RUN /bin/zsh -c "source $HOME/.zshrc && cd /opt/faiss/build && cmake -DFAISS_ENA
 RUN cd /opt/faiss/build && make -j faiss
 RUN cd /opt/faiss/build && make -j swigfaiss 
 RUN cd /opt/faiss/build && make install
-RUN chmod -R ugo+rwx /opt/faiss
+RUN chown -R $USER:$USER /opt/faiss
 RUN sudo -u $USER /bin/zsh -c "source $HOME/.zshrc && cd /opt/faiss/build/faiss/python && python setup.py install"
 
 # Install PyTorch
@@ -95,6 +97,7 @@ ENV PYTORCH_INSTALL_CMD="pip install torch==1.12.1+cu116 torchvision torchaudio 
 RUN sudo -u $USER /bin/zsh -c "source $HOME/.zshrc && $PYTORCH_INSTALL_CMD"
 
 # Install videosum
+RUN sudo -u $USER /bin/zsh -c "source $HOME/.zshrc && pip install pandas==1.3.5"
 RUN cd /opt && git clone https://github.com/luiscarlosgph/videosum.git
 RUN chown -R $USER:$USER /opt/videosum
 RUN sudo -u $USER /bin/zsh -c "source $HOME/.zshrc && cd /opt/videosum && python setup.py install" 
