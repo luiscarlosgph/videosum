@@ -56,7 +56,7 @@ Alternatively, you can install the `videosum` package from `pip` or from source,
 
 5. Get a terminal on the container:
    ```bash
-   $ docker exec -it videosum /bin/zsh
+   $ docker exec --user $(whoami) --workdir $HOME -it videosum /bin/zsh
    ```
 
 6. Summarise the test video:
