@@ -23,25 +23,30 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-# Set user environment variables
+# Set user environment variables and create user account
 ARG USER
+ARG UID
+ARG GID
 ENV HOME="/home/$USER"
-RUN mkdir $HOME
+RUN groupadd -g $UID $USER
+RUN useradd -m -u $UID -g $UID -p pass123 -s /bin/zsh $USER
+RUN usermod -a -G sudo $USER
+RUN touch $HOME/.zshrc && chown $USER:$USER $HOME/.zshrc
 
 # Intall oh-my-zsh so we have a nice terminal
-RUN wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O $HOME/install.sh
-RUN chmod +x $HOME/install.sh 
-RUN $HOME/install.sh --unattended
-RUN sed -i 's/robbyrussell/terminalparty/g' $HOME/.zshrc
+RUN sudo -u $USER wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O $HOME/install.sh
+RUN sudo -u $USER chmod +x $HOME/install.sh 
+RUN sudo -u $USER $HOME/install.sh --unattended
+RUN sudo -u $USER sed -i 's/robbyrussell/terminalparty/g' $HOME/.zshrc
 
 # Install Python's pyenv environment
 ENV PYTHON_VERSION="3.10"
-RUN git clone https://github.com/pyenv/pyenv.git $HOME/.pyenv
-RUN echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.zshrc
-RUN echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.zshrc
-RUN echo 'eval "$(pyenv init --path)"' >> $HOME/.zshrc
-RUN /bin/zsh -c "source $HOME/.zshrc && pyenv install $PYTHON_VERSION"
-RUN /bin/zsh -c "source $HOME/.zshrc && pyenv global $PYTHON_VERSION"
+RUN sudo -u $USER git clone https://github.com/pyenv/pyenv.git $HOME/.pyenv
+RUN sudo -u $USER echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.zshrc
+RUN sudo -u $USER echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.zshrc
+RUN sudo -u $USER echo 'eval "$(pyenv init --path)"' >> $HOME/.zshrc
+RUN sudo -u $USER /bin/zsh -c "source $HOME/.zshrc && pyenv install $PYTHON_VERSION"
+RUN sudo -u $USER /bin/zsh -c "source $HOME/.zshrc && pyenv global $PYTHON_VERSION"
 
 # Install ffmpeg
 RUN DEBIAN_FRONTEND=noninteractive apt install -y ffmpeg
@@ -78,15 +83,17 @@ RUN /bin/zsh -c "source $HOME/.zshrc && cd /opt/numpy && pip install ."
 ENV FAISS_VERSION="v1.7.4"
 RUN cd /opt && git clone https://github.com/facebookresearch/faiss.git
 RUN cd /opt/faiss && git checkout $FAISS_VERSION && mkdir build 
-RUN /bin/zsh -c "source $HOME/.zshrc && cd /opt/faiss/build && cmake -DFAISS_ENABLE_GPU=ON -DFAISS_ENABLE_PYTHON=ON -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON -DFAISS_ENABLE_C_API=ON -DCMAKE_BUILD_TYPE=Release -DFAISS_OPT_LEVEL=avx2 -DBLA_VENDOR=Intel10_64_dyn -DMKL_LIBRARIES='-L/opt/intel/oneapi/mkl/latest/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core' -DCUDAToolkit_ROOT=/usr/local/cuda -DPython_EXECUTABLE=$HOME/.pyenv/shims/python -DPython_INCLUDE_DIRS=$HOME/.pyenv/versions/3.10.12/include -DPython_LIBRARIES=$HOME/.pyenv/versions/3.10.12/lib .."
+RUN /bin/zsh -c "source $HOME/.zshrc && cd /opt/faiss/build && cmake -DFAISS_ENABLE_GPU=ON -DFAISS_ENABLE_PYTHON=ON -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON -DFAISS_ENABLE_C_API=ON -DCMAKE_BUILD_TYPE=Release -DFAISS_OPT_LEVEL=avx2 -DBLA_VENDOR=Intel10_64_dyn -DMKL_LIBRARIES='-L/opt/intel/oneapi/mkl/latest/lib/intel64 -lgomp -lmkl_intel_lp64 -lmkl_sequential -lmkl_core' -DCUDAToolkit_ROOT=/usr/local/cuda -DPython_EXECUTABLE=$HOME/.pyenv/shims/python -DPython_INCLUDE_DIRS=$HOME/.pyenv/versions/3.10.12/include -DPython_LIBRARIES=$HOME/.pyenv/versions/3.10.12/lib .."
 RUN cd /opt/faiss/build && make -j faiss
 RUN cd /opt/faiss/build && make -j swigfaiss 
 RUN cd /opt/faiss/build && make install
-RUN /bin/zsh -c "source $HOME/.zshrc && cd /opt/faiss/build/faiss/python && python setup.py install"
+RUN chmod -R ugo+rwx /opt/faiss
+RUN sudo -u $USER /bin/zsh -c "source $HOME/.zshrc && cd /opt/faiss/build/faiss/python && python setup.py install"
 
 # Install videosum
 RUN cd /opt && git clone https://github.com/luiscarlosgph/videosum.git
-RUN /bin/zsh -c "source $HOME/.zshrc && cd /opt/videosum && python setup.py install" 
+RUN chown -R $USER:$USER /opt/videosum
+RUN sudo -u $USER /bin/zsh -c "source $HOME/.zshrc && cd /opt/videosum && python setup.py install" 
 
 # Start services and run the user-specified command
 ADD files/entrypoint.sh /opt/entrypoint.sh
