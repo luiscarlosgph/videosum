@@ -61,7 +61,7 @@ Alternatively, you can install the `videosum` package from `pip` or from source,
 
 6. Summarise the test video:
    ```bash
-   $ python -m videosum.run --input /opt/videosum/test/data/video.mp4 --output /mnt/user_home/storyboard.jpg --nframes 100 --height 1080 --width 1920 --algo inception
+   $ python -m videosum.run --input /opt/videosum/test/data/video.mp4 --output /mnt/user_home/storyboard.jpg --fps 2 --nframes 16 --height 1080 --width 1920 --algo inception
    ```
    After running this command you should have the summary of the test video saved as `storyboard.jpg` in you home directory.
 
