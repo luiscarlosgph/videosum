@@ -86,7 +86,7 @@ If you are not using the videosum Python package via Docker (as explained in the
 * [swig](https://www.swig.org): in Ubuntu/Debian, run `$ sudo apt install swig` to install it.
    <!-- * In Mac: `$ brew install swig` -->
 
-* [faiss-gpu](https://github.com/facebookresearch/faiss) version `1.7.4`: there are [several](https://github.com/facebookresearch/faiss/blob/main/INSTALL.md) ways to install this library. A tutorial on how I do it [here](https://github.com/luiscarlosgph/how-to/tree/main/faiss).
+* [faiss-gpu](https://github.com/facebookresearch/faiss) version `1.7.4`: you have a tutorial on how I do it [here](https://github.com/luiscarlosgph/how-to/tree/main/faiss).
 
 A good way to see all the commands that need to be executed to install all the dependencies is by checking the [Dockerfile](https://github.com/luiscarlosgph/videosum/blob/main/docker/Dockerfile).
 
