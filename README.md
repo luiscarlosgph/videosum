@@ -68,7 +68,11 @@ Alternatively, you can install the `videosum` package from `pip` or from source,
 Install dependencies 
 --------------------
 
-**WARNING:** if you are not using the videosum Python package via Docker (as explained in the previous section), but you are planning to install it natively in your system, you must install the dependencies as explained in this section, you cannot skip this step.
+If you are not using the videosum Python package via Docker (as explained in the previous section), but you are planning to install it natively in your system, you must install all the dependencies detailed in this section.
+
+* Python version `3.10`: works well with `faiss` version `1.7.4`. You can find a howto guide to install this version of Python [here](https://github.com/luiscarlosgph/how-to/tree/main/pyenv).
+
+* PyTorch version `1.12.1+cu116`: I usually install it running `$ pip install torch==1.12.1+cu116 torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116`.
 
 * [ffmpeg](https://www.ffmpeg.org): in Ubuntu/Debian, run `$ sudo apt install ffmpeg` to install it.
    <!-- * In Mac: `$ brew install ffmpeg`
@@ -78,7 +82,7 @@ Install dependencies
 * [swig](https://www.swig.org): in Ubuntu/Debian, run `$ sudo apt install swig` to install it.
    <!-- * In Mac: `$ brew install swig` -->
 
-* [faiss-gpu](https://github.com/facebookresearch/faiss): there are [several](https://github.com/facebookresearch/faiss/blob/main/INSTALL.md) ways to install this library. I do it like [this](https://github.com/luiscarlosgph/how-to/tree/main/faiss).
+* [faiss-gpu](https://github.com/facebookresearch/faiss) version `1.7.4`: there are [several](https://github.com/facebookresearch/faiss/blob/main/INSTALL.md) ways to install this library. A tutorial on how I do it [here](https://github.com/luiscarlosgph/how-to/tree/main/faiss).
 
 A good way to see all the commands that need to be executed to install all the dependencies is by checking the [Dockerfile](https://github.com/luiscarlosgph/videosum/blob/main/docker/Dockerfile).
 
