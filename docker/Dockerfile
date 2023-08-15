@@ -65,7 +65,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt remove --purge --auto-remove -y cmake
 RUN cd /opt && git clone https://github.com/Kitware/CMake.git && cd CMake && git checkout $CMAKE_VERSION && ./bootstrap && make -j && make install
 
 # Install numpy with MKL support
-ENV NUMPY_VERSION="v1.21.5"
+ENV NUMPY_VERSION="v1.21.6"
 RUN cd /opt && git clone https://github.com/numpy/numpy.git
 RUN cd /opt/numpy && git checkout $NUMPY_VERSION
 RUN cd /opt/numpy && echo "[mkl]" >> site.cfg
