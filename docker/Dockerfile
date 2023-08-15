@@ -90,6 +90,10 @@ RUN cd /opt/faiss/build && make install
 RUN chmod -R ugo+rwx /opt/faiss
 RUN sudo -u $USER /bin/zsh -c "source $HOME/.zshrc && cd /opt/faiss/build/faiss/python && python setup.py install"
 
+# Install PyTorch
+ENV PYTORCH_INSTALL_CMD="pip install torch==1.12.1+cu116 torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116"
+RUN sudo -u $USER /bin/zsh -c "source $HOME/.zshrc && $PYTORCH_INSTALL_CMD"
+
 # Install videosum
 RUN cd /opt && git clone https://github.com/luiscarlosgph/videosum.git
 RUN chown -R $USER:$USER /opt/videosum
