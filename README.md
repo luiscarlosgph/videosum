@@ -72,7 +72,7 @@ If you are not using the videosum Python package via Docker (as explained in the
 
 * Python version `3.10`: works well with `faiss` version `1.7.4`. You can find a howto guide to install this version of Python [here](https://github.com/luiscarlosgph/how-to/tree/main/pyenv).
 
-* PyTorch version `1.12.1+cu116`: I usually install it running `$ pip install torch==1.12.1+cu116 torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116`.
+* [PyTorch](https://pytorch.org) version `1.12.1+cu116`: I usually install it running `$ pip install torch==1.12.1+cu116 torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116`.
 
 * [ffmpeg](https://www.ffmpeg.org): in Ubuntu/Debian, run `$ sudo apt install ffmpeg` to install it.
    <!-- * In Mac: `$ brew install ffmpeg`
