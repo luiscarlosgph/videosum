@@ -25,6 +25,7 @@ setuptools.setup(name='videosum',
         'videosum._methods' : 'src/_methods',
     }, 
     install_requires = [
+        'pandas==1.3.5',
         'numpy', 
         'opencv-python==4.7.0.72',
         'numba',

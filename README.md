@@ -47,7 +47,7 @@ Alternatively, you can install the `videosum` package from `pip` or from source,
 3. Run `videosum` Docker container:
 
    ```bash
-   $ docker run --volume $HOME:/mnt/user_home --name videosum --runtime nvidia --user $(id -u):$(id -g) luiscarlosgph/videosum:latest &
+   $ docker run --volume $HOME:/mnt/user_home --name videosum --runtime nvidia luiscarlosgph/videosum:latest &
    ```
    
    The `--volume` argument mounts your home directory (outside the container) into the directory `/mnt/user_home` inside the container.
@@ -56,12 +56,12 @@ Alternatively, you can install the `videosum` package from `pip` or from source,
 
 5. Get a terminal on the container:
    ```bash
-   $ docker exec -it videosum /bin/zsh
+   $ docker exec --user $(whoami) --workdir $HOME -it videosum /bin/zsh
    ```
 
 6. Summarise the test video:
    ```bash
-   $ python -m videosum.run --input /opt/videosum/test/data/video.mp4 --output /mnt/user_home/storyboard.jpg --nframes 100 --height 1080 --width 1920 --algo inception
+   $ python -m videosum.run --input /opt/videosum/test/data/video.mp4 --output /mnt/user_home/storyboard.jpg --fps 2 --nframes 16 --height 1080 --width 1920 --algo inception
    ```
    After running this command you should have the summary of the test video saved as `storyboard.jpg` in you home directory.
 
