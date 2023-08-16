@@ -13,7 +13,8 @@ import imageio_ffmpeg
 import videosum
 
 
-def get_key_frames_inception(self, input_path, eps=1e-6, time_smoothing=0.):
+def get_key_frames_inception(self, input_path, eps=1e-6, time_smoothing=0.,
+        batch_size=16):
     """
     @brief Get a list of key video frames. 
     @details They key frames are selected by unsupervised clustering of 
@@ -26,6 +27,8 @@ def get_key_frames_inception(self, input_path, eps=1e-6, time_smoothing=0.):
                                 Higher values make the clustering closer
                                 to the 'time' method. The maximum value
                                 is 1.
+    @param[in]  batch_size      Size of the batch of images that will be
+                                passed to the Inception Feature Extractor.
     
     @returns a list of Numpy/BGR images, range [0.0, 1.0], dtype = np.uint8. 
     """
@@ -41,16 +44,31 @@ def get_key_frames_inception(self, input_path, eps=1e-6, time_smoothing=0.):
 
     # Collect feature vectors for all the frames
     print('[INFO] Collecting feature vectors for all the frames ...')
-    for raw_frame in tqdm.tqdm(reader):
-        # Convert video frame into a BGR OpenCV/Numpy image
-        im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
+    
+    finished = False
+    while not finished:
+        # Collect N frames from the video
+        frame_batch = []
+        for raw_frame in tqdm.tqdm(reader):
+            # Convert video frame into a BGR OpenCV/Numpy image
+            im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
 
-        # Compute latent feature vector for this video frame
-        vec = model.get_latent_feature_vector(im)
+            # Add frame to batch
+            frame_batch.append(im)
+            
+            # Check if batch is full
+            if len(frame_batch) == batch_size:
+                break
 
+        # Convert list of frames into an ndarray
+        frame_batch = np.array(frame_batch)
+             
+        # Compute latent feature vector for this batch of video frames
+        vec = model.get_latent_feature_vector(frame_batch)
+ 
         # Add feature vector to our list
         latent_vectors.append(vec)
-    print('[INFO] Done. Feature vectors computed.')
+        print('[INFO] Done. Feature vectors computed.')
 
     # There is no point to cluster if we have less frames in the video 
     # than the number of frames that fit in the collage
