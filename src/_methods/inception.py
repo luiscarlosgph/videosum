@@ -8,13 +8,14 @@ import tqdm
 import faiss
 import sklearn_extra.cluster
 import imageio_ffmpeg 
+import time
 
 # My imports 
 import videosum
 
 
 def get_key_frames_inception(self, input_path, eps=1e-6, time_smoothing=0.,
-        batch_size=16):
+        batch_size=64):
     """
     @brief Get a list of key video frames. 
     @details They key frames are selected by unsupervised clustering of 
@@ -44,12 +45,12 @@ def get_key_frames_inception(self, input_path, eps=1e-6, time_smoothing=0.,
 
     # Collect feature vectors for all the frames
     print('[INFO] Collecting feature vectors for all the frames ...')
-    
+    tic = time.time() 
     finished = False
     while not finished:
-        # Collect N frames from the video
+        # Collect a batch of frames from the video
         frame_batch = []
-        for raw_frame in tqdm.tqdm(reader):
+        for raw_frame in reader:
             # Convert video frame into a BGR OpenCV/Numpy image
             im = np.frombuffer(raw_frame, dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
 
@@ -59,16 +60,20 @@ def get_key_frames_inception(self, input_path, eps=1e-6, time_smoothing=0.,
             # Check if batch is full
             if len(frame_batch) == batch_size:
                 break
+        
+        # If we have less frames than expected, we are finished reading the video
+        if len(frame_batch) < batch_size:
+            finished = True
+        
+        # In case the video has a number of frames that is a multiple of the batch size
+        if len(frame_batch) > 0:
+            # Compute latent feature vector for this batch of video frames
+            vec = model.get_latent_feature_vector(np.array(frame_batch))
 
-        # Convert list of frames into an ndarray
-        frame_batch = np.array(frame_batch)
-             
-        # Compute latent feature vector for this batch of video frames
-        vec = model.get_latent_feature_vector(frame_batch)
- 
-        # Add feature vector to our list
-        latent_vectors.append(vec)
-        print('[INFO] Done. Feature vectors computed.')
+            # Add feature vectors to our list
+            latent_vectors += [ vec[i] for i in range(vec.shape[0]) ]
+    toc = time.time()
+    print('[INFO] Feature vectors computed in {} seconds.'.format(toc - tic))
 
     # There is no point to cluster if we have less frames in the video 
     # than the number of frames that fit in the collage
@@ -91,6 +96,7 @@ def get_key_frames_inception(self, input_path, eps=1e-6, time_smoothing=0.,
 
         # Cluster the feature vectors
         print('[INFO] k-medoids clustering ...')
+        tic = time.time()
         kmedoids = sklearn_extra.cluster.KMedoids(n_clusters=self.number_of_frames,
             metric='precomputed',
             method='pam',
@@ -98,7 +104,8 @@ def get_key_frames_inception(self, input_path, eps=1e-6, time_smoothing=0.,
             random_state=0).fit(dist)
         self.indices_ = kmedoids.medoid_indices_
         self.labels_ = kmedoids.labels_
-        print('[INFO] k-medoids clustering finished.')
+        toc = time.time()
+        print('[INFO] k-medoids clustering finished in {} seconds.'.format(toc - tic))
 
     # Retrieve the video frames corresponding to the cluster means
     print('[INFO] Retrieving key frames ...')
