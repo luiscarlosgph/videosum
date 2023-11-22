@@ -26,7 +26,7 @@ setuptools.setup(name='videosum',
     }, 
     install_requires = [
         'pandas==1.3.5',
-        'numpy', 
+        'numpy==1.22.4', 
         'opencv-python==4.7.0.72',
         'numba',
         #'faiss-gpu',
