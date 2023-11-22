@@ -31,7 +31,7 @@ setuptools.setup(name='videosum',
         'numba==0.58.1',
         #'faiss-gpu',
         'scikit-image==0.22.0',
-        'scikit-learn==1.3.2'
+        'scikit-learn==1.3.2',
         'scikit-learn-extra==0.3.0',
         'imageio_ffmpeg==0.4.9',
         'tqdm==4.66.1',
