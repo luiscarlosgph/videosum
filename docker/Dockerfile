@@ -74,7 +74,7 @@ RUN cd /opt && git clone https://github.com/Kitware/CMake.git && cd CMake && git
 # Install numpy with MKL support
 ENV NUMPY_VERSION="v1.25.2"
 RUN cd /opt && git clone https://github.com/numpy/numpy.git
-RUN cd /opt/numpy && git checkout $NUMPY_VERSION
+RUN cd /opt/numpy && git checkout $NUMPY_VERSION && git submodule update --init
 RUN cd /opt/numpy && echo "[mkl]" >> site.cfg
 RUN cd /opt/numpy && echo "library_dirs = /opt/intel/oneapi/mkl/latest/lib/intel64" >> site.cfg
 RUN cd /opt/numpy && echo "include_dirs = /opt/intel/oneapi/mkl/latest/include" >> site.cfg
