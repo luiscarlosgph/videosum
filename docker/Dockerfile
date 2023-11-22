@@ -72,7 +72,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt remove --purge --auto-remove -y cmake
 RUN cd /opt && git clone https://github.com/Kitware/CMake.git && cd CMake && git checkout $CMAKE_VERSION && ./bootstrap && make -j && make install
 
 # Install numpy with MKL support
-ENV NUMPY_VERSION="v1.26.2"
+ENV NUMPY_VERSION="v1.25.2"
 RUN sudo -u $USER /bin/zsh -c "source $HOME/.zshrc && pip install meson-python"
 RUN cd /opt && git clone https://github.com/numpy/numpy.git
 RUN cd /opt/numpy && git checkout $NUMPY_VERSION
