@@ -23,7 +23,7 @@ import seaborn as sns
 import videosum
 
 
-class VideoSummariser():
+class VideoSummarizer():
     def __init__(self, algo, number_of_frames: int = 100, 
             width: int = 1920, height: int = 1080, fps=None,
             time_segmentation=False, segbar_height=32, time_smoothing=0.,
@@ -47,7 +47,7 @@ class VideoSummariser():
                                        video.
         """
         # Sanity checks
-        assert(algo in VideoSummariser.ALGOS)
+        assert(algo in VideoSummarizer.ALGOS)
         assert(number_of_frames > 0)
         assert(width > 0)
         assert(height > 0)
@@ -68,12 +68,12 @@ class VideoSummariser():
 
         # Compute the width and height of each collage tile
         self.tile_height = self.height
-        nframes = VideoSummariser._how_many_rectangles_fit(self.tile_height, 
+        nframes = VideoSummarizer._how_many_rectangles_fit(self.tile_height, 
                                                           self.width, 
                                                           self.height)
         while nframes < self.number_of_frames: 
             self.tile_height -= 1
-            nframes = VideoSummariser._how_many_rectangles_fit(self.tile_height, 
+            nframes = VideoSummarizer._how_many_rectangles_fit(self.tile_height, 
                                                                self.width, 
                                                                self.height)
         self.tile_width = int(round(self.tile_height * self.form_factor))
@@ -185,7 +185,7 @@ class VideoSummariser():
     from ._methods.scda import get_key_frames_scda
 
     def get_key_frames(self, input_path):
-        return VideoSummariser.ALGOS[self.algo](self, input_path,
+        return VideoSummarizer.ALGOS[self.algo](self, input_path,
             time_smoothing=self.time_smoothing)
 
     def check_collage_validity(self, input_path, key_frames):
@@ -251,7 +251,7 @@ class VideoSummariser():
         self.labels_ = None
 
         # Get list of key frames
-        key_frames = VideoSummariser.ALGOS[self.algo](self, input_path,
+        key_frames = VideoSummarizer.ALGOS[self.algo](self, input_path,
             time_smoothing=self.time_smoothing)
 
         # Ensure that summariser actually filled the labels

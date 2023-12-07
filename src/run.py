@@ -92,15 +92,22 @@ def validate_cmdline_params(args):
     if os.path.isfile(args.output):
         raise RuntimeError('[ERROR] Output file already exists.')
 
-    if args.algo not in videosum.VideoSummariser.ALGOS: 
+    if args.algo not in videosum.VideoSummarizer.ALGOS: 
         raise ValueError("[ERROR] The method {} does not exist.".format(args.algo))
 
     return args
 
 
 def process_video(input_path, output_path, args):
+    """
+    @brief Summarizes a video into a storyboard.
+    @param[in]  input_path   Path to the input video.
+    @param[in]  output_path  Path to the image file where you want to save
+                             the image containing the storyboard.
+    @returns nothing.
+    """
     # Create video summariser
-    vidsum = videosum.VideoSummariser(args.algo, args.nframes, 
+    vidsum = videosum.VideoSummarizer(args.algo, args.nframes, 
                                       args.width, args.height, 
                                       time_segmentation=args.time_segmentation,
                                       fps=args.fps,
@@ -129,6 +136,63 @@ def setup_logging(logfile_path):
         datefmt='%H:%M:%S', level=logging.DEBUG)
 
 
+def detect_input_type(args, image_extensions=['.png', '.jpg', '.jpeg']):
+    """
+    @brief   This function determines tbe type of input provided by the user. 
+    @details There are four types of input accepted by this script: 
+            
+            1. 'video': the input path provided points to a video file.
+            2. 'many_videos': the input path provided points to a directory
+                              containing many video files. All of them will
+                              be summarized.
+            3. 'frame': the input path provided points to a directory 
+                        containing many images that represent the video
+                        frames. Alphabetic order is expected for the frames.
+            4. 'many_frames': the input path provided points to a directory
+                              containing other subdirectories. 
+                              Each subdirectory represents a video, and it is
+                              expected to contain the frames as images. The
+                              name of the images will be used to get the 
+                              frame order.
+
+    @param[in]  args              Object returned by argparse.parse_args() 
+                                  containing the command line parameters 
+                                  provided by the user.
+    @param[in]  image_extensions  List of extensions used to detect if a
+                                  directory contains videos or frames.
+
+    @returns 'video', 'many_videos', 'frame', 'many_frames'. 
+    """
+    # Get the path to the input
+    path = args.path
+    
+    # If it is a file, it must be a video file
+    if os.path.isfile(args.input):
+        return 'video'
+    elif os.path.isdir(args.input):
+        # We need to find out whether it is a list of videos or a list of dirs 
+        listing = [x for x in os.path.listdir(args.input) if not x.startswith('.')] 
+       
+        # Sanity check: the folder cannot be empty, it has to contain videos
+        #               or folders of frames
+        if len(listing) < 1: 
+            raise ValueError('[ERROR] The input directory does not contain anything.')              
+        
+        # Find out whether the first item inside the folder is a video file or
+        # a directory
+        path_to_first_item = os.path.join(args.input, listing[0])
+        if os.path.isfile(path_to_first_item):
+            # We need to find out whether this item is an image or a video
+            for ext in image_extensions:
+                if path_to_first_item.endswith(ext):
+                    return 'frame'
+            return 'many_videos'
+        else:
+            return 'many_frames'
+    else 
+        raise ValueError('[ERROR] Input type not recognized.')
+
+
 def main():
     # Read command line parameters
     args = parse_cmdline_params()
@@ -136,11 +200,16 @@ def main():
 
     # Setup logging
     setup_logging(args.log)
+
+    # Detect the type of input provided by the user 
+    input_type = detect_input_type(args)  
     
-    # Check whether the input is a file or a folder of videos
-    if os.path.isfile(args.input):
-        # Create video summariser
-        vidsum = videosum.VideoSummariser(args.algo, args.nframes, 
+    # Summarize whatever the user wants to summarize
+    if input_type == 'video': 
+        # The input is a single video
+
+        # Create video summarizer
+        vidsum = videosum.VideoSummarizer(args.algo, args.nframes, 
                                           args.width, args.height, 
                                           time_segmentation=args.time_segmentation,
                                           fps=args.fps, 
@@ -152,7 +221,29 @@ def main():
         toc = time.time()
         print("[INFO] Video summarised in {} seconds.".format(toc - tic))
         cv2.imwrite(args.output, im, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
-    else:
+
+    elif input_type == 'frame':
+        # The input is a folder of images corresponding to video frames
+        input_dir = args.input
+        output_path = args.output
+
+        # Create video summarizer
+        vidsum = videosum.VideoSummarizer(args.algo, args.nframes,
+            args.width, args.height, 
+            time_segmentation=args.time_segmentation, fps=None,
+            time_smoothing=args.time_smoothing, args.metric)
+
+        try:
+            # Summarise video
+            im = vidsum.summarise(input_dir)
+
+            # Save summary to the output folder
+            cv2.imwrite(output_path, im, 
+                [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+        except IOError as e:
+            logging.info("The video {} is broken. Skipping.".format(os.path.basename(input_path)))
+
+    elif input_type == 'many_videos':
         # The input is a folder of videos
         input_dir = args.input
         output_dir = args.output
@@ -162,6 +253,7 @@ def main():
             os.mkdir(output_dir)
 
         # Gather the list of video filenames inside the folder
+        # TODO: we should accept videos in different containers (not just mp4)
         videos = [x for x in os.listdir(input_dir) if x.endswith('.mp4')]
         prev_len = len(videos)
 
@@ -181,10 +273,13 @@ def main():
         # Run batch processing
         pool = multiprocessing.Pool(processes=args.processes)
         pool.starmap(process_video, data_inputs)
-        #for input_path, output_path, args in data_input:
-        #    print("[INFO] Processing {} ...".format(input_path))
-        #    process_video(input_path, output_path, args)
 
+    elif input_type == 'many_frames':
+        # TODO
 
+    else:
+        raise ValueError('[ERROR] Input type not recognized.')
+
+        
 if __name__ == '__main__':
     main()

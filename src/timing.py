@@ -62,8 +62,8 @@ def main():
     iterations = 10
     timings = {}
     for i in range(iterations):
-        for m in videosum.VideoSummariser.ALGOS:
-            vs = videosum.VideoSummariser(m, num_collage_images, width, height, 
+        for m in videosum.VideoSummarizer.ALGOS:
+            vs = videosum.VideoSummarizer(m, num_collage_images, width, height, 
                                           fps=fps)
             tic = time.time() 
             vs.summarise(args.input)
@@ -75,21 +75,21 @@ def main():
                 timings[m].append(elapsed / num_frames)
 
     # Compute the average over iterations
-    for m in videosum.VideoSummariser.ALGOS:
+    for m in videosum.VideoSummarizer.ALGOS:
         timings[m] = sum(timings[m])/ len(timings[m])
 
     # Print the summarisation time per frame
     print("\n")
     print('| Method | Summarisation time per frame (s) |')
     print('| ------ | -------------------------------- |')
-    for m in videosum.VideoSummariser.ALGOS:
+    for m in videosum.VideoSummarizer.ALGOS:
         print("| {:10s} | {:1.3f} |".format(m, timings[m]))
 
     # One hour video sampled at 1fps example
     print("\n")
     print('| Method | Time for a 1h video sampled at 1fps |')
     print('| ------ | ----------------------------------- |')
-    for m in videosum.VideoSummariser.ALGOS:
+    for m in videosum.VideoSummarizer.ALGOS:
         td = round(timings[m] * 3600)
         print("| {:10s} | {}s |".format(m, td))
 
