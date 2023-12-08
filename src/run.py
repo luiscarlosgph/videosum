@@ -1,5 +1,5 @@
 """
-@brief   Package to summarise a video into N frames. There are a lot of methods
+@brief   Package to summarize a video into N frames. There are a lot of methods
          for video summarisation, and a lot of repositories in GitHub, but
          none of them seems to work out of the box. This package contains a 
          simple way of doing it.
@@ -106,7 +106,7 @@ def process_video(input_path, output_path, args):
                              the image containing the storyboard.
     @returns nothing.
     """
-    # Create video summariser
+    # Create video summarizer
     vidsum = videosum.VideoSummarizer(args.algo, args.nframes, 
                                       args.width, args.height, 
                                       time_segmentation=args.time_segmentation,
@@ -116,7 +116,32 @@ def process_video(input_path, output_path, args):
 
     try:
         # Summarise video
-        im = vidsum.summarise(input_path)
+        im = vidsum.summarize(input_path)
+
+        # Save summary to the output folder
+        cv2.imwrite(output_path, im, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+    except IOError as e:
+        logging.info("The video {} is broken. Skipping.".format(os.path.basename(input_path)))
+
+
+def process_image_dir(input_path, output_path, args):
+    """
+    @brief Summarizes a video into a storyboard.
+    @param[in]  input_path   Path to the input video.
+    @param[in]  output_path  Path to the image file where you want to save
+                             the image containing the storyboard.
+    @returns nothing.
+    """
+    # Create video summarizer
+    vidsum = videosum.ImageDirSummarizer(args.algo, args.nframes, 
+                                         args.width, args.height, 
+                                         time_segmentation=args.time_segmentation,
+                                         time_smoothing=args.time_smoothing,
+                                         compute_fid=args.metric)
+
+    try:
+        # Summarise video
+        im = vidsum.summarize(input_path)
 
         # Save summary to the output folder
         cv2.imwrite(output_path, im, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
@@ -217,9 +242,9 @@ def main():
                                           compute_fid=args.metric)
         # The input is a file
         tic = time.time()
-        im = vidsum.summarise(args.input)
+        im = vidsum.summarize(args.input)
         toc = time.time()
-        print("[INFO] Video summarised in {} seconds.".format(toc - tic))
+        print("[INFO] Video summarized in {} seconds.".format(toc - tic))
         cv2.imwrite(args.output, im, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
 
     elif input_type == 'frame':
@@ -228,14 +253,14 @@ def main():
         output_path = args.output
 
         # Create video summarizer
-        vidsum = videosum.VideoSummarizer(args.algo, args.nframes,
-            args.width, args.height, 
-            time_segmentation=args.time_segmentation, fps=None,
+        vidsum = videosum.ImageDirSummarizer(args.algo, args.nframes,
+            args.width, args.height,
+            time_segmentation=args.time_segmentation,
             time_smoothing=args.time_smoothing, args.metric)
 
         try:
             # Summarise video
-            im = vidsum.summarise(input_dir)
+            im = vidsum.summarize(input_dir)
 
             # Save summary to the output folder
             cv2.imwrite(output_path, im, 
@@ -257,11 +282,11 @@ def main():
         videos = [x for x in os.listdir(input_dir) if x.endswith('.mp4')]
         prev_len = len(videos)
 
-        # Filter out the videos that have been already summarised
-        already_summarised = [x.split('.jpg')[0] + '.mp4' \
+        # Filter out the videos that have been already summarized
+        already_summarized = [x.split('.jpg')[0] + '.mp4' \
             for x in os.listdir(output_dir) if x.endswith('.jpg')]
-        videos = [x for x in videos if x not in already_summarised] 
-        print("[INFO] {} videos have been already summarised.".format(prev_len - len(videos)))
+        videos = [x for x in videos if x not in already_summarized] 
+        print("[INFO] {} videos have been already summarized.".format(prev_len - len(videos)))
         
         # Build data input ready for batch processing
         data_inputs = []
@@ -275,7 +300,37 @@ def main():
         pool.starmap(process_video, data_inputs)
 
     elif input_type == 'many_frames':
-        # TODO
+        # The input path contains several subdirectories, each 
+        # representing a video and containing images that represent 
+        # the video frames
+        
+        # The input is a directory of directories
+        input_dir = args.input
+        output_dir = args.output
+        
+        # Create output folder
+        if not os.path.isdir(output_dir):
+            os.mkdir(output_dir)
+
+        # Gather the list of directory names inside the input folder 
+        video_dirs = os.listdir(input_dir)
+
+        # Filter out the videos that have been already summarized
+        already_summarized = [x.split('.jpg')[0] \
+            for x in os.listdir(output_dir) if x.endswith('.jpg')]
+        videos_dirs = [x for x in video_dirs \
+            if x not in already_summarized] 
+
+        # Build data input ready for batch processing
+        data_inputs = []
+        for v in video_dirs:
+            input_path = os.path.join(input_dir, v)
+            output_path = os.path.join(output_dir, v + '.jpg')
+            data_inputs.append((input_path, output_path, args))
+        
+        # Run batch processing
+        pool = multiprocessing.Pool(processes=args.processes)
+        pool.starmap(process_image_dir, data_inputs)
 
     else:
         raise ValueError('[ERROR] Input type not recognized.')
