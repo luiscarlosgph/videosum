@@ -214,7 +214,7 @@ def detect_input_type(args, image_extensions=['.png', '.jpg', '.jpeg']):
             return 'many_videos'
         else:
             return 'many_frames'
-    else 
+    else:
         raise ValueError('[ERROR] Input type not recognized.')
 
 
