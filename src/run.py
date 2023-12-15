@@ -253,11 +253,11 @@ def main():
         output_path = args.output
 
         # Create video summarizer
-        vidsum = videosum.ImageDirSummarizer(args.algo, args.nframes,
-            args.width, args.height,
+        vidsum = videosum.ImageDirSummarizer(args.algo, args.nframes, 
+            args.width, args.height, 
             time_segmentation=args.time_segmentation,
-            time_smoothing=args.time_smoothing, args.metric)
-
+            time_smoothing=args.time_smoothing,
+            compute_fid=args.metric)
         try:
             # Summarise video
             im = vidsum.summarize(input_dir)

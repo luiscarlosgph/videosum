@@ -38,10 +38,12 @@ class VideoSummarizer():
                                        to see in the collage.
         @param[in]  width              Width of the summary collage.
         @param[in]  height             Height of the summary collage.
+        @param[in]  fps                TODO.
         @param[in]  time_segmentation  Set to True to show a time segmentation
                                        under the video collage.
         @param[in]  segbar_height      Height in pixels of the time
                                        segmentation bar.
+        @param[in]  time_smoothing     TODO.
         @param[in]  compute_fid        Set it to True if you want a report on
                                        the FID of the summary to the whole
                                        video.
