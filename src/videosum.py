@@ -20,10 +20,11 @@ import faiss
 import seaborn as sns
 
 # My imports
-import videosum
+from .videoreader import VideoReader
+from .summarizer import BaseSummarizer
 
 
-class VideoSummarizer():
+class VideoSummarizer(BaseSummarizer):
     def __init__(self, algo, number_of_frames: int = 100, 
             width: int = 1920, height: int = 1080, fps=None,
             time_segmentation=False, segbar_height=32, time_smoothing=0.,
@@ -90,106 +91,6 @@ class VideoSummarizer():
         # Initialise the array that holds the indices of the key frames
         self.indices_ = None
  
-    @staticmethod
-    def _how_many_rectangles_fit(tile_height, width, height):
-        """
-        @brief Given a certain tile height, this method computes how many
-               of them fit in a collage of a given size. We assume that the
-               form factor of the tiles in the collage has to be the same of 
-               the collage itself.
-        @param[in]  tile_height  Tile height.
-        @param[in]  width        Width of the collage.
-        @param[in]  height       Height of the collage.
-        """
-        # Compute form factor
-        ff = float(width) / height
-
-        # Compute rectangle height 
-        tile_width = int(round(tile_height * ff))
-
-        # Compute how many rectangles fit inside the collage
-        tiles_per_row = width // tile_width 
-        tiles_per_col = height // tile_height
-
-        return tiles_per_row * tiles_per_col 
-    
-    def _insert_frame(self, im, i, j):
-        """@brief Insert image into the collage."""
-
-        # Resize frame to the right tile size
-        im_resized = cv2.resize(im, (self.tile_width, self.tile_height), 
-                                interpolation = cv2.INTER_LANCZOS4)
-
-        # Insert image within the collage
-        y_start = i * self.tile_height
-        y_end = y_start + im_resized.shape[0] 
-        x_start = j * self.tile_width
-        x_end = x_start + im_resized.shape[1] 
-        self.collage[y_start:y_end, x_start:x_end] = im_resized
-    
-    @staticmethod
-    def transition_indices(labels):
-        """
-        @brief This method provides the indices of the boundary frames.
-
-        @details  After the summarisation, the video frames are clustered into
-                  classes. This means that there will be a video frame that
-                  belongs to class X followed by another frame that belongs to 
-                  class Y. This method detects this transitions and returns a
-                  list of the Y frames, i.e. the first frames after a class
-                  transition.
-        @param[in]  labels  Pass the self.labels_ produced after calling
-                            the summarise() method.
-        @returns a list of indices.
-        """
-        transition_frames = []
-
-        # Loop over the labels of all the video frames
-        prev_class = None
-        for idx, l in enumerate(labels):
-            if l != prev_class:
-                transition_frames.append(idx)
-                prev_class = l
-
-        return transition_frames
-    
-    @staticmethod
-    def frame_distance_matrix(n: int):
-        """
-        @brief Compute the normalised distance matrix of rows and columns. 
-        @details The distance matrix of rows and columns is (assuming only four
-                 frames):
-
-                    0 1 2 3
-                    1 0 1 2
-                    2 1 0 1
-                    3 2 1 0
-                  
-                 The normalised version is simply a minmax normalisation of the
-                 matrix above.
-        """
-        # Create lower triangular distance matrix
-        dist = np.zeros((n, n), dtype=np.float32)
-        for i in range(n):
-            for j in range(0, i):
-                dist[i, j] = np.abs(i - j)
-
-        # Fill the upper triangular part
-        dist = dist + dist.T
-
-        # Normalise matrix to [0, 1]
-        return dist / np.max(dist)
-    
-    # Import the different summarisation methods from their corresponding files
-    from ._methods.time import get_key_frames_time
-    from ._methods.inception import get_key_frames_inception
-    from ._methods.uid import get_key_frames_uid 
-    from ._methods.scda import get_key_frames_scda
-
-    def get_key_frames(self, input_path):
-        return VideoSummarizer.ALGOS[self.algo](self, input_path,
-            time_smoothing=self.time_smoothing)
-
     def check_collage_validity(self, input_path, key_frames):
         """
         @brief Asserts that if there are enough frames to make a collage,
@@ -198,7 +99,7 @@ class VideoSummarizer():
         @param[in]  key_frames  List of key frames.
         @returns None
         """
-        nframes_in_video = videosum.VideoReader.num_frames(input_path, self.fps)
+        nframes_in_video = VideoReader.num_frames(input_path, self.fps)
         nframes_in_collage = len(key_frames)
         nframes_requested = self.number_of_frames
         if nframes_in_video > nframes_requested:
@@ -207,39 +108,6 @@ class VideoSummarizer():
                         + "in [{}], but the collage ".format(input_path) \
                         + "only has {} ".format(nframes_in_collage) \
                         + "out of the {} requested.".format(nframes_requested))
-
-    def generate_segbar(self):
-        # Create an empty segmentation bar
-        segbar_width = self.collage.shape[1]
-        segbar = np.full((self.segbar_height, segbar_width, 3), 255, 
-            dtype=np.uint8)
-
-        # Create the colour palette, one colour per cluster
-        palette = np.array(sns.color_palette("Set3", self.number_of_frames))
-        colours = (palette * 255.).astype(np.uint8)
-
-        # Loop over segmentation bar columns
-        for c in range(segbar_width):
-            # Find the frame corresponding to this vertical bar
-            frame_idx = int(round(float(c) * len(self.labels_) / segbar_width))
-            frame_idx = np.clip(frame_idx, 0, len(self.labels_) - 1)
-
-            # Find the cluster index of the frame
-            cluster_idx = self.labels_[frame_idx]
-            
-            # Make the line of the colour of the cluster the frame belongs to
-            segbar[:, c] = colours[cluster_idx]
-        
-        # Add the key frame vertical lines to the segmentation bar
-        key_frame_line_colour = [0, 0, 0]
-        for i in self.indices_:
-            # Find the vertical bar corresponding to this frame index
-            idx = int(round(i * segbar_width / len(self.labels_)))
-            
-            # Colour the column corresponding to this key frame
-            segbar[:, idx] = key_frame_line_colour
-
-        return segbar
 
     def summarise(self, input_path):
         """
@@ -258,7 +126,7 @@ class VideoSummarizer():
 
         # Ensure that summariser actually filled the labels
         assert(self.labels_ is not None)
-        assert(len(self.labels_) == videosum.VideoReader.num_frames(input_path, self.fps))
+        assert(len(self.labels_) == VideoReader.num_frames(input_path, self.fps))
 
         # If the video has more frames than those requested, 
         # the collage should have all the frames filled
@@ -324,7 +192,7 @@ class VideoSummarizer():
         # Compute the multivariate Gaussian of the whole video 
         # (including the summary of course)
         video_fv = []
-        reader = videosum.VideoReader(input_path, sampling_rate=self.fps, 
+        reader = VideoReader(input_path, sampling_rate=self.fps, 
                                       pix_fmt='rgb24')
         w, h = reader.size
         for raw_frame in tqdm.tqdm(reader):
@@ -342,14 +210,6 @@ class VideoSummarizer():
 
         return emd
     
-    # Class attribute: supported key frame selection algorithms
-    ALGOS = {
-        'time':      get_key_frames_time,
-        'inception': get_key_frames_inception,
-        'uid' :      get_key_frames_uid,
-        'scda':      get_key_frames_scda,
-    }
-
 
 if __name__ == '__main__':
     raise RuntimeError('[ERROR] This is not a Python script.')
