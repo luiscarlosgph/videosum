@@ -25,6 +25,7 @@ setuptools.setup(name='videosum',
         'videosum._methods' : 'src/_methods',
     }, 
     install_requires = [
+        'cython==0.29.37',
         'pandas==1.3.5',
         'numpy==1.25.2', 
         'opencv-python==4.7.0.72',
