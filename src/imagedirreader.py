@@ -8,8 +8,11 @@ import natsort
 import PIL
 import numpy as np
 
+# My imports
+from .reader import Reader
 
-class ImageDirReader:
+
+class ImageDirReader(Reader):
     """
     @class ImageDirReader is meant to make the process of reading a video that
            is stored as a folder of images easy.
@@ -17,9 +20,9 @@ class ImageDirReader:
 
     def __init__(self, path: str):
         """
-        @param[in]  path           Path to the video.
-        @param[in]  pix_fmt        Pixel format string compatible with
-                                   imageio_ffmpeg.
+        @param[in]  path     Path to the video.
+        @param[in]  pix_fmt  Pixel format string compatible with
+                             imageio_ffmpeg.
         """
         # Sanity check: make sure that the path points to a folder 
         if not os.path.isdir(path):
@@ -35,9 +38,6 @@ class ImageDirReader:
         # We don't know yet the size of the images of this "video"
         self._width = None
         self._height = None
-
-    def __iter__(self):
-        return self
 
     def __next__(self):
         """
@@ -62,5 +62,5 @@ class ImageDirReader:
 
 
 if __name__ == '__main__':
-    raise RuntimeError('[ERROR] The module videosum.imagereader is not a script.')
-
+    raise RuntimeError('[ERROR] The module videosum.imagereader ' \
+        + 'is not a script.')

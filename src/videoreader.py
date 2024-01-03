@@ -6,8 +6,10 @@
 """
 import imageio_ffmpeg
 
+# My imports
+from .reader import BaseReader
 
-class VideoReader:
+class VideoReader(BaseReader):
 
     def __init__(self, path: str, sampling_rate: int = None, pix_fmt='rgb24'):
         """
@@ -38,46 +40,24 @@ class VideoReader:
         # Get videeo info
         self.meta_ = self.reader_.__next__()
 
-    def __iter__(self):
-        return self
-
     def __next__(self):
         return self.reader_.__next__()
-
-    @property
-    def width(self):
-        return self.meta_['size'][0]
-
-    @property
-    def height(self):
-        return self.meta_['size'][1]
-
-    @property
-    def size(self):
-        return self.meta_['size']
-
-    @property
-    def duration(self):
-        return self.meta_['duration']
-
-    @property
-    def fps(self):
-        return self.meta_['fps']
-
-    @staticmethod
-    def num_frames(path: str, sampling_rate: int = None):
+    
+    def num_frames(self, path: str, sampling_rate: int = None):
         """
         @brief Function to count the number of frames in a video.
+
         @param[in]  path           Path to the video file.
         @param[in]  sampling_rate  At how many fps you want to read the video.
+
         @returns the number of frames as an integer.
         """
         # Create video reader
         if sampling_rate is None:
-            reader = imageio_ffmpeg.read_frames(path, pix_fmt='rgb24', 
+            reader = imageio_ffmpeg.read_frames(self.path, pix_fmt='rgb24', 
                 input_params=['-hide_banner'])
         else:
-            reader = imageio_ffmpeg.read_frames(path, pix_fmt='rgb24', 
+            reader = imageio_ffmpeg.read_frames(self.path, pix_fmt='rgb24', 
                 input_params=['-hide_banner'],
                 output_params=['-filter:v', "fps={}".format(sampling_rate)])
 
@@ -91,7 +71,27 @@ class VideoReader:
 
         return count
 
+    @property
+    def width(self):
+        return self.meta_['size'][0]
 
+    @property
+    def height(self):
+        return self.meta_['size'][1]
+
+    #@property
+    #def size(self):
+    #    return self.meta_['size']
+
+    @property
+    def duration(self):
+        return self.meta_['duration']
+
+    @property
+    def fps(self):
+        return self.meta_['fps']
+
+    
 if __name__ == '__main__':
     raise RuntimeError('[ERROR] The module videosum.videoreader is not a script.')
 

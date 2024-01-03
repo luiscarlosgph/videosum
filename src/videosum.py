@@ -1,5 +1,5 @@
 """
-@brief   Module to summarise a video into N frames. There are a lot of methods
+@brief   Module to summarize a video into N frames. There are a lot of methods
          for video summarisation, and a lot of repositories in GitHub, but
          none of them seems to work out of the box. This module contains a 
          simple way of doing it.
@@ -26,9 +26,9 @@ from .summarizer import BaseSummarizer
 
 class VideoSummarizer(BaseSummarizer):
     def __init__(self, algo, number_of_frames: int = 100, 
-            width: int = 1920, height: int = 1080, fps=None,
+            width: int = 1920, height: int = 1080,
             time_segmentation=False, segbar_height=32, time_smoothing=0.,
-            compute_fid=False):
+            compute_fid=False, fps=None):
         """
         @brief   Summarise a video into a collage.
         @details The frames in the collage are evenly taken from the video. 
@@ -39,7 +39,6 @@ class VideoSummarizer(BaseSummarizer):
                                        to see in the collage.
         @param[in]  width              Width of the summary collage.
         @param[in]  height             Height of the summary collage.
-        @param[in]  fps                TODO.
         @param[in]  time_segmentation  Set to True to show a time segmentation
                                        under the video collage.
         @param[in]  segbar_height      Height in pixels of the time
@@ -48,50 +47,19 @@ class VideoSummarizer(BaseSummarizer):
         @param[in]  compute_fid        Set it to True if you want a report on
                                        the FID of the summary to the whole
                                        video.
+        @param[in]  fps                TODO.
         """
-        # Sanity checks
-        assert(algo in VideoSummarizer.ALGOS)
-        assert(number_of_frames > 0)
-        assert(width > 0)
-        assert(height > 0)
-        if (algo == 'time' and time_smoothing > 1e-6):
-            raise ValueError('[ERROR] You cannot use time smoothing with the time algorithm.')
+
+        # Call parent's constructor to handle the setup of all the base
+        # parameters
+        super().__init__(algo, number_of_frames, width, height, 
+                         time_segmentation, segbar_height, time_smoothing,
+                         compute_fid)
         
-        # Store attributes
-        self.algo = algo
-        self.number_of_frames = number_of_frames
-        self.width = width
-        self.height = height
+        # Store child-specific attributes
         self.fps = fps
-        self.form_factor = float(self.width) / self.height
-        self.time_segmentation = time_segmentation
-        self.segbar_height = segbar_height
-        self.time_smoothing = time_smoothing
-        self.compute_fid = compute_fid
-
-        # Compute the width and height of each collage tile
-        self.tile_height = self.height
-        nframes = VideoSummarizer._how_many_rectangles_fit(self.tile_height, 
-                                                          self.width, 
-                                                          self.height)
-        while nframes < self.number_of_frames: 
-            self.tile_height -= 1
-            nframes = VideoSummarizer._how_many_rectangles_fit(self.tile_height, 
-                                                               self.width, 
-                                                               self.height)
-        self.tile_width = int(round(self.tile_height * self.form_factor))
-
-        # Compute how many tiles per row and column
-        self.tiles_per_row = self.width // self.tile_width
-        self.tiles_per_col = self.height // self.tile_height 
-
-        # Initialise the array that holds the label of each frame
-        self.labels_ = None
-
-        # Initialise the array that holds the indices of the key frames
-        self.indices_ = None
  
-    def check_collage_validity(self, input_path, key_frames):
+    def check_storyboard_validity(self, input_path, key_frames):
         """
         @brief Asserts that if there are enough frames to make a collage,
                we should have a full collage.
@@ -109,7 +77,7 @@ class VideoSummarizer(BaseSummarizer):
                         + "only has {} ".format(nframes_in_collage) \
                         + "out of the {} requested.".format(nframes_requested))
 
-    def summarise(self, input_path):
+    def summarize(self, input_path: str) -> np.ndarray:
         """
         @brief Create a collage of the video.  
 
@@ -124,13 +92,14 @@ class VideoSummarizer(BaseSummarizer):
         key_frames = VideoSummarizer.ALGOS[self.algo](self, input_path,
             time_smoothing=self.time_smoothing)
 
-        # Ensure that summariser actually filled the labels
+        # Ensure that summarizer actually filled the labels
         assert(self.labels_ is not None)
-        assert(len(self.labels_) == VideoReader.num_frames(input_path, self.fps))
+        assert(len(self.labels_) == VideoReader.num_frames(input_path, 
+            self.fps))
 
         # If the video has more frames than those requested, 
         # the collage should have all the frames filled
-        self.check_collage_validity(input_path, key_frames)
+        self.check_storyboard_validity(input_path, key_frames)
         
         # Warn the user about the collage having less frames than requested,
         # this is expected if the number of requested frames is higher than

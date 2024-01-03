@@ -1,14 +1,89 @@
 """
-TODO
+@brief This is the base class of a summarizer, which is a class meant to 
+       hold methods to produce the storyboard. This class is agnostic to the
+       method used to choose the key frames.
+@author Luis C. Garcia Peraza Herrera (luiscarlos.gph@gmail.com).
+@date   31 Dec 2023.
 """
 import abc
 
 class BaseSummarizer(abc.ABC):
     """
-    @class TODO
+    @class BaseSummarizer contains all the methods related to the 
+           summarization process, except the actual method to choose which
+           frames of the video are the key frames. 
+    @details You are supposed to inherit from this class to build classes
+             that can summarize different types of input, for example a video
+             that comes as a folder of images where each image is a frame, or
+             a video that comes in an actual video file.
     """
 
-    # Import the different summarisation methods from their corresponding files
+    def __init__(self, reader, number_of_frames: int = 100, 
+            width: int = 1920, height: int = 1080,
+            time_segmentation=False, segbar_height=32, time_smoothing=0.,
+            compute_fid=False) -> None:
+        """
+        @brief This method constructs the 'base' part of the summarizer, 
+               leaving the rest of the construction to the child classes, 
+               which should construct the objects according to each child's 
+               specific requirement.
+        
+        @param[in]  reader             TODO
+        @param[in]  number_of_frames   Number of frames of the video you want
+                                       to see in the storyboard.
+        @param[in]  width              Width of the summary storyboard.
+        @param[in]  height             Height of the summary storybard.
+        @param[in]  time_segmentation  Set to True to show a time 
+                                       segmentation under the storyboard.
+        @param[in]  segbar_height      Height in pixels of the time
+                                       segmentation bar.
+        @param[in]  time_smoothing     TODO.
+        @param[in]  compute_fid        Set it to True if you want a report on
+                                       the FID of the summary to the whole
+                                       video.
+        """
+        # Sanity checks
+        assert(algo in VideoSummarizer.ALGOS)
+        assert(number_of_frames > 0)
+        assert(width > 0)
+        assert(height > 0)
+        if (algo == 'time' and time_smoothing > 1e-6):
+            raise ValueError('[ERROR] You cannot use time smoothing ' \
+                + 'with the time algorithm.')
+        
+        # Store attributes
+        self.reader = reader
+        self.number_of_frames = number_of_frames
+        self.width = width
+        self.height = height
+        self.form_factor = float(self.width) / self.height
+        self.time_segmentation = time_segmentation
+        self.segbar_height = segbar_height
+        self.time_smoothing = time_smoothing
+        self.compute_fid = compute_fid
+        
+        # Compute the width and height of each collage tile
+        self.tile_height = self.height
+        nframes = BaseSummarizer._how_many_rectangles_fit(
+            self.tile_height, self.width, self.height)
+        while nframes < self.number_of_frames: 
+            self.tile_height -= 1
+            nframes = BaseSummarizer._how_many_rectangles_fit(
+                self.tile_height, self.width, self.height)
+        self.tile_width = int(round(self.tile_height * self.form_factor))
+        
+        # Compute how many tiles per row and column
+        self.tiles_per_row = self.width // self.tile_width
+        self.tiles_per_col = self.height // self.tile_height
+        
+        # Initialise the array that holds the label of each frame
+        self.labels_ = None
+        
+        # Initialise the array that holds the indices of the key frames
+        self.indices_ = None
+
+    # Import the different summarisation methods from their corresponding 
+    # files
     from ._methods.time import get_key_frames_time
     from ._methods.inception import get_key_frames_inception
     from ._methods.uid import get_key_frames_uid 
@@ -20,10 +95,11 @@ class BaseSummarizer(abc.ABC):
         @brief This method provides the indices of the boundary frames.
 
         @details  After the summarisation, the video frames are clustered into
-                  classes. This means that there will be a video frame that
-                  belongs to class X followed by another frame that belongs to 
-                  class Y. This method detects this transitions and returns a
-                  list of the Y frames, i.e. the first frames after a class
+                  classes. 
+                  This means that there will be a video frame that belongs to 
+                  class X followed by another frame that belongs to class Y. 
+                  This method detects this transitions and returns a list of 
+                  the Y frames, i.e. the first frames after a class
                   transition.
         @param[in]  labels  Pass the self.labels_ produced after calling
                             the summarise() method.
@@ -43,17 +119,32 @@ class BaseSummarizer(abc.ABC):
     @staticmethod
     def frame_distance_matrix(n: int):
         """
-        @brief Compute the normalised distance matrix of rows and columns. 
-        @details The distance matrix of rows and columns is (assuming only four
-                 frames):
+        @brief Compute the normalised distance matrix for a video of n frames.
+        @details This static method is useful because we want to use the 
+                 matrix produced by this method as an additional term for the
+                 cost function provided to the method that selects the key
+                 frames.
+
+                 The idea is that frames that are further apart, have a 
+                 higher distance between them because they are less likely
+                 to belong to the same cluster.
+                 
+                 The distance matrix of a video of n frames would be:
 
                     0 1 2 3
                     1 0 1 2
                     2 1 0 1
                     3 2 1 0
-                  
-                 The normalised version is simply a minmax normalisation of the
-                 matrix above.
+                 
+                 This method does not return exactly this matrix, but a 
+                 normalized version of it. That is, the matrix above but where
+                 all the elements are divided by four, so that the maximum
+                 value is 1.
+
+        @param[in]  n  Number of frames in the video.
+        @returns a cost matrix of n frames where the cost between two frames
+                 is equal to the number of frames between them divided by the
+                 total number of frames.
         """
         # Create lower triangular distance matrix
         dist = np.zeros((n, n), dtype=np.float32)
@@ -90,11 +181,21 @@ class BaseSummarizer(abc.ABC):
 
         return tiles_per_row * tiles_per_col
     
-    def get_key_frames(self, input_path):
-        return Summarizer.ALGOS[self.algo](self, input_path,
-            time_smoothing=self.time_smoothing)
+    def get_key_frames(self, input_path: str):
+        """
+        @brief TODO
+        @details This is the key method that the child classes should 
+                 implement.
+        @param[in]  input_path  TODO
+        """
+        #return Summarizer.ALGOS[self.algo](self, input_path,
+        #    time_smoothing=self.time_smoothing)
+        raise NotImplemented()
 
     def generate_segbar(self):
+        """
+        @brief TODO
+        """
         # Create an empty segmentation bar
         segbar_width = self.collage.shape[1]
         segbar = np.full((self.segbar_height, segbar_width, 3), 255, 
@@ -107,7 +208,8 @@ class BaseSummarizer(abc.ABC):
         # Loop over segmentation bar columns
         for c in range(segbar_width):
             # Find the frame corresponding to this vertical bar
-            frame_idx = int(round(float(c) * len(self.labels_) / segbar_width))
+            frame_idx = int(round(
+                float(c) * len(self.labels_) / segbar_width))
             frame_idx = np.clip(frame_idx, 0, len(self.labels_) - 1)
 
             # Find the cluster index of the frame
@@ -126,6 +228,16 @@ class BaseSummarizer(abc.ABC):
             segbar[:, idx] = key_frame_line_colour
 
         return segbar
+
+    def summarize(self, input_path: str) -> np.ndarray:
+        """
+        @brief This method should return a BGR image containing a storyboard 
+               of the input video.
+        @param[in]  input_path  Input path to be passed to the summarize()
+                                method of a child that implements this
+                                interface class.
+        """
+        raise NotImplemented()
     
     def _insert_frame(self, im, i, j):
         """@brief Insert image into the collage."""
