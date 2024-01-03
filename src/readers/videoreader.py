@@ -7,7 +7,8 @@
 import imageio_ffmpeg
 
 # My imports
-from .reader import BaseReader
+from ..reader.base import BaseReader
+
 
 class VideoReader(BaseReader):
 

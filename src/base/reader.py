@@ -12,21 +12,25 @@ class BaseReader(abc.ABC):
     @class BaseReader defines the skeleton that any reader used by the video
            summarizer should implement.
     """
+    @abstractmethod
     def __init__(self, path: str, *args, **kwargs)) -> None:
         """
-        @param[in]  path  Path to the input.
+        @param[in]  path  Path to the input. Might be a file or a directory
+                          path. This will depend on every particular reader.
         """
         raise NotImplemented()
 
     def __iter__(self):
         return self
 
+    @abstractmethod
     def __next__(self):
         """
         @returns the next frame of the video.
         """
         raise NotImplemented()
 
+    @abstractmethod
     def num_frames(self) -> int:
         """
         @returns This method should return the total number of frames of the
@@ -34,7 +38,7 @@ class BaseReader(abc.ABC):
         """
         raise NotImplemented()
 
-    @property
+    @abstractproperty
     def width(self):
         """
         @returns This method should return the width of all the frames of 
@@ -42,7 +46,7 @@ class BaseReader(abc.ABC):
         """ 
         raise NotImplemented()
 
-    @property
+    @abstractproperty
     def height(self):
         """
         @returns This method should return the height of all the frames of

@@ -9,7 +9,7 @@ import PIL
 import numpy as np
 
 # My imports
-from .reader import Reader
+from ..base.reader import Reader
 
 
 class ImageDirReader(Reader):
