@@ -9,10 +9,10 @@ import PIL
 import numpy as np
 
 # My imports
-from ..base.reader import Reader
+from .base_reader import BaseReader
 
 
-class ImageDirReader(Reader):
+class ImageDirReader(BaseReader):
     """
     @class ImageDirReader is meant to make the process of reading a video that
            is stored as a folder of images easy.

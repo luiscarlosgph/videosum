@@ -20,9 +20,6 @@ class BaseReader(abc.ABC):
         """
         raise NotImplemented()
 
-    def __iter__(self):
-        return self
-
     @abstractmethod
     def __next__(self):
         """
@@ -37,6 +34,9 @@ class BaseReader(abc.ABC):
                  video.
         """
         raise NotImplemented()
+
+    def __iter__(self):
+        return self
 
     @abstractproperty
     def width(self):

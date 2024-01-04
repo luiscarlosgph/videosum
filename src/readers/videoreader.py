@@ -7,12 +7,13 @@
 import imageio_ffmpeg
 
 # My imports
-from ..reader.base import BaseReader
+from .basereader import BaseReader
 
 
 class VideoReader(BaseReader):
 
-    def __init__(self, path: str, sampling_rate: int = None, pix_fmt='rgb24'):
+    def __init__(self, path: str, sampling_rate: int = None, 
+                 pix_fmt: str = 'rgb24'):
         """
         @param[in]  path           Path to the video.
         @param[in]  sampling_rate  How many frames per second to get from the
