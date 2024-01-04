@@ -7,10 +7,14 @@
 import imageio_ffmpeg
 
 # My imports
-from .basereader import BaseReader
+from .base_reader import BaseReader
 
 
 class VideoReader(BaseReader):
+    """
+    @class VideoReader is a class that helps to read the frames contained
+           in a video file such as an mp4.
+    """
 
     def __init__(self, path: str, sampling_rate: int = None, 
                  pix_fmt: str = 'rgb24'):

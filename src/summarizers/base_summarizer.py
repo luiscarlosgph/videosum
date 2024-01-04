@@ -9,7 +9,7 @@
 import abc
 
 # My imports
-from .reader import BaseReader
+from ..readers.base_reader import BaseReader
 
 
 class BaseSummarizer(abc.ABC):
@@ -32,8 +32,7 @@ class BaseSummarizer(abc.ABC):
                  time_segmentation: bool = False, 
                  segbar_height: int = 32, 
                  time_smoothing: float = 0., 
-                 compute_fid: bool = False, 
-                 *args, **kwargs) -> None:
+                 compute_fid: bool = False) -> None:
         """
         @brief This method constructs the 'base' part of the 
                summarizer, leaving the rest of the construction to 
@@ -368,4 +367,5 @@ class BaseSummarizer(abc.ABC):
         x_start = j * self.tile_width
         x_end = x_start + im_resized.shape[1] 
         self.collage[y_start:y_end, x_start:x_end] = im_resized
+
 

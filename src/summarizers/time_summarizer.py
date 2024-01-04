@@ -9,23 +9,32 @@ import tqdm
 import numpy as np
 
 # My imports
-from ..base.summarizer import BaseSummarizer 
+from .base_summarizer import BaseSummarizer 
 
 
 class TimeSummarizer(BaseSummarizer):
+    """
+    @class TimeSummarizer is a class that picks the key frames of a video
+           in an evenly spaced manner.
+    """
 
-    def __init__(self):
-        # TODO
-        raise NotImplemented()
+    def __init__(self, 
+                 reader: BaseReader, 
+                 number_of_frames: int = 100, 
+                 width: int = 1920, 
+                 height: int = 1080,
+                 time_segmentation: bool = False, 
+                 segbar_height: int = 32, 
+                 compute_fid: bool = False):
+        super().__init__(reader, number_of_frames, width, height, 
+            time_segmentation, segbar_height, 0., compute_fid)
 
-    def get_key_frames(self, input_path):
+    def get_key_frames(self):
         """
         @brief Get a list of key frames from the video. 
                The key frames are simply evenly spaced along the 
                video.
         
-        @param[in]  input_path      Path to the video file.
-
         @returns a list of Numpy/OpenCV BGR images. 
                  After this method is executed the list self.indices_ 
                  will hold the list of frame indices that represent 
@@ -72,4 +81,4 @@ class TimeSummarizer(BaseSummarizer):
 
 
 if __name__ == '__main__':
-    raise RuntimeError('[ERROR] time.py cannot be run as a script.')
+    raise RuntimeError('[ERROR] time_summarizer.py cannot be run as a script.')

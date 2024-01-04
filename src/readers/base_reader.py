@@ -7,6 +7,7 @@
 """
 import abc
 
+
 class BaseReader(abc.ABC):
     """
     @class BaseReader defines the skeleton that any reader used by the video

@@ -6,9 +6,9 @@
 import os
 
 # My imports
-import .basereader import BaseReader
-import .videoreader import VideoReader
-import .imagedirreader import ImageDirReader
+from .base_reader import BaseReader
+from .video_reader import VideoReader
+from .imagedir_reader import ImageDirReader
 
 
 class ReaderFactory():
