@@ -19,7 +19,8 @@ import multiprocessing
 import logging
 
 # My imports
-import videosum
+from reader.reader_factory import ReaderFactory
+from summarizers.summarizer_factory import SummarizerFactory
 
 
 def help(short_option):
@@ -226,47 +227,33 @@ def main():
     # Setup logging
     setup_logging(args.log)
 
-    # Detect the type of input provided by the user 
+    # First we need to know if the user wants to summarize only one video or
+    # many videos
     input_type = detect_input_type(args)  
     
     # Summarize whatever the user wants to summarize
-    if input_type == 'video': 
+    if input_type == 'video' or input_type == 'frame': 
         # The input is a single video
 
+        # Create video reader: the factory checks what the input is and 
+        #                      creates the correct reader
+        reader = ReaderFactory(args.input, args.fps)
+
         # Create video summarizer
-        vidsum = videosum.VideoSummarizer(args.algo, args.nframes, 
-                                          args.width, args.height, 
-                                          time_segmentation=args.time_segmentation,
-                                          fps=args.fps, 
-                                          time_smoothing=args.time_smoothing,
-                                          compute_fid=args.metric)
-        # The input is a file
+        vidsum = SummarizerFactory(args.algo, reader, args.nframes, 
+                                   args.width, args.height, 
+                                   time_segmentation=args.time_segmentation,
+                                   segbar_height=32, 
+                                   time_smoothing=args.time_smoothing,
+                                   compute_fid=args.metric)
+        # Summarize video and generate storyboard
         tic = time.time()
-        im = vidsum.summarize(args.input)
+        im = vidsum.summarize()
         toc = time.time()
         print("[INFO] Video summarized in {} seconds.".format(toc - tic))
+
+        # Write storyboard as an image to an output file
         cv2.imwrite(args.output, im, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
-
-    elif input_type == 'frame':
-        # The input is a folder of images corresponding to video frames
-        input_dir = args.input
-        output_path = args.output
-
-        # Create video summarizer
-        vidsum = videosum.ImageDirSummarizer(args.algo, args.nframes, 
-            args.width, args.height, 
-            time_segmentation=args.time_segmentation,
-            time_smoothing=args.time_smoothing,
-            compute_fid=args.metric)
-        try:
-            # Summarise video
-            im = vidsum.summarize(input_dir)
-
-            # Save summary to the output folder
-            cv2.imwrite(output_path, im, 
-                [int(cv2.IMWRITE_JPEG_QUALITY), 100])
-        except IOError as e:
-            logging.info("The video {} is broken. Skipping.".format(os.path.basename(input_path)))
 
     elif input_type == 'many_videos':
         # The input is a folder of videos
