@@ -10,6 +10,7 @@ import numpy as np
 
 # My imports
 from .base_summarizer import BaseSummarizer 
+from ..readers.base_reader import BaseReader
 
 
 class TimeSummarizer(BaseSummarizer):

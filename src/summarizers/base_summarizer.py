@@ -7,6 +7,7 @@
 @date   31 Dec 2023.
 """
 import abc
+import numpy as np
 
 # My imports
 from ..readers.base_reader import BaseReader
@@ -105,7 +106,7 @@ class BaseSummarizer(abc.ABC):
         # Initialise the array that holds the indices of the key frames
         self.indices_ = None
     
-    @abstractmethod
+    @abc.abstractmethod
     def get_key_frames(self):
         """
         @brief This method is meant to analyze the video and return the
@@ -158,8 +159,7 @@ class BaseSummarizer(abc.ABC):
 
         return segbar
 
-    def check_storyboard_validity(self, key_frames: List[np.ndarray]) 
-            -> None:
+    def check_storyboard_validity(self, key_frames: list[np.ndarray]) -> None:
         """
         @brief Asserts that if there are enough frames to make a 
                collage, we should have a full collage.
