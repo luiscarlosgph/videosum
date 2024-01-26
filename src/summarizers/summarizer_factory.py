@@ -56,9 +56,15 @@ class SummarizerFactory():
                                        summary to the whole video.
         @returns a constructed video summarizer for the requested method.
         """
-        if algo == 'time': 
+        if algo == 'time':
             return TimeSummarizer(reader, number_of_frames, width, height,
                 time_segmentation, segbar_height, compute_fid)
+        elif algo == 'inception':
+            raise NotImplemented()
+        elif algo == 'uid':
+            raise NotImplemented()
+        elif algo == 'scda':
+            raise NotImplemented()
         else:
             error_msg = "[ERROR] The summarization method {} is not " \
                 + "recognized."
@@ -66,4 +72,5 @@ class SummarizerFactory():
 
 
 if __name__ == '__main__':
-    raise RuntimeError('[ERROR] summarizer_factory.py cannot be run as a script.')
+    raise RuntimeError('[ERROR] summarizer_factory.py cannot be run as '
+        'a script.')

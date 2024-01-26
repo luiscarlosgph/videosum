@@ -153,7 +153,7 @@ import videosum
 nframes = 100
 
 # Choose the dimensions of the collage
-widtth = 1920
+width = 1920
 height = 1080
 
 # Choose the algotrithm that selects the key frames

@@ -8,6 +8,7 @@
 """
 import abc
 import numpy as np
+import cv2
 
 # My imports
 from ..readers.base_reader import BaseReader
@@ -197,8 +198,7 @@ class BaseSummarizer(abc.ABC):
 
         # Ensure that summariser actually filled the labels
         assert(self.labels_ is not None)
-        assert(len(self.labels_) == self.reader.num_frames(
-            input_path, self.fps))
+        assert(len(self.labels_) == self.reader.num_frames())
 
         # If the video has more frames than those requested, 
         # the collage should have all the frames filled

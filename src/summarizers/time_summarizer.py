@@ -43,20 +43,17 @@ class TimeSummarizer(BaseSummarizer):
         """
         key_frames = []
 
-        # Initialise video reader
-        reader = videosum.VideoReader(input_path, 
-            sampling_rate=self.fps)
-
         # Get the properties of the video
-        w, h = reader.size
-        nframes = videosum.VideoReader.num_frames(input_path, self.fps)
+        w = self.reader.width
+        h = self.reader.height 
+        nframes = self.reader.num_frames()
         
         # We know the key frames straight away 
         self.indices_ = np.round(np.linspace(0, nframes - 1, 
             num=self.number_of_frames)).astype(int)
 
         frame_count = 0
-        for raw_frame in tqdm.tqdm(reader):
+        for raw_frame in tqdm.tqdm(self.reader):
             if frame_count in self.indices_: 
                 # Convert video frame into a BGR OpenCV/Numpy image
                 im = np.frombuffer(raw_frame, 

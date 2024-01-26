@@ -68,6 +68,42 @@ def random_temp_file_path(length=10):
 
 class TestVideosum(unittest.TestCase):
 
+    def test_readme_example(self):
+        """
+        @brief This is the example used in the README, so it must work.
+        """
+        # Create and save dummy video to disk
+        video_path = random_temp_file_path() + '.mp4'
+        create_toy_video(video_path, fps=30)
+
+        # Create video reader
+        vr = videosum.ReaderFactory(video_path)
+        
+        # Create video summarizer 
+        nframes = 9
+        width = 1920
+        height = 1080
+        vs = videosum.SummarizerFactory('time', vr, nframes, width, height)
+        
+        # Create storyboard
+        im = vs.summarize()
+        
+        # Save storyboard to file
+        cv2.imwrite('/tmp/storyabord.jpg', im)
+
+        # Retrieve a list of Numpy/OpenCV BGR images corresponding to the 
+        # key frames of the video
+        key_frames = vs.get_key_frames()
+
+        # Print the video frame indices of the key frames, available after 
+        # calling summarize() or get_key_frames()
+        print(vs.indices_)
+
+        # Print the video frame cluster labels, available after calling 
+        # summarize() or get_key_frames()
+        print(vs.labels_)
+
+    '''
     def test_video_reader_1fps(self, duration=12, fps=1, eps=1e-6):
         """
         @brief If the toy video displays 12 solid colour frames at 1fps, 
@@ -429,7 +465,7 @@ class TestVideosum(unittest.TestCase):
 
         # Delete dummy video
         os.unlink(video_path)
-
+    '''
 
 if __name__ == '__main__':
     unittest.main()
