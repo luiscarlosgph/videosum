@@ -68,9 +68,10 @@ def random_temp_file_path(length=10):
 
 class TestVideosum(unittest.TestCase):
 
-    def test_readme_example(self):
+    def test_readme_like_time_example(self):
         """
-        @brief This is the example used in the README, so it must work.
+        @brief Test the 'time' method in a way similar to the example in the
+               README.
         """
         # Create and save dummy video to disk
         video_path = random_temp_file_path() + '.mp4'
@@ -89,7 +90,8 @@ class TestVideosum(unittest.TestCase):
         im = vs.summarize()
         
         # Save storyboard to file
-        cv2.imwrite('/tmp/storyabord.jpg', im)
+        fpath = os.path.join(tempfile.gettempdir(), 'storyabord.jpg')
+        cv2.imwrite(fpath, im)
 
         # Retrieve a list of Numpy/OpenCV BGR images corresponding to the 
         # key frames of the video
@@ -102,6 +104,46 @@ class TestVideosum(unittest.TestCase):
         # Print the video frame cluster labels, available after calling 
         # summarize() or get_key_frames()
         print(vs.labels_)
+    
+    def test_readme_like_inception_example(self):
+        """
+        @brief Testing the 'inception' method in a similar way to the example
+               in the README. 
+        """
+        # Create and save dummy video to disk
+        video_path = random_temp_file_path() + '.mp4'
+        create_toy_video(video_path, fps=30)
+
+        # Create video reader
+        vr = videosum.ReaderFactory(video_path)
+        
+        # Create video summarizer 
+        nframes = 9
+        width = 1920
+        height = 1080
+        vs = videosum.SummarizerFactory('inception', vr, nframes, 
+                                        width, height)
+        
+        # Create storyboard
+        im = vs.summarize()
+        
+        # Save storyboard to file
+        fpath = os.path.join(tempfile.gettempdir(), 'storyabord.jpg')
+        cv2.imwrite(fpath, im)
+
+        # Retrieve a list of Numpy/OpenCV BGR images corresponding to the 
+        # key frames of the video
+        key_frames = vs.get_key_frames()
+
+        # Print the video frame indices of the key frames, available after 
+        # calling summarize() or get_key_frames()
+        print(vs.indices_)
+
+        # Print the video frame cluster labels, available after calling 
+        # summarize() or get_key_frames()
+        print(vs.labels_)
+
+
 
     '''
     def test_video_reader_1fps(self, duration=12, fps=1, eps=1e-6):

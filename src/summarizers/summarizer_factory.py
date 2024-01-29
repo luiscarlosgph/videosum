@@ -9,6 +9,7 @@ import os
 from ..readers.base_reader import BaseReader
 from .base_summarizer import BaseSummarizer
 from .time_summarizer import TimeSummarizer
+from .inception_summarizer import InceptionSummarizer
 
 
 class SummarizerFactory():
@@ -60,7 +61,12 @@ class SummarizerFactory():
             return TimeSummarizer(reader, number_of_frames, width, height,
                 time_segmentation, segbar_height, compute_fid)
         elif algo == 'inception':
-            raise NotImplemented()
+            return InceptionSummarizer(reader, number_of_frames, 
+                                       width, height, 
+                                       time_segmentation, 
+                                       segbar_height, 
+                                       time_smoothing,
+                                       compute_fid)
         elif algo == 'uid':
             raise NotImplemented()
         elif algo == 'scda':

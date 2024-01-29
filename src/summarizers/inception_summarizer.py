@@ -16,6 +16,7 @@ import time
 # My imports 
 from .base_summarizer import BaseSummarizer 
 from ..readers.base_reader import BaseReader
+from ..inception_feature_extractor import InceptionFeatureExtractor
 
 
 class InceptionSummarizer(BaseSummarizer):
@@ -63,14 +64,12 @@ class InceptionSummarizer(BaseSummarizer):
         """
         latent_vectors = []
 
-        # Initialise video reader
-        reader = videosum.VideoReader(input_path, 
-                                      sampling_rate=self.fps, 
-                                      pix_fmt='rgb24')
-        w, h = reader.size
+        # Get video reader info
+        w = self.reader.width
+        h = self.reader.height
 
         # Initialise Inception network model
-        model = videosum.InceptionFeatureExtractor('vector')
+        model = InceptionFeatureExtractor('vector')
 
         # Collect feature vectors for all the frames
         print('[INFO] Collecting feature vectors for all ' \

@@ -1,6 +1,6 @@
 """
-@brief   This module provides a class to easily compute the Frechet Inception 
-         Distance between to Numpy/OpenCV BGR images.
+@brief   This module provides functions to easily compute the 
+         Frechet Inception Distance between two Numpy/OpenCV BGR images.
 
 @author  Luis C. Garcia Peraza Herrera (luiscarlos.gph@gmail.com).
 @date    21 Jul 2022.
@@ -12,17 +12,22 @@ import scipy
 import numba
 
 # My imports
-import videosum
+# TODO
 
 
 @numba.jit(nopython=True)
-def numba_uid(X, eps=1e-6):
+def numba_uid(X: np.ndarray, eps: np.float64 = 1e-6) -> np.ndarray:
     """
     @brief   The Frechet Inception Distance is computed between two 
-             distributions. Here we just have a list of feature vectors. 
+             distributions.
              Inspired by FID, in this function we define the 
              Univariate Inception Distance (UID), and compute a distance
              matrix from each vector in X to each other vector in X.
+
+    @param[in]  X  Matrix that has in each row the feature vector of a
+                   different image, shape (N, M), where N is the number of
+                   feature vectors and M is the number of features contained
+                   within each vector.
 
     @details In this function we assume that each feature vector contains
              many samples from the same univariate Gaussian distribution.
@@ -32,7 +37,7 @@ def numba_uid(X, eps=1e-6):
 
              uid = sqrt((u_1 - u_2)**2 + (sigma_1 - sigma_2)**2)
              
-    @details a distance matrix.
+    @details a distance matrix of shape (N, N).
     """
     uid = np.zeros((X.shape[0], X.shape[0]), dtype=np.float64)
     for i in range(X.shape[0]):
@@ -51,83 +56,13 @@ def numba_uid(X, eps=1e-6):
     return uid
 
 
-class InceptionFeatureExtractor():
-    def __init__(self, mode: str, device: str = 'cuda'):
-        self.mode = mode
-        self.device = device
-        
-        # Initialise model
-        if self.mode == 'vector':
-            self.model = videosum.InceptionV3().to(device)
-        elif self.mode == 'tensor':
-            self.model = videosum.InceptionV3(output_vector=False).to(device)
-        else:
-            raise ValueError('[ERROR] Output mode not recognized.')
-        self.model.eval()
+class FrechetInceptionDistance:
     
-    def _get_latent_features(self, im):
-        """
-        @brief  Given a BGR image, this method computes a 1D feature vector.
-
-        @param[in]  im  Numpy/OpenCV BGR image, shape (H, W, 3),
-                        dtype = np.uint8. 
-                        Could also be a batch of images with 
-                        shape (B, H, W, 3).
-        
-        @returns a Numpy ndarray of 2048 channels.
-        """
-        single_image = True if len(im.shape) == 3 else False
-
-        # Convert the image to RGB in range [0, 1]
-        im = im[...,::-1].copy().astype(np.float32) / 255.
-
-        # Convert image from Numpy to Pytorch and upload it to GPU
-        im = torch.from_numpy(im).to(self.device)
-
-        # Convert image to shape (B, 3, H, W)
-        if single_image:
-            im = im.permute(2, 0, 1).unsqueeze(0)
-        else:
-            im = im.permute(0, 3, 1, 2)
-
-        # Run inference on the image and get a vector of shape (2048,)
-        with torch.no_grad():
-            if single_image:
-                output = self.model(im)[0].flatten().cpu().detach().numpy()
-            else:
-                bs, chan, _, _ = im.shape
-                output = torch.squeeze(self.model(im)[0]).cpu().detach().numpy()
-
-        return output
-
-    def get_latent_feature_vector(self, im):
-        assert(self.mode == 'vector')
-        return self._get_latent_features(im)
-    
-    def get_latent_feature_tensor(self, im):
-        assert(self.mode == 'tensor')
-        #return self._get_latent_features(im).reshape((8, 8, 2048))
-        return self._get_latent_features(im).reshape((2048, 8, 8))
-
     @staticmethod
     def frechet_inception_distance(vec1, vec2):
-        return InceptionFeatureExtractor._calculate_frechet_distance(
+        return FrechetInceptionDistance._calculate_frechet_distance(
             np.mean(vec1), np.cov(vec1), np.mean(vec2), np.cov(vec2))
     
-    #@staticmethod
-    #def frechet_inception_distance(mu_sigma_1, mu_sigma_2):
-    #    """
-    #    @brief Compute the Frechet inception distance between two 
-    #           distributions.
-    # 
-    #    @param[in]  mu_sigma_1  Numpy array of arrays [[means], [covs]] for 
-    #                            distribution 1.
-    #    @param[in]  mu_sigma_2  Numpy array of arrays [[means], [covs]] for 
-    #                            distribution 2.
-    #    """
-    #    return InceptionFeatureExtractor._calculate_frechet_distance(
-    #        mu_sigma_1[0], mu_sigma_1[1], mu_sigma_2[0], mu_sigma_2[0])
-
     @staticmethod 
     def _calculate_frechet_distance(mu1, sigma1, mu2, sigma2, eps=1e-6):
         """
@@ -188,4 +123,4 @@ class InceptionFeatureExtractor():
 
 
 if __name__ == '__main__':
-    raise RuntimeError('[ERROR] The FID module is not a script.')
+    raise RuntimeError('[ERROR] The fid.py module is not a script.')
