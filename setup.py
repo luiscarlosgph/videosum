@@ -20,11 +20,13 @@ setuptools.setup(name='videosum',
         'videosum',
         'videosum.readers',
         'videosum.summarizers',
+        'videosum.networks',
     ],
     package_dir={
         'videosum': 'src',
         'videosum.readers': 'src/readers',
         'videosum.summarizers': 'src/summarizers',
+        'videosum.networks': 'src/networks',
     },
     install_requires = [
         'numpy==1.25.2', 

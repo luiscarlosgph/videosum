@@ -332,20 +332,10 @@ class TestVideosum(unittest.TestCase):
         vs = videosum.SummarizerFactory('inception', vr, nframes, width, 
             height, time_segmentation=1)
 
-        print('--------------------------------------------------------------')
-        print('Hola!')
-        print('--------------------------------------------------------------')
-        
         # Make collage
         new_collage_path = 'test/data/inception_dummy.png'
         new_collage = vs.summarize()
-        print('--------------------------------------------------------------')
-        print('Hola 2!')
-        print('--------------------------------------------------------------')
         cv2.imwrite(new_collage_path, new_collage)
-        print('--------------------------------------------------------------')
-        print('Hola 3!')
-        print('--------------------------------------------------------------')
         
         # Compare the collage with the one stored in the test folder
         old_collage_path = 'test/data/test_inception.png'

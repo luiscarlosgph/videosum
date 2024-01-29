@@ -48,6 +48,23 @@ class VideoReader(BaseReader):
 
     def __next__(self):
         return self.reader_.__next__()
+
+    def rewind(self):
+        # Open video reader
+        if self.output_fps is None:
+            self.reader_ = imageio_ffmpeg.read_frames(self.path,
+                input_params=['-hide_banner'],
+                pix_fmt=self.pix_fmt)
+        else:
+            self.reader_ = imageio_ffmpeg.read_frames(self.path, 
+                pix_fmt=self.pix_fmt, 
+                input_params=['-hide_banner'],
+                output_params=[
+                    '-filter:v', "fps={}".format(self.output_fps),
+                ])
+
+        # Get videeo info
+        self.meta_ = self.reader_.__next__()
     
     def num_frames(self):
         """

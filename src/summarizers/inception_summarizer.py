@@ -68,23 +68,18 @@ class InceptionSummarizer(BaseSummarizer):
         w = self.reader.width
         h = self.reader.height
         
-        print('caca 0')
-
         # Initialise Inception network model
         model = InceptionFeatureExtractor('vector')
         
-        print('caca 1')
-
         # Collect feature vectors for all the frames
         print('[INFO] Collecting feature vectors for all ' \
             + 'the frames ...')
         tic = time.time() 
         finished = False
         while not finished:
-            print('caca 2')
             # Collect a batch of frames from the video
             frame_batch = []
-            for raw_frame in reader:
+            for raw_frame in self.reader:
                 # Convert video frame into a BGR OpenCV/Numpy image
                 im = np.frombuffer(raw_frame, 
                     dtype=np.uint8).reshape(
@@ -136,7 +131,7 @@ class InceptionSummarizer(BaseSummarizer):
 
             # Compute the distance matrix with time smoothing 
             # if requested
-            fdm = videosum.VideoSummariser.frame_distance_matrix(
+            fdm = BaseSummarizer.frame_distance_matrix(
                 l2norm.shape[0])
             dist = (1. - self.time_smoothing) * l2norm \
                 + self.time_smoothing * fdm
@@ -159,11 +154,9 @@ class InceptionSummarizer(BaseSummarizer):
         # Retrieve the video frames corresponding to the cluster means
         print('[INFO] Retrieving key frames ...')
         key_frames = []
-        reader = videosum.VideoReader(input_path, 
-                                      sampling_rate=self.fps, 
-                                      pix_fmt='rgb24')
+        self.reader.rewind()
         counter = 0
-        for raw_frame in tqdm.tqdm(reader):
+        for raw_frame in tqdm.tqdm(self.reader):
             if counter in self.indices_:
                 # Convert video frame into a BGR OpenCV/Numpy image
                 im = np.frombuffer(raw_frame, 

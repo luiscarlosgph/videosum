@@ -12,7 +12,7 @@ import scipy
 import numba
 
 # My imports
-from .inception import InceptionV3
+from .networks.inception import InceptionV3
 
 
 class InceptionFeatureExtractor():
@@ -26,13 +26,9 @@ class InceptionFeatureExtractor():
         self.mode = mode
         self.device = device
 
-        print('DEBUG: inception feature extractor 1')
-        
         # Initialise model
         if self.mode == 'vector':
-            print('DEBUG: inception feature extractor 2')
             self.model = InceptionV3().to(device)
-            print('DEBUG: inception feature extractor 3')
         elif self.mode == 'tensor':
             self.model = InceptionV3(output_vector=False).to(device)
         else:

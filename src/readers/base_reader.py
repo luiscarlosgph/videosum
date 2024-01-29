@@ -36,6 +36,14 @@ class BaseReader(abc.ABC):
         """
         raise NotImplemented()
 
+    @abc.abstractmethod
+    def rewind(self):
+        """
+        @brief Brings back the frame reader to the start of the video so we
+               can iterate over it again.
+        """
+        raise NotImplemented()
+
     def __iter__(self):
         return self
 
