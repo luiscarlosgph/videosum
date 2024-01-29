@@ -106,7 +106,6 @@ class TestVideosum(unittest.TestCase):
         # summarize() or get_key_frames()
         print(vs.labels_)
     
-    '''
     def test_readme_like_inception_example(self):
         """
         @brief Testing the 'inception' method in a similar way to the example
@@ -145,7 +144,6 @@ class TestVideosum(unittest.TestCase):
         # Print the video frame cluster labels, available after calling 
         # summarize() or get_key_frames()
         print(vs.labels_)
-    '''
 
     def test_video_reader_1fps(self, duration=12, fps=1, eps=1e-6):
         """
@@ -347,7 +345,6 @@ class TestVideosum(unittest.TestCase):
         os.unlink(video_path)
         os.unlink(new_collage_path)
 
-    '''
     def test_same_inception_collage_at_different_fps(self, eps=1e-6):
         """
         @brief No matter the FPS of the video there are 12 solid colors in the
@@ -356,17 +353,21 @@ class TestVideosum(unittest.TestCase):
         # Create dummy video
         video_path = random_temp_file_path() + '.mp4'
         create_toy_video(video_path, fps=30)
+
+        # Create video readers
+        vr_30fps = videosum.ReaderFactory(video_path, output_fps=30)
+        vr_60fps = videosum.ReaderFactory(video_path, output_fps=60)
         
         # Make collage at different fps
         width = 640
         height = 480
         nframes = 12
-        vs_30fps = videosum.VideoSummariser('inception', nframes, width, height, 
-                                           time_segmentation=0, fps=30)
-        vs_60fps = videosum.VideoSummariser('inception', nframes, width, height, 
-                                           time_segmentation=0, fps=60)
-        collage_30fps = vs_30fps.summarise(video_path)
-        collage_60fps = vs_60fps.summarise(video_path)
+        vs_30fps = videosum.SummarizerFactory('inception', vr_30fps, nframes, width, height,
+                                              time_segmentation=0)
+        vs_60fps = videosum.SummarizerFactory('inception', vr_60fps, nframes, width, height, 
+                                              time_segmentation=0)
+        collage_30fps = vs_30fps.summarize()
+        collage_60fps = vs_60fps.summarize()
             
         # Make sure that there is no difference, the key frames should be the same
         diff = np.sum(np.abs(collage_30fps.astype(np.float32) - collage_60fps.astype(np.float32)))
@@ -375,6 +376,7 @@ class TestVideosum(unittest.TestCase):
         # Delete dummy video and new collage
         os.unlink(video_path)
 
+    '''
     def test_that_indices_and_labels_are_correctly_generated(self, eps=1e-6):
         """
         @brief self.labels_ and self.indices_ must be generate after the video
