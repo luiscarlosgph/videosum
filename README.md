@@ -28,7 +28,7 @@ Supported platforms
 Use the package from a Docker container
 ---------------------------------------
 
-If you want to quickly try the package, this is the easiest way, provided that you have Docker installed with GPU support. If you do not have it, you can follow [this](https://github.com/luiscarlosgph/how-to/tree/main/docker) tutorial to install Docker with GPU support.
+If you want to quickly try the package, **this is the easiest way**, provided that you have Docker installed with GPU support. If you do not have it, you can follow [this](https://github.com/luiscarlosgph/how-to/tree/main/docker) tutorial to install Docker with GPU support.
 Alternatively, you can install the `videosum` package from `pip` or from source, following the next sections of this README.
 
 1. Download repository:
