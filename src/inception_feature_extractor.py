@@ -25,10 +25,14 @@ class InceptionFeatureExtractor():
     def __init__(self, mode: str, device: str = 'cuda'):
         self.mode = mode
         self.device = device
+
+        print('DEBUG: inception feature extractor 1')
         
         # Initialise model
         if self.mode == 'vector':
+            print('DEBUG: inception feature extractor 2')
             self.model = InceptionV3().to(device)
+            print('DEBUG: inception feature extractor 3')
         elif self.mode == 'tensor':
             self.model = InceptionV3(output_vector=False).to(device)
         else:

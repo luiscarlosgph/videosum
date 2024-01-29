@@ -9,6 +9,7 @@
 import abc
 import numpy as np
 import cv2
+import seaborn as sns
 
 # My imports
 from ..readers.base_reader import BaseReader

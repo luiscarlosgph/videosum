@@ -16,22 +16,22 @@ class VideoReader(BaseReader):
            in a video file such as an mp4.
     """
 
-    def __init__(self, path: str, sampling_rate: int = None, 
+    def __init__(self, path: str, output_fps: int = None, 
                  pix_fmt: str = 'rgb24'):
         """
-        @param[in]  path           Path to the video.
-        @param[in]  sampling_rate  How many frames per second to get from the
-                                   video, i.e. sampling fps.
-        @param[in]  pix_fmt        Pixel format string compatible with
-                                   imageio_ffmpeg.
+        @param[in]  path        Path to the video.
+        @param[in]  output_fps  How many frames per second to get from the
+                                video, i.e. sampling fps.
+        @param[in]  pix_fmt     Pixel format string compatible with
+                                imageio_ffmpeg.
         """
         # Store parameters
-        self.path = path
-        self.sampling_rate = sampling_rate
-        self.pix_fmt = pix_fmt
+        self._path = path
+        self._output_fps = output_fps
+        self._pix_fmt = pix_fmt
         
         # Open video reader
-        if self.sampling_rate is None:
+        if self.output_fps is None:
             self.reader_ = imageio_ffmpeg.read_frames(self.path,
                 input_params=['-hide_banner'],
                 pix_fmt=self.pix_fmt)
@@ -40,7 +40,7 @@ class VideoReader(BaseReader):
                 pix_fmt=self.pix_fmt, 
                 input_params=['-hide_banner'],
                 output_params=[
-                    '-filter:v', "fps={}".format(self.sampling_rate),
+                    '-filter:v', "fps={}".format(self.output_fps),
                 ])
 
         # Get videeo info
@@ -55,13 +55,13 @@ class VideoReader(BaseReader):
         @returns the number of frames as an integer.
         """
         # Create video reader
-        if self.sampling_rate is None:
+        if self.output_fps is None:
             reader = imageio_ffmpeg.read_frames(self.path, pix_fmt='rgb24', 
                 input_params=['-hide_banner'])
         else:
             reader = imageio_ffmpeg.read_frames(self.path, pix_fmt='rgb24', 
                 input_params=['-hide_banner'],
-                output_params=['-filter:v', "fps={}".format(self.sampling_rate)])
+                output_params=['-filter:v', "fps={}".format(self.output_fps)])
 
         # Read videeo info
         _ = reader.__next__()
@@ -90,10 +90,31 @@ class VideoReader(BaseReader):
         return self.meta_['duration']
 
     @property
-    def fps(self):
+    def input_fps(self):
+        """
+        @returns the actual FPS of the original video.
+        """
         return self.meta_['fps']
 
+    @property
+    def output_fps(self):
+        """
+        @returns the FPS at which the reader will actually return the frames.
+        """
+        return self._output_fps
+
+    @property
+    def path(self):
+        """
+        @returns the path of the original input video.
+        """
+        return self._path 
     
+    @property
+    def pix_fmt(self):
+        return self._pix_fmt
+
+
 if __name__ == '__main__':
     raise RuntimeError('[ERROR] The module videosum.videoreader is not a script.')
 

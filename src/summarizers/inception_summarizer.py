@@ -67,9 +67,13 @@ class InceptionSummarizer(BaseSummarizer):
         # Get video reader info
         w = self.reader.width
         h = self.reader.height
+        
+        print('caca 0')
 
         # Initialise Inception network model
         model = InceptionFeatureExtractor('vector')
+        
+        print('caca 1')
 
         # Collect feature vectors for all the frames
         print('[INFO] Collecting feature vectors for all ' \
@@ -77,6 +81,7 @@ class InceptionSummarizer(BaseSummarizer):
         tic = time.time() 
         finished = False
         while not finished:
+            print('caca 2')
             # Collect a batch of frames from the video
             frame_batch = []
             for raw_frame in reader:

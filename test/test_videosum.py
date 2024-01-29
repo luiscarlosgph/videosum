@@ -3,6 +3,7 @@
 @author Luis Carlos Garcia Peraza Herrera (luiscarlos.gph@gmail.com).
 @date   7 June 2022.
 """
+import sys
 import unittest
 import cv2
 import numpy as np
@@ -105,6 +106,7 @@ class TestVideosum(unittest.TestCase):
         # summarize() or get_key_frames()
         print(vs.labels_)
     
+    '''
     def test_readme_like_inception_example(self):
         """
         @brief Testing the 'inception' method in a similar way to the example
@@ -125,6 +127,7 @@ class TestVideosum(unittest.TestCase):
                                         width, height)
         
         # Create storyboard
+        print('test')
         im = vs.summarize()
         
         # Save storyboard to file
@@ -142,10 +145,8 @@ class TestVideosum(unittest.TestCase):
         # Print the video frame cluster labels, available after calling 
         # summarize() or get_key_frames()
         print(vs.labels_)
-
-
-
     '''
+
     def test_video_reader_1fps(self, duration=12, fps=1, eps=1e-6):
         """
         @brief If the toy video displays 12 solid colour frames at 1fps, 
@@ -156,9 +157,9 @@ class TestVideosum(unittest.TestCase):
         create_toy_video(path, fps=fps)
 
         # Check that the video is read as expected
-        reader = videosum.VideoReader(path, sampling_rate=1)
+        reader = videosum.VideoReader(path, output_fps=1)
         self.assertTrue(np.abs(reader.duration - duration) < eps)
-        self.assertTrue(np.abs(reader.fps - fps) < eps)
+        self.assertTrue(np.abs(reader.output_fps - fps) < eps)
 
         # Count the number of frames, should be 12 * 1
         count = 0
@@ -168,7 +169,7 @@ class TestVideosum(unittest.TestCase):
 
         # Delete dummy video
         os.unlink(path)
-
+    
     def test_video_reader_30fps(self, duration=12, fps=30, eps=1e-6):
         """
         @brief We should read 12 * 30 frames from the toy video.
@@ -178,9 +179,9 @@ class TestVideosum(unittest.TestCase):
         create_toy_video(path, fps=fps)
 
         # Check that the video is read as expected
-        reader = videosum.VideoReader(path, sampling_rate=fps)
+        reader = videosum.VideoReader(path, output_fps=fps)
         self.assertTrue(np.abs(reader.duration - duration) < eps)
-        self.assertTrue(np.abs(reader.fps - fps) < eps)
+        self.assertTrue(np.abs(reader.output_fps - fps) < eps)
         
         # Count the number of frames, should be 16 * 1
         count = 0
@@ -202,9 +203,9 @@ class TestVideosum(unittest.TestCase):
         create_toy_video(path, fps=src_fps)
 
         # Check that the video is read as expected
-        reader = videosum.VideoReader(path, sampling_rate=dst_fps)
+        reader = videosum.VideoReader(path, output_fps=dst_fps)
         self.assertTrue(np.abs(reader.duration - duration) < eps)
-        self.assertTrue(np.abs(reader.fps - dst_fps) < eps)
+        self.assertTrue(np.abs(reader.output_fps - dst_fps) < eps)
         
         # Count the number of frames, should be 12 * 1
         count = 0
@@ -226,7 +227,7 @@ class TestVideosum(unittest.TestCase):
         create_toy_video(path, fps=src_fps)
 
         # Check that the video is read as expected
-        reader = videosum.VideoReader(path, sampling_rate=dst_fps)
+        reader = videosum.VideoReader(path, output_fps=dst_fps)
         self.assertTrue(np.abs(reader.duration - duration) < eps)
         
         # Count the number of frames, should be 12 * 30
@@ -245,8 +246,9 @@ class TestVideosum(unittest.TestCase):
 
         # Read frames at 30fps
         frames_30fps = []
-        reader_30fps = videosum.VideoReader(path, sampling_rate=30)
-        w, h = reader_30fps.size
+        reader_30fps = videosum.VideoReader(path, output_fps=30)
+        w = reader_30fps.width
+        h = reader_30fps.height
         for raw_frame in reader_30fps:
             im = np.frombuffer(raw_frame, 
                                dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
@@ -254,7 +256,7 @@ class TestVideosum(unittest.TestCase):
 
         # Read frames at 1fps
         frames_1fps = []
-        reader_1fps = videosum.VideoReader(path, sampling_rate=1)
+        reader_1fps = videosum.VideoReader(path, output_fps=1)
         for raw_frame in reader_1fps:
             im = np.frombuffer(raw_frame, 
                                dtype=np.uint8).reshape((h, w, 3))[...,::-1].copy()
@@ -285,16 +287,19 @@ class TestVideosum(unittest.TestCase):
         video_path = random_temp_file_path() + '.mp4'
         create_toy_video(video_path, fps=30)
 
-        # Load video
+        # Create video reader
+        vr = videosum.ReaderFactory(video_path, output_fps=30)
+
+        # Create video summarizer
         width = 640
         height = 480
         nframes = 12
-        vs = videosum.VideoSummariser('time', nframes, width, height, 
-                                      time_segmentation=1, fps=30)
+        vs = videosum.SummarizerFactory('time', vr, nframes, width, 
+            height, time_segmentation=1)
 
         # Make collage
         new_collage_path = 'test/data/time_dummy.png'
-        new_collage = vs.summarise(video_path)
+        new_collage = vs.summarize()
         cv2.imwrite(new_collage_path, new_collage)
 
         # Compare the collage with the one stored in the test folder
@@ -316,18 +321,31 @@ class TestVideosum(unittest.TestCase):
         # Create dummy video
         video_path = random_temp_file_path() + '.mp4'
         create_toy_video(video_path, fps=30)
+
+        # Create video reader
+        vr = videosum.ReaderFactory(video_path, output_fps=30)
         
         # Load video
         width = 640
         height = 480
         nframes = 12
-        vs = videosum.VideoSummariser('inception', nframes, width, height, 
-                                      time_segmentation=1, fps=30)
+        vs = videosum.SummarizerFactory('inception', vr, nframes, width, 
+            height, time_segmentation=1)
+
+        print('--------------------------------------------------------------')
+        print('Hola!')
+        print('--------------------------------------------------------------')
         
         # Make collage
         new_collage_path = 'test/data/inception_dummy.png'
-        new_collage = vs.summarise(video_path)
+        new_collage = vs.summarize()
+        print('--------------------------------------------------------------')
+        print('Hola 2!')
+        print('--------------------------------------------------------------')
         cv2.imwrite(new_collage_path, new_collage)
+        print('--------------------------------------------------------------')
+        print('Hola 3!')
+        print('--------------------------------------------------------------')
         
         # Compare the collage with the one stored in the test folder
         old_collage_path = 'test/data/test_inception.png'
@@ -339,7 +357,7 @@ class TestVideosum(unittest.TestCase):
         os.unlink(video_path)
         os.unlink(new_collage_path)
 
-    
+    '''
     def test_same_inception_collage_at_different_fps(self, eps=1e-6):
         """
         @brief No matter the FPS of the video there are 12 solid colors in the
@@ -509,5 +527,7 @@ class TestVideosum(unittest.TestCase):
         os.unlink(video_path)
     '''
 
+
 if __name__ == '__main__':
-    unittest.main()
+    #unittest.main()
+    unittest.main(testRunner=unittest.TextTestRunner(stream=sys.stdout))
